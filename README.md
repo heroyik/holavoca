@@ -9,6 +9,7 @@ HolaVoca is a vibrant, DuoLingo-inspired Spanish vocabulary learning application
 - 📝 **Interactive Quizzes**: Multiple question types including translation (ES->KO, KO->ES) and gender identification.
 - 🔐 **Google Login**: Integrated authentication using Auth.js (NextAuth v5). (Requires configuration)
 - 📊 **Progress Tracking**: Local storage-based gamification system to keep track of your learning journey.
+- 📚 **Textbook Integration**: Visual indicators showing that vocabulary is sourced from "¡Hola, español! 1 & 2".
 - 📱 **Responsive Design**: Optimized for mobile, tablet, and PC.
 
 ## Database

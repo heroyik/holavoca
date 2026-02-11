@@ -54,6 +54,84 @@ export default function Home() {
         <p style={{ color: 'var(--text-secondary)' }}>Total XP: {stats.xp}</p>
       </div>
 
+      {/* Studying From Section */}
+      <section style={{
+        padding: '0 20px 32px 20px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
+      }}>
+        <h2 style={{ 
+          fontSize: '14px', 
+          fontWeight: '800', 
+          color: 'var(--text-secondary)', 
+          textTransform: 'uppercase',
+          letterSpacing: '1px',
+          marginBottom: '20px'
+        }}>
+          Currently Studying From
+        </h2>
+        <div style={{ 
+          display: 'flex', 
+          gap: '24px', 
+          justifyContent: 'center',
+          flexWrap: 'wrap'
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            gap: '12px',
+            width: '140px'
+          }}>
+            <div style={{
+              width: '100%',
+              aspectRatio: '1/1.4',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
+              border: '1px solid var(--border-light)',
+              transition: 'transform 0.3s'
+            }}>
+              <img 
+                src="/vol1.jpg" 
+                alt="¡Hola, español! 1" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            </div>
+            <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-main)', textAlign: 'center' }}>
+              ¡Hola, español! 1
+            </p>
+          </div>
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            gap: '12px',
+            width: '140px'
+          }}>
+            <div style={{
+              width: '100%',
+              aspectRatio: '1/1.4',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
+              border: '1px solid var(--border-light)',
+              transition: 'transform 0.3s'
+            }}>
+              <img 
+                src="/vol2.jpg" 
+                alt="¡Hola, español! 2" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            </div>
+            <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-main)', textAlign: 'center' }}>
+              ¡Hola, español! 2
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Learning Path */}
       <div style={{
         display: 'flex',
