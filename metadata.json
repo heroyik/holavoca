@@ -1,7 +1,0 @@
-{
-  "name": "HolaVoca - Spanish Vocabulary Tutor",
-  "description": "An intelligent Spanish learning app that extracts vocabulary from your textbooks and provides interactive flashcards, quizzes, and a real-time AI voice tutor for conversation practice.",
-  "requestFramePermissions": [
-    "microphone"
-  ]
-}
