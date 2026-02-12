@@ -68,8 +68,8 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                             Welcome back, Spanish Master! 🇪🇸
                         </p>
 
-                        {/* Hidden Dev Tools */}
-                        {devClickCount >= 5 && (
+                        {/* Hidden Dev Tools - Admin Only */}
+                        {user.email === 'heroyik@gmail.com' && devClickCount >= 5 && (
                             <div style={{ marginBottom: '20px', padding: '16px', backgroundColor: '#f3f4f6', borderRadius: '12px', border: '2px dashed var(--duo-green)' }}>
                                 <p style={{ fontSize: '14px', fontWeight: '800', color: 'var(--duo-green)', marginBottom: '12px' }}>🔧 DEVELOPER CONSOLE</p>
 
