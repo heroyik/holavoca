@@ -216,7 +216,6 @@ export default function Home() {
         </div>
         <div style={{ position: 'absolute', bottom: '70px', left: 0, right: 0, textAlign: 'center', padding: '10px', fontSize: '12px', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-soft)', borderTop: '1px solid var(--border-light)' }}>
           Total Spanish Words: <strong>{totalWords.toLocaleString()}</strong>
-          {totalWords < 1000 && <span style={{ marginLeft: '8px', color: 'var(--es-red)', fontSize: '10px' }}>(Partial Data Loaded)</span>}
         </div>
       </nav>
     </main>
