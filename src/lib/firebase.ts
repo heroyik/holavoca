@@ -4,12 +4,12 @@ import { getFirestore } from "firebase/firestore";
 
 // TODO: Replace with your actual Firebase config from the console
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "holavoca.firebaseapp.com",
-    projectId: "holavoca",
-    storageBucket: "holavoca.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyDfwLDAkt5E_cBWvYBHiJCI811tNobdIq0",
+    authDomain: "holavoca-app-12345.firebaseapp.com",
+    projectId: "holavoca-app-12345",
+    storageBucket: "holavoca-app-12345.firebasestorage.app",
+    messagingSenderId: "634220929894",
+    appId: "1:634220929894:web:2f495a296d88ea8f7e5ea7"
 };
 
 // Initialize Firebase

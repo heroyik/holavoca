@@ -1,47 +1,72 @@
 # HolaVoca - Spanish Vocabulary Learning App
 
-HolaVoca is a vibrant, DuoLingo-inspired Spanish vocabulary learning application. It helps users master over 4,300+ Spanish words through an interactive learning path and gamified quizzes.
+HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 4,300+ Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
 
-## Features
+---
 
-- 🇪🇸 **Spanish Look & Feel**: Vibrant theme using Spanish Red (`#C60B1E`) and Yellow (`#FFC400`).
-- 🎮 **Gamified Learning Path**: Zigzag layout of learning units with XP, gems, and streak tracking.
-- 📝 **Interactive Quizzes**: Multiple question types including translation (ES->KO, KO->ES) and gender identification.
-- 🔐 **Google Login**: Integrated authentication using Auth.js (NextAuth v5). (Requires configuration)
-- 📊 **Progress Tracking**: Local storage-based gamification system to keep track of your learning journey.
-- 📚 **Textbook Integration**: Visual indicators showing that vocabulary is sourced from "¡Hola, español! 1 & 2".
-- 📱 **Responsive Design**: Optimized for mobile, tablet, and PC.
+## ✨ Key Highlights
 
-## Database
+### 🕹️ Gamified "Snake Path" UI
 
-The app is powered by a comprehensive vocabulary database containing thousands of Spanish words, categorized into manageable learning units.
+A winding, interactive learning path that visually guides users through 15+ units.
 
-## Setup & Configuration
+- **Motivational Stickers**: Every unit is labeled with engaging titles like "🌱 First Steps", "🌉 Bridge Builder", and "👑 Word Royalty".
+- **Dynamic Connection**: Units are visually connected by a signature SVG "snake line" that adapts to your progress.
+- **START! Callout**: A pulsing animation ensures you always know which unit to tackle next.
 
-### Environment Variables
+### 📚 Premium Aesthetics
 
-For Google Login to work, you need to set up a `.env.local` file. Use `.env.local.example` as a template:
+- **Vocabulary Arsenal 📚**: Real-time count of total words available (4,300+) prominently displayed in the header.
+- **My Learning Aura ✨**: A dedicated XP tracking system relocated to the sticky footer for constant visibility.
+- **Textbook Lightbox**: High-quality thumbnails of "¡Hola, español! 1 & 2" that can be zoomed for detailed viewing.
 
-1. Copy `.env.local.example` to `.env.local`.
-2. Generate an `AUTH_SECRET`:
-   ```bash
-   npx auth secret
-   ```
-3. Provide your Google Client ID and Secret obtained from the [Google Cloud Console](https://console.cloud.google.com/).
+---
+
+## 🚀 Core Features
+
+- 🏠 **Unified Navigation**: Seamlessly switch between **Learn**, **Leader**, and **Profile** views.
+- 🏆 **Global Hall of Fame**: A real-time leaderboard showing the Top 10 users worldwide by XP.
+- 🔐 **Google Authentication**: One-tap sign-in to sync your streaks, gems, and progress across all devices.
+- ☁️ **Cloud Synchronization**: Powered by **Firebase Firestore**, ensuring your "Learning Aura" follows you everywhere.
+- 📝 **Intelligent Quizzes**: Includes Korean-to-Spanish, Spanish-to-Korean, and a specialized **Spanish Gender (el/la)** logic that handles complex gendered forms.
+
+---
+
+## 🛠️ Technical Stack
+
+- **Framework**: [Next.js 15](https://nextjs.org) (App Router, Client Components)
+- **Backend-as-a-Service**: [Firebase](https://firebase.google.com/) (Auth, Firestore, Hosting)
+- **Styling**: Vanilla CSS with a bespoke premium design system.
+- **Icons & Media**: [Lucide React](https://lucide.dev/) & optimized local assets.
+- **Automation**: Fully configured using MCP (Model Context Protocol).
+
+---
+
+## 🔧 Setup & Local Development
+
+### Prerequisites
+
+- Node.js 18+
+- A Google Firebase Project (for Auth & Firestore)
 
 ### Installation
 
-```bash
-npm install
-npm run dev
-```
+1. Clone the repository and install dependencies:
 
-## Built With
+   ```bash
+   npm install
+   ```
 
-- [Next.js 15](https://nextjs.org)
-- [Auth.js v5](https://authjs.dev)
-- Vanilla CSS for styling
-- LocalStorage for gamification stats
+2. Configure your Firebase credentials in `src/lib/firebase.ts`.
+3. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+### Security Note
+
+Firestore security rules are implemented to ensure that users can only read/write their own progress data, keeping your learning statistics private and secure.
 
 ---
-¡Aprende español con HolaVoca!
+¡Aprende español con HolaVoca! ✨🇪🇸
