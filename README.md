@@ -8,10 +8,11 @@ HolaVoca is a premium, gamified Spanish learning platform inspired by modern edu
 
 ## 🆕 Latest Updates (v1.1.6)
 
-- **R.1.2.0**: **Vocabulary Overhaul**. Reorganized the entire learning path to be **Difficulty-Based** instead of Alphabetical.
-  - **Step 1 (Easy)**: Priority words (hola, yo, gracias) + Short words (1-3 chars).
-  - **Step 15 (Hard)**: Longer, complex words.
-  - **No Alphabetical Order**: Words within the same difficulty tier are shuffled to keep learning interesting.
+- **R.1.2.0**: **Vocabulary Overhaul & Robustness**.
+  - **Overhauled Vocabulary**: Reorganized learning path to be **Difficulty-Based** (Priority Words -> Complex Words) instead of Alphabetical.
+  - **No Alphabetical Order**: Words within tiers are shuffled to keep learning effective.
+  - **Offline Demo Mode**: Leaderboard now gracefully falls back to "Demo Data" if the backend is unreachable, ensuring the app never looks broken.
+  - **Verified Production DB**: Validated successfully against live Firebase Firestore.
 - **R.1.1.6**: **Leaderboard Polish**.
   - **Smart Fallback**: If Firestore index is missing, automatically switches to client-side sorting to prevent infinite loading.
   - **UI**: Added "Hall of Fame" title and 👑 Crown icon for 1st place.
