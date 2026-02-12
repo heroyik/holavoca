@@ -79,62 +79,165 @@ export default function Home() {
       </div>
 
 
-      {/* Learning Path */}
+      {/* Learning Path (Snake UI) */}
       <div style={{
+        maxWidth: '600px',
+        margin: '0 auto',
+        padding: '24px 20px 140px 20px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         gap: '48px',
-        padding: '24px 0 120px 0'
+        position: 'relative'
       }}>
+        {/* Connector SVG Background */}
+        <svg style={{
+          position: 'absolute',
+          top: '60px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '200px',
+          height: 'calc(100% - 180px)',
+          zIndex: 0,
+          pointerEvents: 'none'
+        }}>
+          <path
+            d={units.slice(0, 15).map((_, i) => {
+              const x = 100 + (Math.sin(i * 1.2) * 50);
+              const y = i * 115;
+              return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+            }).join(' ')}
+            fill="none"
+            stroke="#e5e5e5"
+            strokeWidth="12"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+
         {units.slice(0, 15).map((unit, index) => {
-          const offset = Math.sin(index * 1.2) * 45;
+          // Snake pattern offsets
+          const offset = Math.sin(index * 1.2) * 50;
           const isCompleted = stats.completedUnits.includes(unit.id);
           const isLocked = index > stats.completedUnits.length;
+          const isCurrent = index === stats.completedUnits.length;
 
           return (
             <div key={unit.id} style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              transform: `translateX(${offset}px)`
+              transform: `translateX(${offset}px)`,
+              zIndex: 1,
+              position: 'relative'
             }}>
-              <Link href={isLocked ? '#' : `/quiz/${unit.id}`}>
+              <Link
+                href={isLocked ? '#' : `/quiz/${unit.id}`}
+                onClick={(e) => isLocked && e.preventDefault()}
+                style={{ textDecoration: 'none' }}
+              >
                 <button
                   className="flex-center"
                   style={{
-                    width: '80px',
-                    height: '74px',
-                    backgroundColor: isLocked ? '#e5e5e5' : (isCompleted ? 'var(--es-yellow)' : 'var(--es-red)'),
+                    width: '90px',
+                    height: '84px',
+                    backgroundColor: isLocked ? '#e5e5e5' : (isCurrent ? 'var(--es-red)' : 'var(--es-yellow)'),
                     borderRadius: '50%',
-                    boxShadow: `0 8px 0 ${isLocked ? '#afafaf' : (isCompleted ? 'var(--es-yellow-dark)' : 'var(--es-red-dark)')}`,
+                    boxShadow: isLocked
+                      ? '0 8px 0 #afafaf'
+                      : (isCurrent ? '0 8px 0 #b91c1c' : '0 8px 0 #d97706'),
                     color: 'white',
-                    fontSize: '32px',
+                    fontSize: '36px',
                     cursor: isLocked ? 'default' : 'pointer',
-                    transition: 'all 0.2s'
+                    transition: 'all 0.1s',
+                    position: 'relative',
+                    border: 'none',
+                    ...(isCurrent ? { animation: 'pulse-node 2s infinite ease-in-out' } : {})
+                  }}
+                  onPointerDown={(e) => {
+                    if (isLocked) return;
+                    e.currentTarget.style.transform = 'translateY(4px)';
+                    e.currentTarget.style.boxShadow = isCurrent ? '0 4px 0 #b91c1c' : '0 4px 0 #d97706';
+                  }}
+                  onPointerUp={(e) => {
+                    if (isLocked) return;
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = isCurrent ? '0 8px 0 #b91c1c' : '0 8px 0 #d97706';
                   }}
                 >
                   {isLocked ? '🔒' : (isCompleted ? '✓' : '★')}
+
+                  {isCurrent && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '-45px',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      backgroundColor: 'var(--es-red)',
+                      color: 'white',
+                      padding: '8px 16px',
+                      borderRadius: '12px',
+                      fontSize: '14px',
+                      fontWeight: '800',
+                      whiteSpace: 'nowrap',
+                      boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+                    }}>
+                      START!
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '-8px',
+                        left: '50%',
+                        marginLeft: '-8px',
+                        width: 0,
+                        height: 0,
+                        borderLeft: '8px solid transparent',
+                        borderRight: '8px solid transparent',
+                        borderTop: '8px solid var(--es-red)'
+                      }} />
+                    </div>
+                  )}
                 </button>
               </Link>
+
               <div style={{
                 marginTop: '16px',
                 textAlign: 'center',
                 backgroundColor: 'white',
-                padding: '4px 12px',
-                borderRadius: 'var(--radius-md)',
-                boxShadow: 'var(--shadow-sm)',
-                border: '2px solid var(--border-light)'
+                padding: '6px 14px',
+                borderRadius: '16px',
+                border: '2px solid var(--border-light)',
+                boxShadow: '0 4px 0 var(--border-light)',
+                minWidth: '100px'
               }}>
-                <p style={{ fontWeight: '800', fontSize: '12px', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                <p style={{
+                  fontWeight: '800',
+                  fontSize: '11px',
+                  color: isLocked ? '#afafaf' : 'var(--text-secondary)',
+                  letterSpacing: '0.5px',
+                  marginBottom: '2px'
+                }}>
+                  UNIT {index + 1}
+                </p>
+                <p style={{
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  color: isLocked ? '#afafaf' : 'var(--text-main)'
+                }}>
                   {unit.title}
                 </p>
-                <p style={{ fontSize: '14px', fontWeight: '700' }}>{unit.source}</p>
               </div>
             </div>
           );
         })}
       </div>
+
+      <style jsx global>{`
+        @keyframes pulse-node {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+          100% { transform: scale(1); }
+        }
+      `}</style>
 
       {/* Footer Nav */}
       <nav style={{
