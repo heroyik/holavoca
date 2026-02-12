@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { APP_VERSION } from '@/lib/constants';
 import { getUnits, getTotalWordCount } from '@/utils/vocab';
 import Link from 'next/link';
 import Image from 'next/image';
