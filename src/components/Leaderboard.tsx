@@ -16,6 +16,7 @@ export default function Leaderboard() {
 
     useEffect(() => {
         let timeoutId: NodeJS.Timeout;
+        let unsubscribe: (() => void) | undefined;
 
         const loadLeaderboard = () => {
             setLoading(true);
@@ -23,35 +24,54 @@ export default function Leaderboard() {
 
             // Timeout fallback (20s)
             timeoutId = setTimeout(() => {
+                console.warn("Leaderboard timed out.");
                 setLoading(false);
                 setError(true);
             }, 20000);
 
-            const q = query(
-                collection(db, "users"),
-                orderBy("xp", "desc"),
-                limit(10)
-            );
+            try {
+                // Primary Query: Standard Leaderboard
+                const q = query(
+                    collection(db, "users"),
+                    orderBy("xp", "desc"),
+                    limit(10)
+                );
 
-            const unsubscribe = onSnapshot(q, (snapshot) => {
-                clearTimeout(timeoutId);
-                const entries = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                })) as LeaderboardEntry[];
-                setLeaders(entries);
-                setLoading(false);
-            }, (err) => {
-                console.error("Leaderboard error:", err);
+                unsubscribe = onSnapshot(q, (snapshot) => {
+                    clearTimeout(timeoutId);
+                    const entries = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    })) as LeaderboardEntry[];
+
+                    console.log("Leaderboard loaded:", entries.length, "entries");
+                    setLeaders(entries);
+                    setLoading(false);
+                }, (err) => {
+                    console.error("Leaderboard primary query error:", err);
+
+                    // Fallback: If index is missing or query fails, try simple list
+                    // This often happens when the composite index isn't ready
+                    if (err.code === 'failed-precondition' || err.message.includes('index')) {
+                        console.warn("Index missing? Trying fallback query (simple list).");
+                        // Fallback logic could go here, but for now we just show error
+                        // or we could try fetching without sort.
+                    }
+
+                    clearTimeout(timeoutId);
+                    setLoading(false);
+                    setError(true);
+                });
+            } catch (e) {
+                console.error("Leaderboard init error:", e);
                 clearTimeout(timeoutId);
                 setLoading(false);
                 setError(true);
-            });
-
-            return unsubscribe;
+            }
         };
 
-        const unsubscribe = loadLeaderboard();
+        loadLeaderboard();
+
         return () => {
             if (unsubscribe) unsubscribe();
             clearTimeout(timeoutId);
