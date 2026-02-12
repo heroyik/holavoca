@@ -1,6 +1,6 @@
 # HolaVoca - Spanish Vocabulary Learning App
 
-`Revision 966`
+`Revision 1.0`
 
 HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 4,300+ Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
 
