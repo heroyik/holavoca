@@ -52,8 +52,25 @@ export default function Home() {
           alignItems: 'center',
           gap: '16px'
         }}>
-          <h1 style={{ fontSize: '24px', fontWeight: '800', margin: 0, color: 'var(--es-red)' }}>HolaVoca</h1>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+            <h1 style={{ fontSize: '24px', fontWeight: '900', margin: 0, color: 'var(--es-red)', lineHeight: 1.1 }}>HolaVoca</h1>
+            <div style={{
+              fontSize: '11px',
+              fontWeight: '700',
+              color: 'var(--text-secondary)',
+              backgroundColor: 'var(--bg-soft)',
+              padding: '2px 8px',
+              borderRadius: '10px',
+              marginTop: '4px',
+              border: '1px solid var(--border-light)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}>
+              Vocabulary Arsenal <strong style={{ color: 'var(--es-red)' }}>{totalWords.toLocaleString()}</strong> 📚
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
             <div
               onClick={() => setSelectedImage(vol1)}
               style={{ width: '32px', height: '44px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--border-light)', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
@@ -291,16 +308,13 @@ export default function Home() {
           right: 0,
           textAlign: 'center',
           padding: '12px 10px',
-          fontSize: '12px',
+          fontSize: '13px',
           color: 'var(--text-secondary)',
           backgroundColor: 'var(--bg-soft)',
           borderTop: '1px solid var(--border-light)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '4px'
+          fontWeight: '700'
         }}>
-          <div>My Learning Aura: <strong style={{ color: 'var(--es-red)', fontSize: '14px' }}>{stats.xp.toLocaleString()} ✨</strong></div>
-          <div style={{ opacity: 0.8 }}>Total Spanish Words: <strong>{totalWords.toLocaleString()}</strong></div>
+          My Learning Aura: <strong style={{ color: 'var(--es-red)', fontSize: '15px' }}>{stats.xp.toLocaleString()} ✨</strong>
         </div>
       </nav>
 
