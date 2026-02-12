@@ -137,6 +137,15 @@ export default function Home() {
             return 'var(--es-yellow)';      // Gold for Advanced
           };
 
+          const getMotivationalSticker = (idx: number) => {
+            const stickers = [
+              "🌱 First Steps", "🔍 Word Hunter", "🎯 Target Hit", "🚀 Blasting Off", "💎 Shiny Start",
+              "🌉 Bridge Builder", "🔥 Getting Hotter", "🎭 Story Teller", "🧩 Mastermind", "⛰️ Leveling Up",
+              "👑 Word Royalty", "🎓 Wise Scholar", "⚡ Power Flow", "🌌 Zen Master", "🏆 Legend!"
+            ];
+            return stickers[idx] || "🔥 Keep Going!";
+          };
+
           return (
             <div key={unit.id} style={{
               display: 'flex',
@@ -225,11 +234,12 @@ export default function Home() {
                   {getLevelTitle(index)} {index + 1}
                 </p>
                 <p style={{
-                  fontSize: '13px',
-                  fontWeight: '700',
-                  color: isLocked ? '#afafaf' : 'var(--text-main)'
+                  fontSize: '14px',
+                  fontWeight: '800',
+                  color: isLocked ? '#afafaf' : 'var(--text-main)',
+                  marginTop: '4px'
                 }}>
-                  {unit.source}
+                  {getMotivationalSticker(index)}
                 </p>
               </div>
             </div>
