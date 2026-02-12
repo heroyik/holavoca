@@ -11,6 +11,7 @@ interface LeaderboardEntry {
 
 export default function Leaderboard() {
     const [leaders, setLeaders] = useState<LeaderboardEntry[]>([]);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
     useEffect(() => {

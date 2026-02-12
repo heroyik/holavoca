@@ -97,7 +97,7 @@ export default function Home() {
               color: 'var(--text-secondary)',
               opacity: 0.3,
               letterSpacing: '0.5px'
-            }}>R.1.1</span>
+            }}>R.1.1.1</span>
             <div style={{
               fontSize: '11px',
               fontWeight: '700',
