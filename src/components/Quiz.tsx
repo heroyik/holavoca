@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { VocabEntry, getRandomWords } from "@/utils/vocab";
+import { VocabEntry, getRandomWords, getGenderedForm } from "@/utils/vocab";
 import { useRouter } from "next/navigation";
 import { useGamification } from "@/hooks/useGamification";
 
@@ -18,6 +18,7 @@ interface Question {
   type: QuestionType;
   options: string[];
   correctAnswer: string;
+  displayWord?: string;
 }
 
 export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
@@ -30,12 +31,12 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
 
+  // Generate questions from unit words and reset quiz state
   useEffect(() => {
-    // Generate questions from unit words
     const generated: Question[] = unitWords.map((word) => {
       let type: QuestionType = "translate-ko";
       const hasGender = word["성별/문법 정보"]?.includes("m") || word["성별/문법 정보"]?.includes("f");
-      
+
       const rand = Math.random();
       if (hasGender && rand > 0.8) {
         type = "gender";
@@ -44,33 +45,49 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
       } else {
         type = "translate-ko";
       }
-      
+
       let options: string[] = [];
       let correctAnswer = "";
+      let displayWord = "";
 
       if (type === "gender") {
-        correctAnswer = word["성별/문법 정보"].includes("m") ? "El (Masculine)" : "La (Feminine)";
+        const info = word["성별/문법 정보"];
+        const isBoth = info.includes("m") && info.includes("f");
+        let targetGender: "m" | "f" = info.includes("m") ? "m" : "f";
+
+        if (isBoth) {
+          targetGender = Math.random() > 0.5 ? "m" : "f";
+        }
+
+        correctAnswer = targetGender === "m" ? "El (Masculine)" : "La (Feminine)";
         options = ["El (Masculine)", "La (Feminine)"];
+        displayWord = getGenderedForm(word["스페인어 단어"], targetGender);
       } else if (type === "translate-ko") {
         correctAnswer = word["한국어 의미"];
         const distractors = getRandomWords(3, [word["스페인어 단어"]])
           .map(w => w["한국어 의미"]);
         options = [correctAnswer, ...distractors].sort(() => Math.random() - 0.5);
-      } else {
+      } else { // translate-es
         correctAnswer = word["스페인어 단어"];
         const distractors = getRandomWords(3, [word["스페인어 단어"]])
           .map(w => w["스페인어 단어"]);
         options = [correctAnswer, ...distractors].sort(() => Math.random() - 0.5);
       }
 
-      return { word, type, options, correctAnswer };
+      return { word, type, options, correctAnswer, displayWord };
     });
+
     setQuestions(generated);
-  }, [unitWords]);
+    setCurrentIndex(0);
+    setSelectedOption(null);
+    setIsCorrect(null);
+    setScore(0);
+    setIsFinished(false);
+  }, [unitId, unitWords]);
 
   const handleCheck = (option: string) => {
     if (isCorrect !== null) return;
-    
+
     setSelectedOption(option);
     const correct = option === questions[currentIndex].correctAnswer;
     setIsCorrect(correct);
@@ -97,12 +114,12 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
       <div className="container flex-center" style={{ height: '100vh', flexDirection: 'column', gap: '20px' }}>
         <h2 style={{ fontSize: '32px', fontWeight: '800', color: 'var(--duo-green)' }}>Finished!</h2>
         <div style={{ fontSize: '24px', textAlign: 'center' }}>
-          Your Score: <br/>
+          Your Score: <br />
           <span style={{ fontSize: '48px', color: 'var(--duo-blue)' }}>{score} / {questions.length}</span>
           <p style={{ fontSize: '18px', color: 'var(--duo-orange)', marginTop: '8px' }}>+ {score * 10} XP / + {Math.floor(score / 10)} Gems</p>
         </div>
-        <button 
-          className="duo-button duo-button-primary" 
+        <button
+          className="duo-button duo-button-primary"
           onClick={() => router.push('/')}
         >
           Continue
@@ -138,27 +155,28 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
       {/* Question Area */}
       <div style={{ flex: 1 }}>
         <h2 style={{ fontSize: '24px', fontWeight: '800', marginBottom: '32px' }}>
-          {current.type === 'translate-ko' 
-            ? 'Translate to Korean' 
-            : current.type === 'gender' 
-            ? 'Identify the Gender' 
-            : 'Choose the correct Spanish word'}
+          {unitTitle && <span style={{ color: 'var(--duo-blue)', marginRight: '8px' }}>{unitTitle}:</span>}
+          {current.type === 'translate-ko'
+            ? 'Translate to Korean'
+            : current.type === 'gender'
+              ? 'Identify the Gender'
+              : 'Choose the correct Spanish word'}
         </h2>
 
-        <div style={{ 
-          padding: '24px', 
-          border: '2px solid var(--border-light)', 
+        <div style={{
+          padding: '24px',
+          border: '2px solid var(--border-light)',
           borderRadius: 'var(--radius-lg)',
           marginBottom: '32px',
           fontSize: '24px',
           fontWeight: '700',
           textAlign: 'center'
         }}>
-          {current.type === 'translate-ko' 
-            ? current.word["스페인어 단어"] 
+          {current.type === 'translate-ko'
+            ? current.word["스페인어 단어"]
             : current.type === 'gender'
-            ? current.word["스페인어 단어"] // Display Spanish word even for gender questions
-            : current.word["한국어 의미"]}
+              ? current.displayWord || current.word["스페인어 단어"]
+              : current.word["한국어 의미"]}
         </div>
 
         <div style={{ display: 'grid', gap: '12px' }}>
@@ -168,13 +186,13 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
               onClick={() => handleCheck(option)}
               className="duo-button duo-button-outline"
               style={{
-                borderColor: selectedOption === option 
+                borderColor: selectedOption === option
                   ? (isCorrect ? 'var(--duo-green)' : 'var(--es-red)')
                   : 'var(--border-light)',
-                backgroundColor: selectedOption === option 
+                backgroundColor: selectedOption === option
                   ? (isCorrect ? '#eefced' : '#fff0f0')
                   : 'white',
-                color: selectedOption === option 
+                color: selectedOption === option
                   ? (isCorrect ? 'var(--duo-green-dark)' : 'var(--es-red-dark)')
                   : 'var(--text-main)',
                 borderWidth: '2px'
@@ -202,7 +220,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
           alignItems: 'center'
         }}>
           <div>
-            <h3 style={{ 
+            <h3 style={{
               color: isCorrect ? 'var(--duo-green-dark)' : 'var(--duo-red-dark)',
               fontWeight: '800',
               fontSize: '20px'
@@ -211,7 +229,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
             </h3>
             {!isCorrect && <p style={{ color: 'var(--duo-red-dark)' }}>{current.correctAnswer}</p>}
           </div>
-          <button 
+          <button
             className={`duo-button ${isCorrect ? 'duo-button-primary' : 'duo-button-blue'}`}
             style={{ width: 'auto', padding: '12px 48px' }}
             onClick={handleNext}

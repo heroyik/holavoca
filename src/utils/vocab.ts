@@ -45,12 +45,56 @@ export function getUnits(): LearningUnit[] {
 
 export function getRandomWords(count: number, exclude?: string[]): VocabEntry[] {
   const allWords = vocabData as VocabEntry[];
-  const filtered = exclude 
+  const filtered = exclude
     ? allWords.filter(w => !exclude.includes(w["스페인어 단어"]))
     : allWords;
-    
+
   return [...filtered].sort(() => Math.random() - 0.5).slice(0, count);
 }
 export function getTotalWordCount(): number {
-  return (vocabData as any).length;
+  return (vocabData as VocabEntry[]).length;
+}
+
+/**
+ * Parses a Spanish word string and returns the form corresponding to the specified gender.
+ * Handles patterns like "abogado/a", "actor/actriz", "escritor(a)".
+ */
+export function getGenderedForm(fullWord: string, gender: 'm' | 'f'): string {
+  if (gender === 'm') {
+    // Usually the first part is masculine
+    if (fullWord.includes('/')) {
+      const parts = fullWord.split('/');
+      // If second part is just a suffix (e.g., "abogado/a"), first part is masculine
+      if (parts[1].length === 1) return parts[0];
+      // Otherwise, it might be "actor/actriz", so first part is masculine
+      return parts[0];
+    }
+    if (fullWord.includes('(')) {
+      return fullWord.split('(')[0];
+    }
+    return fullWord;
+  } else {
+    // Feminine
+    if (fullWord.includes('/')) {
+      const parts = fullWord.split('/');
+      if (parts[1].length === 1) {
+        // e.g. "abogado/a" -> "abogada"
+        // Replace last character if it's 'o'
+        if (parts[0].endsWith('o')) {
+          return parts[0].slice(0, -1) + parts[1];
+        }
+        // Otherwise just append suffix (rare in this dataset but safe)
+        return parts[0] + parts[1];
+      }
+      // e.g. "actor/actriz" -> "actriz"
+      return parts[1];
+    }
+    if (fullWord.includes('(')) {
+      // e.g. "escritor(a)" -> "escritora"
+      const base = fullWord.split('(')[0];
+      const suffix = fullWord.split('(')[1].replace(')', '');
+      return base + suffix;
+    }
+    return fullWord;
+  }
 }
