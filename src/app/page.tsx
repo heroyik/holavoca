@@ -11,6 +11,7 @@ import Leaderboard from '@/components/Leaderboard';
 import UserProfile from '@/components/UserProfile';
 import vol1 from '../../public/vol1.jpg';
 import vol2 from '../../public/vol2.jpg';
+import { Github } from 'lucide-react';
 
 // Gamification Helpers
 const getLevelTitle = (idx: number) => {
@@ -339,9 +340,31 @@ export default function Home() {
           color: 'var(--text-secondary)',
           backgroundColor: 'var(--bg-soft)',
           borderTop: '1px solid var(--border-light)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '12px',
           fontWeight: '700'
         }}>
-          My Learning Aura: <strong style={{ color: 'var(--es-red)', fontSize: '15px' }}>{stats.xp.toLocaleString()} ✨</strong>
+          <div>My Learning Aura: <strong style={{ color: 'var(--es-red)', fontSize: '15px' }}>{stats.xp.toLocaleString()} ✨</strong></div>
+          <div style={{ width: '1px', height: '14px', backgroundColor: 'var(--border-light)' }}></div>
+          <a
+            href="https://github.com/heroyik/holavoca"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              color: 'var(--text-secondary)',
+              opacity: 0.7,
+              transition: 'opacity 0.2s',
+              cursor: 'pointer'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.opacity = '1'}
+            onMouseOut={(e) => e.currentTarget.style.opacity = '0.7'}
+          >
+            <Github size={16} />
+          </a>
         </div>
       </nav>
 
