@@ -16,10 +16,15 @@ test('Verify HolaVoca v1.1 Deployment', async ({ page }) => {
     // 2. Check title and revision
     await expect(page).toHaveTitle(/HolaVoca/);
 
-    // Check for Revision tag "R.1.1.6"
-    const revisionTag = page.locator('text=R.1.1.6');
+    // Check for Revision tag "R.1.2.0"
+    const revisionTag = page.locator('text=R.1.2.0');
     await expect(revisionTag).toBeVisible({ timeout: 30000 });
-    console.log('✅ Revision R.1.1.6 found.');
+    console.log('✅ Revision R.1.2.0 found.');
+
+    // 2.5 Check Vocabulary (Unit 1 should be beginner)
+    // The UI renders "PRINCIPIANTE 1", not "Unit 1"
+    await expect(page.locator('text=PRINCIPIANTE 1')).toBeVisible({ timeout: 10000 });
+    console.log('✅ Unit 1 (PRINCIPIANTE 1) found.');
 
     // 3. Check Leaderboard
     console.log('Clicking LEADER tab...');
@@ -27,13 +32,13 @@ test('Verify HolaVoca v1.1 Deployment', async ({ page }) => {
     await page.locator('text=LEADER').waitFor({ state: 'visible' });
     await page.locator('text=LEADER').click();
 
-    // 4. Verify Leaderboard loads (check for "Global Hall of Fame")
+    // 4. Verify Leaderboard loads (check for "Hall of Fame")
     console.log('Waiting for Leaderboard content...');
 
     try {
-        await expect(page.locator('text=Global Hall of Fame')).toBeVisible({ timeout: 20000 });
-        console.log('✅ Leaderboard Header found.');
-    } catch (e) {
+        await expect(page.locator('h2:has-text("Hall of Fame")')).toBeVisible({ timeout: 20000 });
+        console.log('✅ Leaderboard Header "Hall of Fame" found.');
+    } catch {
         console.log('❌ Leaderboard Header NOT found. Checking for error state...');
     }
 
@@ -54,7 +59,13 @@ test('Verify HolaVoca v1.1 Deployment', async ({ page }) => {
     }
 
     // 7. Check entries
-    const entries = page.locator('.leaderboard-entry'); // We need to add this class or query by style/structure
+    // Look for entries with the style we defined (white bg, border)
+    // We can look for the crown icon 👑 which indicates the first place
+    const crownIcon = page.locator('text=👑');
+    if (await crownIcon.count() > 0) {
+        console.log('✅ Found 1st place Crown icon!');
+    }
+
     // Simpler check: Look for "XP" text which appears in every entry
     const entriesCount = await page.locator('text=XP').count();
 

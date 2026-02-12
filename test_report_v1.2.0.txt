@@ -1,0 +1,97 @@
+
+Running 1 test using 1 worker
+
+Navigating to https://heroyik.github.io/holavoca/ ...
+PAGE LOG: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+PAGE LOG: [HMR] connected
+✅ Revision R.1.2.0 found.
+PAGE LOG: A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>
+      <LoadingBoundary name="/" loading={null}>
+        <HTTPAccessFallbackBoundary notFound={<SegmentViewNode>} forbidden={undefined} unauthorized={undefined}>
+          <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<SegmentViewNode>} forbidden={undefined} ...>
+            <RedirectBoundary>
+              <RedirectErrorBoundary router={{...}}>
+                <InnerLayoutRouter url="/holavoca" tree={[...]} params={{}} cacheNode={{rsc:<Fragment>, ...}} ...>
+                  <SegmentViewNode type="page" pagePath="page.tsx">
+                    <SegmentTrieNode>
+                    <ClientPageRoot Component={function Home} serverProvidedParams={{...}}>
+                      <Home params={Promise} searchParams={Promise}>
+                        <main style={{...}} className="jsx-465737...">
+                          <header>
+                          <div>
+                          <div style={{maxWidth:"...", ...}} className="jsx-465737...">
+                            <svg>
+                            <div>
+                            <div>
+                            <div>
+                            <div>
+                            <div>
+                            <div>
+                            <div>
+                            <div
+                              style={{
++                               display: "flex"
+-                               display: "flex"
++                               flexDirection: "column"
++                               alignItems: "center"
++                               transform: "translateX(51.27593448529682px)"
+-                               transform: "translateX(51.2759px)"
++                               zIndex: 1
++                               position: "relative"
+-                               position: "relative"
++                               height: "160px"
+-                               height: "160px"
+-                               flex-direction: "column"
+-                               align-items: "center"
+-                               z-index: "1"
+                              }}
+                              className="jsx-465737d6d65f2f28"
+                            >
+                            ...
+                          ...
+                  ...
+                ...
+
+  ✘  1 e2e\verify-deployment.spec.ts:3:5 › Verify HolaVoca v1.1 Deployment (5.8s)
+
+
+  1) e2e\verify-deployment.spec.ts:3:5 › Verify HolaVoca v1.1 Deployment ───────────────────────────
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('text=Unit 1')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('text=Unit 1')[22m
+
+
+      24 |     // 2.5 Check Vocabulary (Unit 1 should be beginner)
+      25 |     // We check for "Unit 1" and "PRINCIPIANTE"
+    > 26 |     await expect(page.locator('text=Unit 1')).toBeVisible();
+         |                                               ^
+      27 |     await expect(page.locator('text=PRINCIPIANTE').first()).toBeVisible();
+      28 |     console.log('✅ Unit 1 found.');
+      29 |
+        at C:\Users\heroy\proj\새 폴더\holavoca\e2e\verify-deployment.spec.ts:26:47
+
+    Error Context: test-results\e2e-verify-deployment-Verify-HolaVoca-v1-1-Deployment\error-context.md
+
+  1 failed
+    e2e\verify-deployment.spec.ts:3:5 › Verify HolaVoca v1.1 Deployment ────────────────────────────
