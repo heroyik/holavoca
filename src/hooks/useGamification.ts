@@ -23,15 +23,20 @@ export function useGamification() {
     completedUnits: [],
   });
 
-  // Handle Auth State
+  // Handle Auth State & Initial Load
   useEffect(() => {
+    // always load local first for instant UI
+    const saved = localStorage.getItem("holavoca_stats");
+    if (saved) {
+      try {
+        setStats(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse local stats", e);
+      }
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
-      if (!u) {
-        // Load local if not logged in
-        const saved = localStorage.getItem("holavoca_stats");
-        if (saved) setStats(JSON.parse(saved));
-      }
     });
     return () => unsubscribe();
   }, []);

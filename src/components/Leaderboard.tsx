@@ -21,11 +21,11 @@ export default function Leaderboard() {
             setLoading(true);
             setError(false);
 
-            // Timeout fallback (10s)
+            // Timeout fallback (20s)
             timeoutId = setTimeout(() => {
                 setLoading(false);
                 setError(true);
-            }, 10000);
+            }, 20000);
 
             const q = query(
                 collection(db, "users"),

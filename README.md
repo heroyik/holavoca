@@ -1,14 +1,16 @@
 # HolaVoca - Spanish Vocabulary Learning App
 
-`Revision 1.1.1`
+`Revision 1.1.2`
 
 HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 4,300+ Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
 
 ---
 
-## 🆕 Latest Updates (v1.1.1)
+## 🆕 Latest Updates (v1.1.2)
 
-- **🚑 Hotfix**: Resolved a build error that prevented the v1.1 functionality (Mobile Fixes & Smart Sync) from deploying correctly.
+- **⚡ Instant Sync Fix**: Tweaked the initialization logic to load local data immediately on startup. This prevents the "Level 1 Reset" scare while cloud data is syncing in the background.
+- **🎨 UI Polish**: Improved the positioning of the version tag (`R.1.1.2`) for a cleaner look.
+- **⏱️ Extended Timeout**: Increased the Leaderboard loading timeout to 20 seconds to accommodate slower mobile networks.
 - **📱 Mobile Leaderboard Fix**: Resolved an "Infinite Loading" issue on Galaxy S25 and other mobile devices by implementing a 10-second timeout and a manual "Retry" mechanism.
 - **🔄 Smart History Sync**: Implemented a "Merge Strategy" for login. Instead of overwriting data, the app now intelligently combines local and cloud progress, keeping the highest XP/Streak and merging completed units.
 

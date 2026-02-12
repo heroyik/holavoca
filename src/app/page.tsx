@@ -89,15 +89,18 @@ export default function Home() {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', position: 'relative' }}>
             <h1 style={{ fontSize: '24px', fontWeight: '900', margin: 0, color: 'var(--es-red)', lineHeight: 1.1 }}>HolaVoca</h1>
             <span style={{
-              position: 'absolute',
-              top: '-8px',
-              right: '-35px',
-              fontSize: '8px',
+              fontSize: '9px',
               fontWeight: '900',
               color: 'var(--text-secondary)',
-              opacity: 0.3,
-              letterSpacing: '0.5px'
-            }}>R.1.1.1</span>
+              opacity: 0.5,
+              letterSpacing: '0.5px',
+              alignSelf: 'flex-start',
+              marginTop: '4px',
+              marginLeft: '4px',
+              backgroundColor: '#f3f4f6',
+              padding: '2px 6px',
+              borderRadius: '6px'
+            }}>R.1.1.2</span>
             <div style={{
               fontSize: '11px',
               fontWeight: '700',
