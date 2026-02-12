@@ -27,6 +27,9 @@ export default function Leaderboard() {
             })) as LeaderboardEntry[];
             setLeaders(entries);
             setLoading(false);
+        }, (error) => {
+            console.error("Leaderboard error:", error);
+            setLoading(false); // Stop loading even on error
         });
 
         return () => unsubscribe();
