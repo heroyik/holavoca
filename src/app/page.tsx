@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from 'react';
 import { getUnits, getTotalWordCount } from '@/utils/vocab';
 import Link from 'next/link';
 import Image from 'next/image';
+import { StaticImageData } from 'next/image';
 import { useGamification } from '@/hooks/useGamification';
 import vol1 from '../../public/vol1.jpg';
 import vol2 from '../../public/vol2.jpg';
@@ -10,6 +12,7 @@ export default function Home() {
   const units = getUnits();
   const totalWords = getTotalWordCount();
   const { stats } = useGamification();
+  const [selectedImage, setSelectedImage] = useState<StaticImageData | null>(null);
 
   return (
     <main className="container" style={{ minHeight: '100vh', backgroundColor: 'var(--bg-soft)' }}>
@@ -22,7 +25,8 @@ export default function Home() {
         borderBottom: '2px solid var(--border-light)',
         padding: '12px 20px',
         display: 'flex',
-        justifyContent: 'center'
+        flexDirection: 'column',
+        alignItems: 'center'
       }}>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center', width: '100%', maxWidth: '600px' }}>
           <div style={{ flex: 1, height: '14px', backgroundColor: '#e5e5e5', borderRadius: '7px', overflow: 'hidden' }}>
@@ -38,95 +42,42 @@ export default function Home() {
             <span style={{ color: 'var(--duo-blue)' }}>💎 {stats.gems}</span>
           </div>
         </div>
-      </header>
 
-      {/* Hero / Course Title */}
-      <div style={{
-        padding: '32px 20px',
-        textAlign: 'center',
-        background: 'linear-gradient(to bottom, white, var(--bg-soft))'
-      }}>
-        <h1 style={{ fontSize: '28px', fontWeight: '800', marginBottom: '8px', color: 'var(--es-red)' }}>HolaVoca</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Total XP: {stats.xp}</p>
-      </div>
-
-      {/* Studying From Section */}
-      <section style={{
-        padding: '0 20px 32px 20px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center'
-      }}>
-        <h2 style={{
-          fontSize: '14px',
-          fontWeight: '800',
-          color: 'var(--text-secondary)',
-          textTransform: 'uppercase',
-          letterSpacing: '1px',
-          marginBottom: '20px'
-        }}>
-          Currently Studying From
-        </h2>
         <div style={{
+          width: '100%',
+          maxWidth: '600px',
+          marginTop: '12px',
           display: 'flex',
-          gap: '24px',
           justifyContent: 'center',
-          flexWrap: 'wrap'
+          alignItems: 'center',
+          gap: '16px'
         }}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '12px',
-            width: '140px'
-          }}>
-            <div style={{
-              width: '100%',
-              aspectRatio: '1/1.4',
-              borderRadius: '12px',
-              overflow: 'hidden',
-              boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
-              border: '1px solid var(--border-light)',
-              transition: 'transform 0.3s'
-            }}>
-              <Image
-                src={vol1}
-                alt="¡Hola, español! 1"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+          <h1 style={{ fontSize: '24px', fontWeight: '800', margin: 0, color: 'var(--es-red)' }}>HolaVoca</h1>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <div
+              onClick={() => setSelectedImage(vol1)}
+              style={{ width: '32px', height: '44px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--border-light)', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+            >
+              <Image src={vol1} alt="Book 1" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
-            <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-main)', textAlign: 'center' }}>
-              ¡Hola, español! 1
-            </p>
-          </div>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '12px',
-            width: '140px'
-          }}>
-            <div style={{
-              width: '100%',
-              aspectRatio: '1/1.4',
-              borderRadius: '12px',
-              overflow: 'hidden',
-              boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
-              border: '1px solid var(--border-light)',
-              transition: 'transform 0.3s'
-            }}>
-              <Image
-                src={vol2}
-                alt="¡Hola, español! 2"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+            <div
+              onClick={() => setSelectedImage(vol2)}
+              style={{ width: '32px', height: '44px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--border-light)', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+            >
+              <Image src={vol2} alt="Book 2" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
-            <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-main)', textAlign: 'center' }}>
-              ¡Hola, español! 2
-            </p>
           </div>
         </div>
-      </section>
+      </header>
+
+      {/* Hero / Stats Info */}
+      <div style={{
+        padding: '16px 20px',
+        textAlign: 'center'
+      }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '14px', fontWeight: '700' }}>Total XP: {stats.xp}</p>
+      </div>
+
 
       {/* Learning Path */}
       <div style={{
@@ -218,6 +169,66 @@ export default function Home() {
           Total Spanish Words: <strong>{totalWords.toLocaleString()}</strong>
         </div>
       </nav>
+
+      {/* Lightbox / Modal */}
+      {selectedImage && (
+        <div
+          onClick={() => setSelectedImage(null)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.85)',
+            zIndex: 1000,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '20px',
+            cursor: 'zoom-out'
+          }}
+        >
+          <div style={{
+            position: 'relative',
+            width: '100%',
+            maxWidth: '350px',
+            aspectRatio: '1/1.4',
+            borderRadius: '16px',
+            overflow: 'hidden',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+            backgroundColor: 'white'
+          }}>
+            <Image
+              src={selectedImage}
+              alt="Zoomed book"
+              fill
+              style={{ objectFit: 'contain', padding: '10px' }}
+            />
+            <button
+              onClick={(e) => { e.stopPropagation(); setSelectedImage(null); }}
+              style={{
+                position: 'absolute',
+                top: '15px',
+                right: '15px',
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(255,255,255,0.9)',
+                border: 'none',
+                fontWeight: '800',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
