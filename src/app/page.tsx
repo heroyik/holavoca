@@ -100,7 +100,7 @@ export default function Home() {
               backgroundColor: '#f3f4f6',
               padding: '2px 6px',
               borderRadius: '6px'
-            }}>R.1.1.2</span>
+            }}>R.1.1.3</span>
             <div style={{
               fontSize: '11px',
               fontWeight: '700',
