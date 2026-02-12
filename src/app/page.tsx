@@ -87,7 +87,10 @@ export default function Home() {
           gap: '16px'
         }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-            <h1 style={{ fontSize: '24px', fontWeight: '900', margin: 0, color: 'var(--es-red)', lineHeight: 1.1 }}>HolaVoca</h1>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+              <h1 style={{ fontSize: '24px', fontWeight: '900', margin: 0, color: 'var(--es-red)', lineHeight: 1.1 }}>HolaVoca</h1>
+              <span style={{ fontSize: '9px', fontWeight: '900', color: 'var(--text-secondary)', opacity: 0.5 }}>R.966</span>
+            </div>
             <div style={{
               fontSize: '11px',
               fontWeight: '700',
