@@ -2,7 +2,10 @@
 
 import { getUnits, getTotalWordCount } from '@/utils/vocab';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useGamification } from '@/hooks/useGamification';
+import vol1 from '../../public/vol1.jpg';
+import vol2 from '../../public/vol2.jpg';
 export default function Home() {
   const units = getUnits();
   const totalWords = getTotalWordCount();
@@ -86,8 +89,8 @@ export default function Home() {
               border: '1px solid var(--border-light)',
               transition: 'transform 0.3s'
             }}>
-              <img
-                src="/vol1.jpg"
+              <Image
+                src={vol1}
                 alt="¡Hola, español! 1"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
@@ -112,8 +115,8 @@ export default function Home() {
               border: '1px solid var(--border-light)',
               transition: 'transform 0.3s'
             }}>
-              <img
-                src="/vol2.jpg"
+              <Image
+                src={vol2}
                 alt="¡Hola, español! 2"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
