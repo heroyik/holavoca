@@ -15,12 +15,25 @@ export interface UserStats {
 
 export function useGamification() {
   const [user, setUser] = useState<User | null>(null);
-  const [stats, setStats] = useState<UserStats>({
-    xp: 0,
-    gems: 0,
-    streak: 0,
-    lastStudyDate: null,
-    completedUnits: [],
+  const [stats, setStats] = useState<UserStats>(() => {
+    // Initialize from local storage if available
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem("holavoca_stats");
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error("Failed to parse local stats", e);
+        }
+      }
+    }
+    return {
+      xp: 0,
+      gems: 0,
+      streak: 0,
+      lastStudyDate: null,
+      completedUnits: [],
+    };
   });
 
   // Ref to hold latest stats for use in effects/callbacks without triggering re-renders
@@ -31,20 +44,8 @@ export function useGamification() {
     statsRef.current = stats;
   }, [stats]);
 
-  // Handle Auth State & Initial Load
+  // Handle Auth State
   useEffect(() => {
-    // always load local first for instant UI
-    const saved = localStorage.getItem("holavoca_stats");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setStats(parsed);
-        statsRef.current = parsed; // Update ref immediately
-      } catch (e) {
-        console.error("Failed to parse local stats", e);
-      }
-    }
-
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
     });
