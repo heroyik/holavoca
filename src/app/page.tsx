@@ -87,29 +87,29 @@ export default function Home() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '48px',
+        gap: '40px', // height (160) + gap (40) = 200px centers
         position: 'relative'
       }}>
         {/* Connector SVG Background */}
         <svg style={{
           position: 'absolute',
-          top: '60px',
+          top: '68px', // Start exactly at the first circle center (24px padding + 44px half-circle)
           left: '50%',
           transform: 'translateX(-50%)',
-          width: '200px',
-          height: 'calc(100% - 180px)',
+          width: '240px',
+          height: '100%',
           zIndex: 0,
           pointerEvents: 'none'
         }}>
           <path
             d={units.slice(0, 15).map((_, i) => {
-              const x = 100 + (Math.sin(i * 1.2) * 50);
-              const y = i * 115;
+              const x = 120 + (Math.sin(i * 1.2) * 60);
+              const y = i * 200; // Adjusted for better alignment with larger gaps
               return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
             }).join(' ')}
             fill="none"
             stroke="#e5e5e5"
-            strokeWidth="12"
+            strokeWidth="16"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -117,10 +117,31 @@ export default function Home() {
 
         {units.slice(0, 15).map((unit, index) => {
           // Snake pattern offsets
-          const offset = Math.sin(index * 1.2) * 50;
+          const offset = Math.sin(index * 1.2) * 60;
           const isCompleted = stats.completedUnits.includes(unit.id);
           const isLocked = index > stats.completedUnits.length;
           const isCurrent = index === stats.completedUnits.length;
+
+          // Gamification: Different badges/emojis based on level
+          const getLevelTitle = (idx: number) => {
+            if (idx < 5) return "PRINCIPIANTE"; // Beginner
+            if (idx < 10) return "INTERMEDIO";   // Intermediate
+            return "AVANZADO";                 // Advanced
+          };
+
+          const getUnitIcon = (idx: number) => {
+            if (isLocked) return '🔒';
+            if (isCompleted) return '✅';
+            if (idx === 4 || idx === 9 || idx === 14) return '👑'; // Milestone
+            return '⭐';
+          };
+
+          const getLevelColor = (idx: number) => {
+            if (isLocked) return '#afafaf';
+            if (idx < 5) return 'var(--es-red)';
+            if (idx < 10) return '#3b82f6'; // Blue for Intermediate
+            return 'var(--es-yellow)';      // Gold for Advanced
+          };
 
           return (
             <div key={unit.id} style={{
@@ -129,7 +150,8 @@ export default function Home() {
               alignItems: 'center',
               transform: `translateX(${offset}px)`,
               zIndex: 1,
-              position: 'relative'
+              position: 'relative',
+              height: '160px' // Fixed height for better line alignment
             }}>
               <Link
                 href={isLocked ? '#' : `/quiz/${unit.id}`}
@@ -139,33 +161,23 @@ export default function Home() {
                 <button
                   className="flex-center"
                   style={{
-                    width: '90px',
-                    height: '84px',
-                    backgroundColor: isLocked ? '#e5e5e5' : (isCurrent ? 'var(--es-red)' : 'var(--es-yellow)'),
+                    width: '95px',
+                    height: '88px',
+                    backgroundColor: isLocked ? '#e5e5e5' : (isCurrent ? 'var(--es-red)' : (isCompleted ? 'var(--duo-green)' : 'var(--es-yellow)')),
                     borderRadius: '50%',
                     boxShadow: isLocked
-                      ? '0 8px 0 #afafaf'
-                      : (isCurrent ? '0 8px 0 #b91c1c' : '0 8px 0 #d97706'),
+                      ? '0 10px 0 #afafaf'
+                      : (isCurrent ? '0 10px 0 #b91c1c' : (isCompleted ? '0 10px 0 #16a34a' : '0 10px 0 #d97706')),
                     color: 'white',
-                    fontSize: '36px',
+                    fontSize: '40px',
                     cursor: isLocked ? 'default' : 'pointer',
                     transition: 'all 0.1s',
                     position: 'relative',
                     border: 'none',
                     ...(isCurrent ? { animation: 'pulse-node 2s infinite ease-in-out' } : {})
                   }}
-                  onPointerDown={(e) => {
-                    if (isLocked) return;
-                    e.currentTarget.style.transform = 'translateY(4px)';
-                    e.currentTarget.style.boxShadow = isCurrent ? '0 4px 0 #b91c1c' : '0 4px 0 #d97706';
-                  }}
-                  onPointerUp={(e) => {
-                    if (isLocked) return;
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = isCurrent ? '0 8px 0 #b91c1c' : '0 8px 0 #d97706';
-                  }}
                 >
-                  {isLocked ? '🔒' : (isCompleted ? '✓' : '★')}
+                  {getUnitIcon(index)}
 
                   {isCurrent && (
                     <div style={{
@@ -182,7 +194,7 @@ export default function Home() {
                       whiteSpace: 'nowrap',
                       boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
                     }}>
-                      START!
+                      GET READY!
                       <div style={{
                         position: 'absolute',
                         bottom: '-8px',
@@ -205,25 +217,25 @@ export default function Home() {
                 backgroundColor: 'white',
                 padding: '6px 14px',
                 borderRadius: '16px',
-                border: '2px solid var(--border-light)',
-                boxShadow: '0 4px 0 var(--border-light)',
-                minWidth: '100px'
+                border: `3px solid ${isLocked ? 'var(--border-light)' : getLevelColor(index)}`,
+                boxShadow: `0 4px 0 ${isLocked ? '#e5e5e5' : 'rgba(0,0,0,0.1)'}`,
+                minWidth: '110px'
               }}>
                 <p style={{
-                  fontWeight: '800',
+                  fontWeight: '900',
                   fontSize: '11px',
-                  color: isLocked ? '#afafaf' : 'var(--text-secondary)',
+                  color: getLevelColor(index),
                   letterSpacing: '0.5px',
-                  marginBottom: '2px'
+                  marginBottom: '1px'
                 }}>
-                  UNIT {index + 1}
+                  {getLevelTitle(index)} {index + 1}
                 </p>
                 <p style={{
                   fontSize: '13px',
                   fontWeight: '700',
                   color: isLocked ? '#afafaf' : 'var(--text-main)'
                 }}>
-                  {unit.title}
+                  {unit.source}
                 </p>
               </div>
             </div>
