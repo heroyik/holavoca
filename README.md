@@ -20,8 +20,7 @@ HolaVoca is a premium, gamified Spanish learning platform inspired by modern edu
   - **Smart Fallback**: If Firestore index is missing, automatically switches to client-side sorting to prevent infinite loading.
   - **UI**: Added "Hall of Fame" title and 👑 Crown icon for 1st place.
   - **Admin**: Strict reset logic for cleaner testing.
-- **R.1.1.5**: **Leaderboard Fallback**. Added robust error handling.
- (v1.1.5) to prevent infinite loading when Firestore indexes are missing.
+- **R.1.1.5**: **Leaderboard Fallback**. Added robust error handling to prevent infinite loading when Firestore indexes are missing.
 - **🛠️ Admin Cheat Codes**: Added a hidden Developer Console for manual stat management (accessible via 5-tap on profile picture). restricted to admin email.
 - **🔓 Level Selector**: Admins can now instantly unlock any level from 1 to 15, automatically calculating XP, Gems, and Unit completions.
 - **🔢 Version Automation**: Centralized version management to ensure the Revision tag always reflects the latest build.
