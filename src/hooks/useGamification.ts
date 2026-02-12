@@ -1,6 +1,7 @@
-"use client";
-
 import { useState, useEffect } from "react";
+import { auth, db } from "@/lib/firebase";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 
 export interface UserStats {
   xp: number;
@@ -8,9 +9,12 @@ export interface UserStats {
   streak: number;
   lastStudyDate: string | null;
   completedUnits: string[];
+  displayName?: string;
+  photoURL?: string;
 }
 
 export function useGamification() {
+  const [user, setUser] = useState<User | null>(null);
   const [stats, setStats] = useState<UserStats>({
     xp: 0,
     gems: 0,
@@ -19,16 +23,57 @@ export function useGamification() {
     completedUnits: [],
   });
 
+  // Handle Auth State
   useEffect(() => {
-    const saved = localStorage.getItem("holavoca_stats");
-    if (saved) {
-      setStats(JSON.parse(saved));
-    }
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      if (!u) {
+        // Load local if not logged in
+        const saved = localStorage.getItem("holavoca_stats");
+        if (saved) setStats(JSON.parse(saved));
+      }
+    });
+    return () => unsubscribe();
   }, []);
 
-  const saveStats = (newStats: UserStats) => {
+  // Handle Cloud Sync
+  useEffect(() => {
+    if (!user) return;
+
+    const userRef = doc(db, "users", user.uid);
+
+    // Subscribe to cloud changes
+    const unsubscribe = onSnapshot(userRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const cloudData = docSnap.data() as UserStats;
+        setStats(cloudData);
+      } else {
+        // First time user: push local data to cloud
+        const saved = localStorage.getItem("holavoca_stats");
+        const initialData = saved ? JSON.parse(saved) : stats;
+        setDoc(userRef, {
+          ...initialData,
+          displayName: user.displayName,
+          photoURL: user.photoURL
+        });
+      }
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  const saveStats = async (newStats: UserStats) => {
     setStats(newStats);
     localStorage.setItem("holavoca_stats", JSON.stringify(newStats));
+
+    if (user) {
+      const userRef = doc(db, "users", user.uid);
+      await setDoc(userRef, {
+        ...newStats,
+        displayName: user.displayName,
+        photoURL: user.photoURL
+      }, { merge: true });
+    }
   };
 
   const addXP = (amount: number) => {
@@ -41,8 +86,6 @@ export function useGamification() {
     let newStreak = stats.streak;
 
     if (stats.lastStudyDate !== today) {
-      // Logic for streak: if yesterday was last study, increment. If older, reset or keep.
-      // Simple version: just increment if first study of the day.
       newStreak += 1;
     }
 
@@ -52,12 +95,12 @@ export function useGamification() {
       gems: stats.gems + Math.floor(xpEarned / 10),
       streak: newStreak,
       lastStudyDate: today,
-      completedUnits: stats.completedUnits.includes(unitId) 
-        ? stats.completedUnits 
+      completedUnits: stats.completedUnits.includes(unitId)
+        ? stats.completedUnits
         : [...stats.completedUnits, unitId],
     };
     saveStats(newStats);
   };
 
-  return { stats, addXP, completeUnit };
+  return { stats, user, addXP, completeUnit };
 }
