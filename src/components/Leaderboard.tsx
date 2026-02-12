@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { collection, query, orderBy, limit, onSnapshot, getDocs } from 'firebase/firestore';
 
 interface LeaderboardEntry {
     id: string;
@@ -47,15 +47,31 @@ export default function Leaderboard() {
                     console.log("Leaderboard loaded:", entries.length, "entries");
                     setLeaders(entries);
                     setLoading(false);
-                }, (err) => {
+                }, async (err) => {
                     console.error("Leaderboard primary query error:", err);
 
-                    // Fallback: If index is missing or query fails, try simple list
-                    // This often happens when the composite index isn't ready
+                    // Fallback: If index is missing, fetch unsorted & sort client-side
                     if (err.code === 'failed-precondition' || err.message.includes('index')) {
-                        console.warn("Index missing? Trying fallback query (simple list).");
-                        // Fallback logic could go here, but for now we just show error
-                        // or we could try fetching without sort.
+                        console.warn("Index missing. Switching to Fallback Mode (Client-side Sort).");
+                        try {
+                            // Fetch 20 users comfortably (limit to avoid reading whole DB)
+                            // Without 'orderBy', this doesn't need an index.
+                            const fallbackQ = query(collection(db, "users"), limit(50));
+                            const snapshot = await getDocs(fallbackQ);
+                            const entries = snapshot.docs.map(doc => ({
+                                id: doc.id,
+                                ...doc.data()
+                            })) as LeaderboardEntry[];
+
+                            // Sort client-side
+                            entries.sort((a, b) => b.xp - a.xp);
+                            setLeaders(entries.slice(0, 10)); // Top 10
+                            setLoading(false);
+                            clearTimeout(timeoutId);
+                            return; // Success fallback
+                        } catch (fallbackErr) {
+                            console.error("Fallback query failed:", fallbackErr);
+                        }
                     }
 
                     clearTimeout(timeoutId);

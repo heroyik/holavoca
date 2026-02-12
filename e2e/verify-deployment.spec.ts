@@ -11,15 +11,15 @@ test('Verify HolaVoca v1.1 Deployment', async ({ page }) => {
     test.setTimeout(60000);
 
     // Use domcontentloaded to avoid waiting for long-polling requests
-    await page.goto('https://heroyik.github.io/holavoca/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto('http://localhost:3005/holavoca/', { waitUntil: 'domcontentloaded', timeout: 60000 });
 
     // 2. Check title and revision
     await expect(page).toHaveTitle(/HolaVoca/);
 
-    // Check for Revision tag "R.1.1.4"
-    const revisionTag = page.locator('text=R.1.1.4');
+    // Check for Revision tag "R.1.1.6"
+    const revisionTag = page.locator('text=R.1.1.6');
     await expect(revisionTag).toBeVisible({ timeout: 30000 });
-    console.log('✅ Revision R.1.1.4 found.');
+    console.log('✅ Revision R.1.1.6 found.');
 
     // 3. Check Leaderboard
     console.log('Clicking LEADER tab...');
