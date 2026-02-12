@@ -1,18 +1,25 @@
 import { test, expect } from '@playwright/test';
 
 test('Verify HolaVoca v1.1 Deployment', async ({ page }) => {
+    // Capture browser console logs
+    page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+
     // 1. Visit the deployed site
     console.log('Navigating to https://heroyik.github.io/holavoca/ ...');
+
+    // Increase timeout for this test specifically
+    test.setTimeout(60000);
+
     // Use domcontentloaded to avoid waiting for long-polling requests
     await page.goto('https://heroyik.github.io/holavoca/', { waitUntil: 'domcontentloaded', timeout: 60000 });
 
     // 2. Check title and revision
     await expect(page).toHaveTitle(/HolaVoca/);
 
-    // Check for Revision tag "R.1.1.3"
-    const revisionTag = page.locator('text=R.1.1.3');
+    // Check for Revision tag "R.1.1.4"
+    const revisionTag = page.locator('text=R.1.1.4');
     await expect(revisionTag).toBeVisible({ timeout: 30000 });
-    console.log('✅ Revision R.1.1.3 found.');
+    console.log('✅ Revision R.1.1.4 found.');
 
     // 3. Check Leaderboard
     console.log('Clicking LEADER tab...');

@@ -1,0 +1,33 @@
+
+Running 1 test using 1 worker
+
+Navigating to http://localhost:3000/ ...
+PAGE LOG: Failed to load resource: the server responded with a status of 404 (Not Found)
+PAGE LOG: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+PAGE LOG: [HMR] connected
+Clicking LEADER tab...
+  ✘  1 e2e\verify-deployment.spec.ts:3:5 › Verify HolaVoca v1.1 Deployment (1.0m)
+
+
+  1) e2e\verify-deployment.spec.ts:3:5 › Verify HolaVoca v1.1 Deployment ───────────────────────────
+
+    [31mTest timeout of 60000ms exceeded.[39m
+
+    Error: locator.waitFor: Test timeout of 60000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('text=LEADER') to be visible[22m
+
+
+      25 |     console.log('Clicking LEADER tab...');
+      26 |     // Ensure the tab is clickable
+    > 27 |     await page.locator('text=LEADER').waitFor({ state: 'visible' });
+         |                                       ^
+      28 |     await page.locator('text=LEADER').click();
+      29 |
+      30 |     // 4. Verify Leaderboard loads (check for "Global Hall of Fame")
+        at C:\Users\heroy\proj\새 폴더\holavoca\e2e\verify-deployment.spec.ts:27:39
+
+    Error Context: test-results\e2e-verify-deployment-Verify-HolaVoca-v1-1-Deployment\error-context.md
+
+  1 failed
+    e2e\verify-deployment.spec.ts:3:5 › Verify HolaVoca v1.1 Deployment ────────────────────────────
