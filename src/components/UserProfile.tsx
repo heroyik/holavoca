@@ -12,8 +12,9 @@ interface UserProfileProps {
 }
 
 export default function UserProfile({ user, stats }: UserProfileProps) {
-    const { unlockLevel1 } = useGamification();
+    const { unlockProgress } = useGamification();
     const [devClickCount, setDevClickCount] = useState(0);
+    const [selectedLevel, setSelectedLevel] = useState(1);
 
     const handleLogin = async () => {
         try {
@@ -30,11 +31,18 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
         setDevClickCount(prev => prev + 1);
     };
 
-    const handleUnlockLevel1 = () => {
+    const handleUnlockLevel = () => {
         const units = getUnits();
-        const firstUnitId = units[0]?.id || 'unit-frequency-1';
-        unlockLevel1(firstUnitId);
-        alert(`Level 1 Unlocked! (Unit ID: ${firstUnitId})`);
+        // Get first N units based on selected level
+        const targetUnits = units.slice(0, selectedLevel).map(u => u.id);
+
+        // Calculate stats: 200 XP per unit, 20 Gems per unit
+        const targetXp = selectedLevel * 200;
+        const targetGems = selectedLevel * 20;
+
+        unlockProgress(targetUnits, targetXp, targetGems);
+
+        alert(`🔓 Unlocked Level ${selectedLevel}!\n\nXP: ${targetXp}\nGems: ${targetGems}\nUnits: ${selectedLevel} Completed`);
         setDevClickCount(0); // Reset
     };
 
@@ -62,22 +70,44 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
 
                         {/* Hidden Dev Tools */}
                         {devClickCount >= 5 && (
-                            <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#f3f4f6', borderRadius: '12px' }}>
-                                <p style={{ fontSize: '12px', fontWeight: '800', color: 'var(--text-secondary)', marginBottom: '8px' }}>🔧 DEVELOPER CONSOLE</p>
-                                <button
-                                    onClick={handleUnlockLevel1}
-                                    style={{
-                                        padding: '8px 16px',
-                                        backgroundColor: 'var(--duo-green)',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '8px',
-                                        fontWeight: '700',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    Force Unlock Level 1 🔓
-                                </button>
+                            <div style={{ marginBottom: '20px', padding: '16px', backgroundColor: '#f3f4f6', borderRadius: '12px', border: '2px dashed var(--duo-green)' }}>
+                                <p style={{ fontSize: '14px', fontWeight: '800', color: 'var(--duo-green)', marginBottom: '12px' }}>🔧 DEVELOPER CONSOLE</p>
+
+                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-secondary)' }}>Target Level:</span>
+                                    <select
+                                        value={selectedLevel}
+                                        onChange={(e) => setSelectedLevel(Number(e.target.value))}
+                                        style={{
+                                            padding: '8px',
+                                            borderRadius: '8px',
+                                            border: '2px solid var(--border-light)',
+                                            fontWeight: '700',
+                                            color: 'var(--text-main)',
+                                            outline: 'none'
+                                        }}
+                                    >
+                                        {Array.from({ length: 15 }, (_, i) => i + 1).map(level => (
+                                            <option key={level} value={level}>Level {level}</option>
+                                        ))}
+                                    </select>
+
+                                    <button
+                                        onClick={handleUnlockLevel}
+                                        style={{
+                                            padding: '8px 16px',
+                                            backgroundColor: 'var(--duo-green)',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '8px',
+                                            fontWeight: '700',
+                                            cursor: 'pointer',
+                                            boxShadow: '0 2px 0 #15803d'
+                                        }}
+                                    >
+                                        Unlock 🔓
+                                    </button>
+                                </div>
                             </div>
                         )}
 
