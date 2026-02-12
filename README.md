@@ -26,8 +26,8 @@ A winding, interactive learning path that visually guides users through 15+ unit
 
 ## 🚀 Core Features
 
-- 🏠 **Unified Navigation**: Seamlessly switch between **Learn**, **Leader**, and **Profile** views.
-- 🏆 **Global Hall of Fame**: A real-time leaderboard showing the Top 10 users worldwide by XP.
+- 🏠 **Unified Navigation**: Seamlessly switch between **Learn**, **Leader**, and **Profile** views using a responsive tab bar.
+- 🏆 **Global Hall of Fame**: A real-time leaderboard showing the Top 10 users worldwide by XP. Optimized with error-safe loading states.
 - 🔐 **Google Authentication**: One-tap sign-in to sync your streaks, gems, and progress across all devices.
 - ☁️ **Cloud Synchronization**: Powered by **Firebase Firestore**, ensuring your "Learning Aura" follows you everywhere.
 - 📝 **Intelligent Quizzes**: Includes Korean-to-Spanish, Spanish-to-Korean, and a specialized **Spanish Gender (el/la)** logic that handles complex gendered forms.
@@ -40,7 +40,7 @@ A winding, interactive learning path that visually guides users through 15+ unit
 - **Backend-as-a-Service**: [Firebase](https://firebase.google.com/) (Auth, Firestore, Hosting)
 - **Styling**: Vanilla CSS with a bespoke premium design system.
 - **Icons & Media**: [Lucide React](https://lucide.dev/) & optimized local assets.
-- **Automation**: Fully configured using MCP (Model Context Protocol).
+- **Automation**: Fully configured using MCP (Model Context Protocol) for instant backend deployment.
 
 ---
 
@@ -66,9 +66,10 @@ A winding, interactive learning path that visually guides users through 15+ unit
    npm run dev
    ```
 
-### Security Note
+### 🔒 Security & Performance
 
-Firestore security rules are implemented to ensure that users can only read/write their own progress data, keeping your learning statistics private and secure.
+- **Firestore Security Rules**: Configured for "Public Read / Owner Write" access. This allowing the Global Leaderboard to fetch rankings while ensuring only authenticated users can modify their own progress.
+- **Resilient Data Fetching**: Implemented non-blocking loading handlers in the Leaderboard to ensure the UI remains responsive even during high latency.
 
 ---
 ¡Aprende español con HolaVoca! ✨🇪🇸
