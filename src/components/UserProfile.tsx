@@ -1,7 +1,10 @@
 import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithPopup, signOut } from 'firebase/auth';
-import { UserStats } from '@/hooks/useGamification';
+import { UserStats, useGamification } from '@/hooks/useGamification';
 import { User } from 'firebase/auth';
+
+import { useState } from 'react';
+import { getUnits } from '@/utils/vocab';
 
 interface UserProfileProps {
     user: User | null;
@@ -9,6 +12,9 @@ interface UserProfileProps {
 }
 
 export default function UserProfile({ user, stats }: UserProfileProps) {
+    const { unlockLevel1 } = useGamification();
+    const [devClickCount, setDevClickCount] = useState(0);
+
     const handleLogin = async () => {
         try {
             await signInWithPopup(auth, googleProvider);
@@ -20,21 +26,60 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
 
     const handleLogout = () => signOut(auth);
 
+    const handleDevTrigger = () => {
+        setDevClickCount(prev => prev + 1);
+    };
+
+    const handleUnlockLevel1 = () => {
+        const units = getUnits();
+        const firstUnitId = units[0]?.id || 'unit-frequency-1';
+        unlockLevel1(firstUnitId);
+        alert(`Level 1 Unlocked! (Unit ID: ${firstUnitId})`);
+        setDevClickCount(0); // Reset
+    };
+
     return (
         <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
             <div style={{ backgroundColor: 'white', borderRadius: '24px', padding: '32px', border: '2px solid var(--border-light)', boxShadow: '0 8px 0 var(--border-light)', textAlign: 'center' }}>
                 {user ? (
                     <>
-                        <div style={{ width: '100px', height: '100px', borderRadius: '50%', margin: '0 auto 16px', border: '4px solid var(--duo-blue)', overflow: 'hidden' }}>
+                        <div
+                            onClick={handleDevTrigger}
+                            style={{ width: '100px', height: '100px', borderRadius: '50%', margin: '0 auto 16px', border: '4px solid var(--duo-blue)', overflow: 'hidden', cursor: 'pointer' }}
+                        >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={user.photoURL || ''} alt={user.displayName || ''} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
-                        <h2 style={{ fontSize: '24px', fontWeight: '900', color: 'var(--text-main)', marginBottom: '8px' }}>
+                        <h2
+                            onClick={handleDevTrigger}
+                            style={{ fontSize: '24px', fontWeight: '900', color: 'var(--text-main)', marginBottom: '8px', cursor: 'pointer', userSelect: 'none' }}
+                        >
                             {user.displayName}
                         </h2>
                         <p style={{ color: 'var(--text-secondary)', fontWeight: '700', marginBottom: '24px' }}>
                             Welcome back, Spanish Master! 🇪🇸
                         </p>
+
+                        {/* Hidden Dev Tools */}
+                        {devClickCount >= 5 && (
+                            <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#f3f4f6', borderRadius: '12px' }}>
+                                <p style={{ fontSize: '12px', fontWeight: '800', color: 'var(--text-secondary)', marginBottom: '8px' }}>🔧 DEVELOPER CONSOLE</p>
+                                <button
+                                    onClick={handleUnlockLevel1}
+                                    style={{
+                                        padding: '8px 16px',
+                                        backgroundColor: 'var(--duo-green)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        fontWeight: '700',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Force Unlock Level 1 🔓
+                                </button>
+                            </div>
+                        )}
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '32px' }}>
                             <div style={{ padding: '16px', backgroundColor: 'var(--bg-soft)', borderRadius: '16px', border: '2px solid var(--border-light)' }}>
@@ -56,6 +101,7 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                     </>
                 ) : (
                     <>
+                        {/* Login View - Unchanged */}
                         <div style={{ fontSize: '64px', marginBottom: '16px' }}>🔑</div>
                         <h2 style={{ fontSize: '24px', fontWeight: '900', color: 'var(--text-main)', marginBottom: '16px' }}>
                             Save Your Progress

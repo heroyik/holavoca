@@ -9,10 +9,10 @@ test('Verify HolaVoca v1.1 Deployment', async ({ page }) => {
     // 2. Check title and revision
     await expect(page).toHaveTitle(/HolaVoca/);
 
-    // Check for Revision tag "R.1.1"
-    const revisionTag = page.locator('text=R.1.1');
+    // Check for Revision tag "R.1.1.3"
+    const revisionTag = page.locator('text=R.1.1.3');
     await expect(revisionTag).toBeVisible({ timeout: 30000 });
-    console.log('✅ Revision R.1.1 found.');
+    console.log('✅ Revision R.1.1.3 found.');
 
     // 3. Check Leaderboard
     console.log('Clicking LEADER tab...');

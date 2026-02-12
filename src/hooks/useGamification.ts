@@ -155,5 +155,19 @@ export function useGamification() {
     saveStats(newStats);
   };
 
-  return { stats, user, addXP, completeUnit };
+  // Admin function to force Level 1 completion
+  // ID matches the first unit generated in vocab.ts (e.g., unit-frequency-1)
+  const unlockLevel1 = (unitId: string = 'unit-frequency-1') => {
+    const newStats: UserStats = {
+      ...stats,
+      xp: Math.max(stats.xp, 200), // Ensure at least 200 XP
+      gems: Math.max(stats.gems, 20),
+      streak: Math.max(stats.streak, 1),
+      lastStudyDate: new Date().toISOString().split('T')[0],
+      completedUnits: stats.completedUnits.includes(unitId) ? stats.completedUnits : [...stats.completedUnits, unitId]
+    };
+    saveStats(newStats);
+  };
+
+  return { stats, user, addXP, completeUnit, unlockLevel1 };
 }
