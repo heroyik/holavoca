@@ -3,14 +3,7 @@
 import { getUnits, getTotalWordCount } from '@/utils/vocab';
 import Link from 'next/link';
 import { useGamification } from '@/hooks/useGamification';
-import { login } from '@/app/actions/auth';
-
 export default function Home() {
-  const handleProfileClick = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    alert("Google Client ID가 설정되지 않아 로그인을 시작할 수 없습니다. .env.local 설정을 완료하지 않으셨다면 서버 에러가 발생할 수 있습니다.\n\n설정 방법:\n1. .env.local.example을 .env.local로 복사\n2. Google Client ID/Secret 입력\n3. npx auth secret 실행 후 AUTH_SECRET 입력");
-    await login();
-  };
   const units = getUnits();
   const totalWords = getTotalWordCount();
   const { stats } = useGamification();
@@ -30,9 +23,9 @@ export default function Home() {
       }}>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center', width: '100%', maxWidth: '600px' }}>
           <div style={{ flex: 1, height: '14px', backgroundColor: '#e5e5e5', borderRadius: '7px', overflow: 'hidden' }}>
-            <div style={{ 
-              width: `${Math.min((stats.xp % 100), 100)}%`, 
-              height: '100%', 
+            <div style={{
+              width: `${Math.min((stats.xp % 100), 100)}%`,
+              height: '100%',
               backgroundColor: 'var(--duo-green)',
               transition: 'width 0.5s'
             }} />
@@ -61,26 +54,26 @@ export default function Home() {
         flexDirection: 'column',
         alignItems: 'center'
       }}>
-        <h2 style={{ 
-          fontSize: '14px', 
-          fontWeight: '800', 
-          color: 'var(--text-secondary)', 
+        <h2 style={{
+          fontSize: '14px',
+          fontWeight: '800',
+          color: 'var(--text-secondary)',
           textTransform: 'uppercase',
           letterSpacing: '1px',
           marginBottom: '20px'
         }}>
           Currently Studying From
         </h2>
-        <div style={{ 
-          display: 'flex', 
-          gap: '24px', 
+        <div style={{
+          display: 'flex',
+          gap: '24px',
           justifyContent: 'center',
           flexWrap: 'wrap'
         }}>
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
             gap: '12px',
             width: '140px'
           }}>
@@ -93,9 +86,9 @@ export default function Home() {
               border: '1px solid var(--border-light)',
               transition: 'transform 0.3s'
             }}>
-              <img 
-                src="/vol1.jpg" 
-                alt="¡Hola, español! 1" 
+              <img
+                src="/vol1.jpg"
+                alt="¡Hola, español! 1"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             </div>
@@ -103,10 +96,10 @@ export default function Home() {
               ¡Hola, español! 1
             </p>
           </div>
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
             gap: '12px',
             width: '140px'
           }}>
@@ -119,9 +112,9 @@ export default function Home() {
               border: '1px solid var(--border-light)',
               transition: 'transform 0.3s'
             }}>
-              <img 
-                src="/vol2.jpg" 
-                alt="¡Hola, español! 2" 
+              <img
+                src="/vol2.jpg"
+                alt="¡Hola, español! 2"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             </div>
@@ -144,7 +137,7 @@ export default function Home() {
           const offset = Math.sin(index * 1.2) * 45;
           const isCompleted = stats.completedUnits.includes(unit.id);
           const isLocked = index > stats.completedUnits.length;
-          
+
           return (
             <div key={unit.id} style={{
               display: 'flex',
@@ -153,8 +146,8 @@ export default function Home() {
               transform: `translateX(${offset}px)`
             }}>
               <Link href={isLocked ? '#' : `/quiz/${unit.id}`}>
-                <button 
-                  className="flex-center" 
+                <button
+                  className="flex-center"
                   style={{
                     width: '80px',
                     height: '74px',
@@ -212,9 +205,8 @@ export default function Home() {
           <span style={{ fontSize: '24px' }}>🏆</span>
           <span style={{ fontSize: '10px', fontWeight: '800' }}>LEADER</span>
         </div>
-        <div 
-          onClick={handleProfileClick}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--text-secondary)', cursor: 'pointer' }}
+        <div
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--text-secondary)' }}
         >
           <span style={{ fontSize: '24px' }}>👤</span>
           <span style={{ fontSize: '10px', fontWeight: '800' }}>PROFILE</span>
