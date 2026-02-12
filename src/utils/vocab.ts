@@ -14,31 +14,63 @@ export interface LearningUnit {
   words: VocabEntry[];
 }
 
+import { PRIORITY_WORDS } from './priorityWords';
+
 export function getUnits(): LearningUnit[] {
   const units: LearningUnit[] = [];
-  const wordsBySource: Record<string, VocabEntry[]> = {};
 
-  // Group by source
+  // 1. Flatten and unique the vocabulary
+  const uniqueWords = new Map<string, VocabEntry>();
   (vocabData as VocabEntry[]).forEach((word) => {
-    if (!wordsBySource[word["출처"]]) {
-      wordsBySource[word["출처"]] = [];
+    const key = word["스페인어 단어"].toLowerCase().trim();
+    if (!uniqueWords.has(key)) {
+      uniqueWords.set(key, word);
     }
-    wordsBySource[word["출처"]].push(word);
   });
 
-  // Split each source into units of 20 words
-  Object.keys(wordsBySource).sort().forEach((source) => {
-    const sourceWords = wordsBySource[source];
-    for (let i = 0; i < sourceWords.length; i += 20) {
-      const unitWords = sourceWords.slice(i, i + 20);
-      units.push({
-        id: `unit-${source}-${i / 20 + 1}`,
-        title: `Unit ${i / 20 + 1}`,
-        source: source,
-        words: unitWords,
-      });
+  const allWords = Array.from(uniqueWords.values());
+
+  // 2. Sort by Difficulty Heuristic
+  // Hierarchy: Priority List -> Length -> Deterministic Hash (to mix alphabetical)
+  allWords.sort((a, b) => {
+    const wordA = a["스페인어 단어"].toLowerCase();
+    const wordB = b["스페인어 단어"].toLowerCase();
+
+    // Priority Check
+    const isPriorityA = PRIORITY_WORDS.has(wordA);
+    const isPriorityB = PRIORITY_WORDS.has(wordB);
+
+    if (isPriorityA && !isPriorityB) return -1;
+    if (!isPriorityA && isPriorityB) return 1;
+
+    // Length Check (shorter = easier)
+    if (wordA.length !== wordB.length) {
+      return wordA.length - wordB.length;
     }
+
+    // Deterministic Shuffle: Sort by reversed string
+    // e.g. "gato" (otag) vs "perro" (orrep)
+    // This breaks alphabetical clustering effectively while being deterministic.
+    const revA = wordA.split('').reverse().join('');
+    const revB = wordB.split('').reverse().join('');
+    return revA.localeCompare(revB);
   });
+
+  // 3. Chunk into units of 20
+  const UNIT_SIZE = 20;
+  const totalUnits = Math.ceil(allWords.length / UNIT_SIZE);
+
+  for (let i = 0; i < totalUnits; i++) {
+    const start = i * UNIT_SIZE;
+    const unitWords = allWords.slice(start, start + UNIT_SIZE);
+
+    units.push({
+      id: `unit-${i + 1}`, // Sequential IDs: unit-1, unit-2...
+      title: `Unit ${i + 1}`,
+      source: "General", // Flattened source
+      words: unitWords,
+    });
+  }
 
   return units;
 }

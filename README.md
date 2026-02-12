@@ -8,9 +8,16 @@ HolaVoca is a premium, gamified Spanish learning platform inspired by modern edu
 
 ## 🆕 Latest Updates (v1.1.6)
 
-- **👑 Hall of Fame Polish**: Renamed "Global Hall of Fame" to "Hall of Fame" and added a special **Crown Icon (👑)** for the 1st place winner.
-- **🔄 Admin Logic Refined**: The 'Admin Cheat' feature now strictly sets the user's progress. Returning to a lower level (e.g., Level 3 -> Level 1) will now correctly **erase** the higher-level history, allowing for precise testing of different user states.
-- **🛡️ Leaderboard Fallback**: Added robust error handling (v1.1.5) to prevent infinite loading when Firestore indexes are missing.
+- **R.1.2.0**: **Vocabulary Overhaul**. Reorganized the entire learning path to be **Difficulty-Based** instead of Alphabetical.
+  - **Step 1 (Easy)**: Priority words (hola, yo, gracias) + Short words (1-3 chars).
+  - **Step 15 (Hard)**: Longer, complex words.
+  - **No Alphabetical Order**: Words within the same difficulty tier are shuffled to keep learning interesting.
+- **R.1.1.6**: **Leaderboard Polish**.
+  - **Smart Fallback**: If Firestore index is missing, automatically switches to client-side sorting to prevent infinite loading.
+  - **UI**: Added "Hall of Fame" title and 👑 Crown icon for 1st place.
+  - **Admin**: Strict reset logic for cleaner testing.
+- **R.1.1.5**: **Leaderboard Fallback**. Added robust error handling.
+ (v1.1.5) to prevent infinite loading when Firestore indexes are missing.
 - **🛠️ Admin Cheat Codes**: Added a hidden Developer Console for manual stat management (accessible via 5-tap on profile picture). restricted to admin email.
 - **🔓 Level Selector**: Admins can now instantly unlock any level from 1 to 15, automatically calculating XP, Gems, and Unit completions.
 - **🔢 Version Automation**: Centralized version management to ensure the Revision tag always reflects the latest build.
