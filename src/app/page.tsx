@@ -88,20 +88,20 @@ export default function Home() {
           gap: '16px'
         }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', position: 'relative' }}>
-            <h1 style={{ fontSize: '24px', fontWeight: '900', margin: 0, color: 'var(--es-red)', lineHeight: 1.1 }}>HolaVoca</h1>
-            <span style={{
-              fontSize: '9px',
-              fontWeight: '900',
-              color: 'var(--text-secondary)',
-              opacity: 0.5,
-              letterSpacing: '0.5px',
-              alignSelf: 'flex-start',
-              marginTop: '4px',
-              marginLeft: '4px',
-              backgroundColor: '#f3f4f6',
-              padding: '2px 6px',
-              borderRadius: '6px'
-            }}>{APP_VERSION}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h1 style={{ fontSize: '24px', fontWeight: '900', margin: 0, color: 'var(--es-red)', lineHeight: 1.1 }}>HolaVoca</h1>
+              <span style={{
+                fontSize: '10px',
+                fontWeight: '800',
+                color: 'var(--duo-blue)',
+                backgroundColor: '#e0f2fe', // Light blue bg
+                padding: '2px 8px',
+                borderRadius: '12px',
+                letterSpacing: '0.5px',
+                transform: 'translateY(1px)', // Optical alignment
+                border: '1px solid #bae6fd'
+              }}>{APP_VERSION}</span>
+            </div>
             <div style={{
               fontSize: '11px',
               fontWeight: '700',
