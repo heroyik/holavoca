@@ -1,13 +1,16 @@
 # HolaVoca - Spanish Vocabulary Learning App
 
-`Revision 1.1.4`
+`Revision 1.1.6`
 
 HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 4,300+ Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
 
 ---
 
-## 🆕 Latest Updates (v1.1.4)
+## 🆕 Latest Updates (v1.1.6)
 
+- **👑 Hall of Fame Polish**: Renamed "Global Hall of Fame" to "Hall of Fame" and added a special **Crown Icon (👑)** for the 1st place winner.
+- **🔄 Admin Logic Refined**: The 'Admin Cheat' feature now strictly sets the user's progress. Returning to a lower level (e.g., Level 3 -> Level 1) will now correctly **erase** the higher-level history, allowing for precise testing of different user states.
+- **🛡️ Leaderboard Fallback**: Added robust error handling (v1.1.5) to prevent infinite loading when Firestore indexes are missing.
 - **🛠️ Admin Cheat Codes**: Added a hidden Developer Console for manual stat management (accessible via 5-tap on profile picture). restricted to admin email.
 - **🔓 Level Selector**: Admins can now instantly unlock any level from 1 to 15, automatically calculating XP, Gems, and Unit completions.
 - **🔢 Version Automation**: Centralized version management to ensure the Revision tag always reflects the latest build.

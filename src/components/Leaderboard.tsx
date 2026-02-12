@@ -101,7 +101,7 @@ export default function Leaderboard() {
     return (
         <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
             <h2 style={{ fontSize: '24px', fontWeight: '900', color: 'var(--es-red)', marginBottom: '20px', textAlign: 'center' }}>
-                Global Hall of Fame 🏆
+                Hall of Fame 🏆
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {leaders.map((entry, index) => (
@@ -118,7 +118,7 @@ export default function Leaderboard() {
                         }}
                     >
                         <div style={{ width: '30px', fontWeight: '900', fontSize: '18px', color: 'var(--text-secondary)' }}>
-                            {index + 1}
+                            {index === 0 ? '👑' : index + 1}
                         </div>
                         <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#e5e5e5', marginRight: '12px', overflow: 'hidden' }}>
                             {entry.photoURL ? (

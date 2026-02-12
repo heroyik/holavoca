@@ -155,18 +155,17 @@ export function useGamification() {
     saveStats(newStats);
   };
 
-  // Admin function to force progress
+  // Admin function to force progress (Strict Set)
   const unlockProgress = (targetUnits: string[], totalXp: number, totalGems: number) => {
-    // Merge with existing completed units to avoid un-completing things accidentally
-    const mergedUnits = Array.from(new Set([...stats.completedUnits, ...targetUnits]));
-
+    // Strict Set for Admin: Replace stats to match the target level exactly
+    // This allows "resetting" to a lower level if needed
     const newStats: UserStats = {
       ...stats,
-      xp: Math.max(stats.xp, totalXp),
-      gems: Math.max(stats.gems, totalGems),
-      streak: Math.max(stats.streak, 1), // Ensure at least 1 streak if unlocking
+      xp: totalXp,
+      gems: totalGems,
+      streak: Math.max(stats.streak, 1), // Keep streak or ensure at least 1
       lastStudyDate: new Date().toISOString().split('T')[0],
-      completedUnits: mergedUnits
+      completedUnits: targetUnits // Replace completed units (removing higher level history)
     };
     saveStats(newStats);
   };
