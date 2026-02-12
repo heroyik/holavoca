@@ -70,13 +70,7 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero / Stats Info */}
-      <div style={{
-        padding: '16px 20px',
-        textAlign: 'center'
-      }}>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '14px', fontWeight: '700' }}>Total XP: {stats.xp}</p>
-      </div>
+      <div style={{ padding: '8px' }} />
 
 
       {/* Learning Path (Snake UI) */}
@@ -280,8 +274,23 @@ export default function Home() {
           <span style={{ fontSize: '24px' }}>👤</span>
           <span style={{ fontSize: '10px', fontWeight: '800' }}>PROFILE</span>
         </div>
-        <div style={{ position: 'absolute', bottom: '70px', left: 0, right: 0, textAlign: 'center', padding: '10px', fontSize: '12px', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-soft)', borderTop: '1px solid var(--border-light)' }}>
-          Total Spanish Words: <strong>{totalWords.toLocaleString()}</strong>
+        <div style={{
+          position: 'absolute',
+          bottom: '70px',
+          left: 0,
+          right: 0,
+          textAlign: 'center',
+          padding: '12px 10px',
+          fontSize: '12px',
+          color: 'var(--text-secondary)',
+          backgroundColor: 'var(--bg-soft)',
+          borderTop: '1px solid var(--border-light)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px'
+        }}>
+          <div>My Learning Aura: <strong style={{ color: 'var(--es-red)', fontSize: '14px' }}>{stats.xp.toLocaleString()} ✨</strong></div>
+          <div style={{ opacity: 0.8 }}>Total Spanish Words: <strong>{totalWords.toLocaleString()}</strong></div>
         </div>
       </nav>
 
