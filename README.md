@@ -1,13 +1,16 @@
 # HolaVoca - Spanish Vocabulary Learning App
 
-`Revision 1.1.6`
+`Revision 1.2.1`
 
 HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 4,300+ Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
 
 ---
 
-## 🆕 Latest Updates (v1.1.6)
+## 🆕 Latest Updates (v1.2.1)
 
+- **R.1.2.1**: **Vocabulary Download**.
+  - Added a one-tap download feature for the entire vocabulary dataset (JSON format) by clicking the "**전체 데이터**" count in the header.
+  - Filename format: `오늘날짜-voca.json` (e.g., `2026-02-12-voca.json`).
 - **R.1.2.0**: **Vocabulary Overhaul & Robustness**.
   - **Overhauled Vocabulary**: Reorganized learning path to be **Difficulty-Based** (Priority Words -> Complex Words) instead of Alphabetical.
   - **No Alphabetical Order**: Words within tiers are shuffled to keep learning effective.
@@ -42,7 +45,7 @@ A winding, interactive learning path that visually guides users through 15+ unit
 
 ### 📚 Premium Aesthetics
 
-- **Vocabulary Arsenal 📚**: Real-time count of total words available (4,300+) prominently displayed in the header.
+- **전체 데이터 📚**: Real-time count of total words available prominently displayed in the header. Click to download the dataset as JSON.
 - **My Learning Aura ✨**: A dedicated XP tracking system relocated to the sticky footer for constant visibility.
 - **Textbook Lightbox**: High-quality thumbnails of "¡Hola, español! 1 & 2" that can be zoomed for detailed viewing.
 
