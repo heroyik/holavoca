@@ -42,11 +42,35 @@ export function useGamification() {
 
     const userRef = doc(db, "users", user.uid);
 
-    // Subscribe to cloud changes
+    // Subscribe to cloud changes with Smart Merge
     const unsubscribe = onSnapshot(userRef, (docSnap) => {
       if (docSnap.exists()) {
         const cloudData = docSnap.data() as UserStats;
-        setStats(cloudData);
+
+        // Smart Merge Strategy: Keep the best progress
+        // This handles cases where user studies offline/anon then logs in
+        const mergedStats = {
+          xp: Math.max(cloudData.xp, stats.xp),
+          gems: Math.max(cloudData.gems, stats.gems),
+          streak: Math.max(cloudData.streak, stats.streak),
+          // Keep the latest date
+          lastStudyDate: (new Date(cloudData.lastStudyDate || 0) > new Date(stats.lastStudyDate || 0))
+            ? cloudData.lastStudyDate
+            : stats.lastStudyDate,
+          // Union of completed units
+          completedUnits: Array.from(new Set([...cloudData.completedUnits, ...stats.completedUnits]))
+        };
+
+        // If local had better stats, update cloud immediately
+        if (JSON.stringify(mergedStats) !== JSON.stringify(cloudData)) {
+          setDoc(userRef, {
+            ...mergedStats,
+            displayName: user.displayName,
+            photoURL: user.photoURL
+          }, { merge: true });
+        }
+
+        setStats(mergedStats);
       } else {
         // First time user: push local data to cloud
         const saved = localStorage.getItem("holavoca_stats");

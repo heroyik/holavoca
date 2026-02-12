@@ -11,31 +11,71 @@ interface LeaderboardEntry {
 
 export default function Leaderboard() {
     const [leaders, setLeaders] = useState<LeaderboardEntry[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
 
     useEffect(() => {
-        const q = query(
-            collection(db, "users"),
-            orderBy("xp", "desc"),
-            limit(10)
-        );
+        let timeoutId: NodeJS.Timeout;
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const entries = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            })) as LeaderboardEntry[];
-            setLeaders(entries);
-            setLoading(false);
-        }, (error) => {
-            console.error("Leaderboard error:", error);
-            setLoading(false); // Stop loading even on error
-        });
+        const loadLeaderboard = () => {
+            setLoading(true);
+            setError(false);
 
-        return () => unsubscribe();
+            // Timeout fallback (10s)
+            timeoutId = setTimeout(() => {
+                setLoading(false);
+                setError(true);
+            }, 10000);
+
+            const q = query(
+                collection(db, "users"),
+                orderBy("xp", "desc"),
+                limit(10)
+            );
+
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                clearTimeout(timeoutId);
+                const entries = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                })) as LeaderboardEntry[];
+                setLeaders(entries);
+                setLoading(false);
+            }, (err) => {
+                console.error("Leaderboard error:", err);
+                clearTimeout(timeoutId);
+                setLoading(false);
+                setError(true);
+            });
+
+            return unsubscribe;
+        };
+
+        const unsubscribe = loadLeaderboard();
+        return () => {
+            if (unsubscribe) unsubscribe();
+            clearTimeout(timeoutId);
+        };
     }, []);
 
-    if (loading) return <div className="flex-center" style={{ padding: '40px' }}>Loading Rankings...</div>;
+    if (loading) return <div className="flex-center" style={{ padding: '40px', color: 'var(--text-secondary)' }}>Loading Rankings...</div>;
+
+    if (error) return (
+        <div style={{ padding: '40px', textAlign: 'center' }}>
+            <p style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>Failed to load rankings.</p>
+            <button
+                onClick={() => window.location.reload()}
+                style={{
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-light)',
+                    backgroundColor: 'white',
+                    cursor: 'pointer'
+                }}
+            >
+                Retry
+            </button>
+        </div>
+    );
 
     return (
         <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
