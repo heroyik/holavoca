@@ -3,9 +3,12 @@ import Quiz from "@/components/Quiz";
 import { notFound } from "next/navigation";
 
 interface QuizPageProps {
-  params: {
+  params: Promise<{
     unitId: string;
-  };
+  }>;
+  searchParams: Promise<{
+    sources?: string;
+  }>;
 }
 
 export async function generateStaticParams() {
@@ -15,14 +18,18 @@ export async function generateStaticParams() {
   }));
 }
 
-export default async function QuizPage({ params }: QuizPageProps) {
+export default async function QuizPage({ params, searchParams }: QuizPageProps) {
   const { unitId } = await params;
-  const units = getUnits();
+  const { sources: sourcesStr } = await searchParams;
+
+  const sources = sourcesStr ? sourcesStr.split(',') : ['1'];
+
+  const units = getUnits(sources);
   const unit = units.find((u) => u.id === unitId);
 
   if (!unit) {
     notFound();
   }
 
-  return <Quiz unitId={unit.id} unitWords={unit.words} unitTitle={unit.title} />;
+  return <Quiz unitId={unit.id} unitWords={unit.words} unitTitle={unit.title} sources={sources} />;
 }

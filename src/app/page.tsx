@@ -259,7 +259,7 @@ export default function Home() {
                 height: '160px'
               }}>
                 <Link
-                  href={isLocked ? '#' : `/quiz/${unit.id}`}
+                  href={isLocked ? '#' : `/quiz/${unit.id}?sources=${selectedBooks.join(',')}`}
                   onClick={(e) => isLocked && e.preventDefault()}
                   style={{ textDecoration: 'none' }}
                 >

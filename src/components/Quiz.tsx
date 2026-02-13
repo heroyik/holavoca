@@ -9,6 +9,7 @@ interface QuizProps {
   unitId: string;
   unitWords: VocabEntry[];
   unitTitle: string;
+  sources?: string[]; // Added sources prop
 }
 
 type QuestionType = "translate-ko" | "translate-es" | "gender";
@@ -21,7 +22,7 @@ interface Question {
   displayWord?: string;
 }
 
-export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
+export default function Quiz({ unitId, unitWords, unitTitle, sources = ['1'] }: QuizProps) {
   const router = useRouter();
   const { completeUnit } = useGamification();
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -64,12 +65,12 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
         displayWord = getGenderedForm(word["스페인어 단어"], targetGender);
       } else if (type === "translate-ko") {
         correctAnswer = word["한국어 의미"];
-        const distractors = getRandomWords(3, [word["스페인어 단어"]])
+        const distractors = getRandomWords(3, sources, word["스페인어 단어"])
           .map(w => w["한국어 의미"]);
         options = [correctAnswer, ...distractors].sort(() => Math.random() - 0.5);
       } else { // translate-es
         correctAnswer = word["스페인어 단어"];
-        const distractors = getRandomWords(3, [word["스페인어 단어"]])
+        const distractors = getRandomWords(3, sources, word["스페인어 단어"])
           .map(w => w["스페인어 단어"]);
         options = [correctAnswer, ...distractors].sort(() => Math.random() - 0.5);
       }
@@ -83,7 +84,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
     setIsCorrect(null);
     setScore(0);
     setIsFinished(false);
-  }, [unitId, unitWords]);
+  }, [unitId, unitWords, sources]);
 
   const handleCheck = (option: string) => {
     if (isCorrect !== null) return;

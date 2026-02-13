@@ -78,10 +78,12 @@ export function getUnits(sources: string[] = ['1']): LearningUnit[] {
   return units;
 }
 
-export function getRandomWords(count: number, sources: string[] = ['1'], exclude?: string[]): VocabEntry[] {
+export function getRandomWords(count: number, sources: string[] = ['1'], exclude?: string | string[]): VocabEntry[] {
   const allWords = (vocabData as VocabEntry[]).filter(item => sources.includes(item["출처"]));
-  const filtered = exclude
-    ? allWords.filter(w => !exclude.includes(w["스페인어 단어"]))
+
+  const excludeArray = typeof exclude === 'string' ? [exclude] : exclude || [];
+  const filtered = excludeArray.length > 0
+    ? allWords.filter(w => !excludeArray.includes(w["스페인어 단어"]))
     : allWords;
 
   return [...filtered].sort(() => Math.random() - 0.5).slice(0, count);
