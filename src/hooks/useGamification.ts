@@ -9,6 +9,7 @@ export interface UserStats {
   streak: number;
   lastStudyDate: string | null;
   completedUnits: string[];
+  mistakes?: Record<string, number>;
   displayName?: string;
   photoURL?: string;
 }
@@ -21,6 +22,7 @@ export function useGamification() {
     streak: 0,
     lastStudyDate: null,
     completedUnits: [],
+    mistakes: {},
   });
 
   // Client-side initialization to avoid hydration mismatch (Error #418)
@@ -63,7 +65,8 @@ export function useGamification() {
               ...cloudData,
               // Smart merge for progress-based fields
               xp: Math.max(prev.xp, cloudData.xp || 0),
-              completedUnits: Array.from(new Set([...prev.completedUnits, ...(cloudData.completedUnits || [])]))
+              completedUnits: Array.from(new Set([...prev.completedUnits, ...(cloudData.completedUnits || [])])),
+              mistakes: { ...prev.mistakes, ...(cloudData.mistakes || {}) }
             }));
           }
         });
@@ -145,11 +148,36 @@ export function useGamification() {
     saveStats(newStats);
   };
 
+  const recordMistake = (spanishWord: string) => {
+    const currentMistakes = stats.mistakes || {};
+    const newCount = (currentMistakes[spanishWord] || 0) + 1;
+    const newStats = {
+      ...stats,
+      mistakes: {
+        ...currentMistakes,
+        [spanishWord]: newCount
+      }
+    };
+    saveStats(newStats);
+  };
+
+  const clearMistake = (spanishWord: string) => {
+    if (!stats.mistakes || !stats.mistakes[spanishWord]) return;
+    const { [spanishWord]: _, ...remainingMistakes } = stats.mistakes;
+    const newStats = {
+      ...stats,
+      mistakes: remainingMistakes
+    };
+    saveStats(newStats);
+  };
+
   return {
     user,
     stats,
     addXP,
     completeUnit,
-    unlockProgress
+    unlockProgress,
+    recordMistake,
+    clearMistake
   };
 }

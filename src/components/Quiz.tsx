@@ -24,7 +24,7 @@ interface Question {
 
 export default function Quiz({ unitId, unitWords, unitTitle, sources = ['1'] }: QuizProps) {
   const router = useRouter();
-  const { completeUnit } = useGamification();
+  const { completeUnit, recordMistake, clearMistake } = useGamification();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -92,7 +92,13 @@ export default function Quiz({ unitId, unitWords, unitTitle, sources = ['1'] }: 
     setSelectedOption(option);
     const correct = option === questions[currentIndex].correctAnswer;
     setIsCorrect(correct);
-    if (correct) setScore(s => s + 1);
+    if (correct) {
+      setScore(s => s + 1);
+      // Optional: Clear mistake if correct during regular quiz or review
+      clearMistake(questions[currentIndex].word["스페인어 단어"]);
+    } else {
+      recordMistake(questions[currentIndex].word["스페인어 단어"]);
+    }
   };
 
   const handleNext = () => {

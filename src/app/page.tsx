@@ -10,6 +10,7 @@ import Image from 'next/image';
 import { useGamification } from '@/hooks/useGamification';
 import Leaderboard from '@/components/Leaderboard';
 import UserProfile from '@/components/UserProfile';
+import ReviewTab from '@/components/ReviewTab';
 import vol1 from '../../public/vol1.jpg';
 import vol2 from '../../public/vol2.jpg';
 import { Github } from 'lucide-react';
@@ -46,7 +47,7 @@ const getMotivationalSticker = (idx: number) => {
 
 export default function Home() {
   const [selectedBooks, setSelectedBooks] = useState<string[]>(['1']);
-  const [activeTab, setActiveTab] = useState<'learn' | 'leader' | 'profile'>('learn');
+  const [activeTab, setActiveTab] = useState<'learn' | 'review' | 'leader' | 'profile'>('learn');
   const { stats, user } = useGamification();
 
   // Load selection from sessionStorage on mount
@@ -365,6 +366,7 @@ export default function Home() {
         </div>
       )}
 
+      {activeTab === 'review' && <ReviewTab />}
       {activeTab === 'leader' && <Leaderboard />}
       {activeTab === 'profile' && <UserProfile user={user} stats={stats} />}
 
@@ -404,6 +406,13 @@ export default function Home() {
         >
           <span style={{ fontSize: '24px' }}>🏆</span>
           <span style={{ fontSize: '10px', fontWeight: '800' }}>LEADER</span>
+        </div>
+        <div
+          onClick={() => setActiveTab('review')}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: activeTab === 'review' ? 'var(--duo-blue)' : 'var(--text-secondary)', cursor: 'pointer' }}
+        >
+          <span style={{ fontSize: '24px' }}>📚</span>
+          <span style={{ fontSize: '10px', fontWeight: '800' }}>REVIEW</span>
         </div>
         <div
           onClick={() => setActiveTab('profile')}
