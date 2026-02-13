@@ -1,15 +1,18 @@
 # HolaVoca - Spanish Vocabulary Learning App
 
-`Revision 1.3.0`
+`Revision 1.3.1`
 
 HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 4,300+ Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
 
 ---
 
-## 🆕 Latest Updates (v1.3.0)
+## 🆕 Latest Updates (v1.3.1)
 
+- **R.1.3.1**: **Deployment Stability & Secret Sync**.
+  - **Hydration Fix**: Resolved pixel-perfect hydration mismatches in the "Snake Path" UI by rounding floating-point CSS values.
+  - **Secret Automation**: Synchronized Firebase API keys with GitHub Repository Secrets for secure production authentication.
 - **R.1.3.0**: **Rock-Solid Stability & UI Polish**.
-  - **Stability & Performance**: Fixed React hydration mismatches (Error #418) and background sync logic for smoother performance.
+  - **Stability & Performance**: Adjusted background sync logic for smoother performance.
   - **Build Safety**: Refactored architecture for strictly client-side Firebase initialization, ensuring zero build failures.
   - **Runtime Resilience**: Added smart guards to prevent crashes if API keys are missing, defaulting to an elegant "Offline/Demo Mode".
   - **Header UI**: Renamed the stats badge to "**VOCAB STASH**" for a more hip, casual feel.
