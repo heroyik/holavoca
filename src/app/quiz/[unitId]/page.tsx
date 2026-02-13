@@ -11,13 +11,6 @@ interface QuizPageProps {
   }>;
 }
 
-export async function generateStaticParams() {
-  const units = getUnits();
-  return units.map((unit) => ({
-    unitId: unit.id,
-  }));
-}
-
 export default async function QuizPage({ params, searchParams }: QuizPageProps) {
   const { unitId } = await params;
   const { sources: sourcesStr } = await searchParams;
