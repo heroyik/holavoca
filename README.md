@@ -86,7 +86,7 @@ A winding, interactive learning path that visually guides users through 15+ unit
 
 ### 📚 Premium Aesthetics
 
-- **전체 데이터 📚**: Real-time count of total words available prominently displayed in the header. Click to download the dataset as JSON.
+- **Total number of words 📚**: Real-time count of total words available prominently displayed in the header. Click to download the dataset as JSON.
 - **My Learning Aura ✨**: A dedicated XP tracking system relocated to the sticky footer for constant visibility.
 - **Textbook Lightbox**: High-quality thumbnails of "¡Hola, español! 1 & 2" that can be zoomed for detailed viewing.
 
