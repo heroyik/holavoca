@@ -50,7 +50,7 @@ export default function ReviewTab() {
           <div>
             <h2 style={{ fontSize: '20px', fontWeight: '900', margin: 0 }}>Mis Errores</h2>
             <p style={{ fontSize: '14px', color: 'var(--text-secondary)', fontWeight: '700', margin: '4px 0 0' }}>
-              {missedEntries.length} palabras para repasar
+              {missedEntries.length} {missedEntries.length === 1 ? 'palabra' : 'palabras'} para repasar
             </p>
           </div>
           <Link href={`/quiz/review`} style={{ textDecoration: 'none' }}>

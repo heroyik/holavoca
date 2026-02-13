@@ -60,15 +60,19 @@ export function useGamification() {
         const unsubStats = onSnapshot(userDocRef, (snapshot) => {
           if (snapshot.exists() && !snapshot.metadata.hasPendingWrites) {
             const cloudData = snapshot.data() as UserStats;
-            setStats(prev => ({
-              ...prev,
-              ...cloudData,
-              // Smart merge for progress-based fields
-              xp: Math.max(prev.xp, cloudData.xp || 0),
-              completedUnits: Array.from(new Set([...prev.completedUnits, ...(cloudData.completedUnits || [])])),
-              // For mistakes, we trust the cloud data for deletion sync
-              mistakes: cloudData.mistakes || {}
-            }));
+            setStats(prev => {
+              const mergedMistakes = cloudData.mistakes !== undefined 
+                ? cloudData.mistakes 
+                : prev.mistakes;
+              
+              return {
+                ...prev,
+                ...cloudData,
+                xp: Math.max(prev.xp, cloudData.xp || 0),
+                completedUnits: Array.from(new Set([...prev.completedUnits, ...(cloudData.completedUnits || [])])),
+                mistakes: mergedMistakes || {}
+              };
+            });
           }
         });
         return () => unsubStats();
@@ -96,9 +100,13 @@ export function useGamification() {
   }, [stats, user]);
 
   const saveStats = async (newStats: UserStats) => {
+    // 1. Update local state
     setStats(newStats);
+    
+    // 2. Persist to localStorage immediately
     localStorage.setItem("holavoca_stats", JSON.stringify(newStats));
 
+    // 3. Immediate Firestore sync (optional, but good for critical updates)
     const firestore = db;
     if (user && firestore) {
       try {
@@ -150,34 +158,42 @@ export function useGamification() {
   };
 
   const recordMistake = (spanishWord: string) => {
-    const currentMistakes = stats.mistakes || {};
-    const newCount = (currentMistakes[spanishWord] || 0) + 1;
-    const newStats = {
-      ...stats,
-      mistakes: {
-        ...currentMistakes,
-        [spanishWord]: newCount
-      }
-    };
-    saveStats(newStats);
+    setStats(prev => {
+      const currentMistakes = prev.mistakes || {};
+      const newStats = {
+        ...prev,
+        mistakes: {
+          ...currentMistakes,
+          [spanishWord]: (currentMistakes[spanishWord] || 0) + 1
+        }
+      };
+      localStorage.setItem("holavoca_stats", JSON.stringify(newStats));
+      return newStats;
+    });
   };
 
   const clearMistake = (spanishWord: string) => {
-    if (!stats.mistakes || !stats.mistakes[spanishWord]) return;
-    const { [spanishWord]: _, ...remainingMistakes } = stats.mistakes;
-    const newStats = {
-      ...stats,
-      mistakes: remainingMistakes
-    };
-    saveStats(newStats);
+    setStats(prev => {
+      const currentMistakes = { ...prev.mistakes };
+      delete currentMistakes[spanishWord];
+      const newStats = {
+        ...prev,
+        mistakes: currentMistakes
+      };
+      localStorage.setItem("holavoca_stats", JSON.stringify(newStats));
+      return newStats;
+    });
   };
 
   const clearAllMistakes = () => {
-    const newStats = {
-      ...stats,
-      mistakes: {}
-    };
-    saveStats(newStats);
+    setStats(prev => {
+      const newStats = {
+        ...prev,
+        mistakes: {}
+      };
+      localStorage.setItem("holavoca_stats", JSON.stringify(newStats));
+      return newStats;
+    });
   };
 
   return {
