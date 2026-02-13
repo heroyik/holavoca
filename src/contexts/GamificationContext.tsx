@@ -33,13 +33,27 @@ const GamificationContext = createContext<GamificationContextType | undefined>(u
 export function GamificationProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [stats, setStats] = useState<UserStats>({
-    xp: 0,
-    gems: 0,
-    streak: 0,
-    lastStudyDate: null,
-    completedUnits: [],
-    mistakes: {},
+  const [stats, setStats] = useState<UserStats>(() => {
+    const defaultStats = {
+      xp: 0,
+      gems: 0,
+      streak: 0,
+      lastStudyDate: null,
+      completedUnits: [],
+      mistakes: {},
+    };
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem("holavoca_stats");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          return { ...defaultStats, ...parsed, mistakes: parsed.mistakes || {} };
+        } catch (e) {
+          console.error("Failed to parse local stats", e);
+        }
+      }
+    }
+    return defaultStats;
   });
 
   const statsRef = useRef(stats);
@@ -51,7 +65,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!auth) {
       console.warn("Firebase Auth is not available. Using Guest Mode.");
-      setIsInitialized(true);
+      setTimeout(() => setIsInitialized(true), 0);
       return;
     }
 
@@ -91,22 +105,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     return () => unsubscribeAuth();
   }, []);
 
-  // Hydrate from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem("holavoca_stats");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setStats(prev => ({
-          ...prev,
-          ...parsed,
-          mistakes: parsed.mistakes || {}
-        }));
-      } catch (e) {
-        console.error("Failed to parse local stats", e);
-      }
-    }
-  }, []);
+  // Hydrate from localStorage removed - now handled in initializer
 
   // Throttled Auto-Sync
   useEffect(() => {

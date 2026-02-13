@@ -14,7 +14,7 @@ export interface LearningUnit {
   words: VocabEntry[];
 }
 
-import { PRIORITY_WORDS } from './priorityWords';
+// PRIORITY_WORDS removed (unused)
 
 export function getUnits(sources: string[] = ['1']): LearningUnit[] {
   const units: LearningUnit[] = [];

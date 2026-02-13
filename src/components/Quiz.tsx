@@ -1,233 +1,145 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { VocabEntry, getRandomWords, getGenderedForm } from "@/utils/vocab";
+import { useState, useCallback, useMemo } from "react";
+import { VocabEntry } from "@/utils/vocab";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { X, CheckCircle, XCircle } from "lucide-react";
 import { useGamification } from "@/hooks/useGamification";
 
 interface QuizProps {
   unitId: string;
   unitWords: VocabEntry[];
-  unitTitle: string;
-  sources?: string[]; // Added sources prop
+  unitTitle?: string;
+  sources: string[];
 }
 
-type QuestionType = "translate-ko" | "translate-es" | "gender";
-
-interface Question {
-  word: VocabEntry;
-  type: QuestionType;
-  options: string[];
-  correctAnswer: string;
-  displayWord?: string;
-}
-
-export default function Quiz({ unitId, unitWords, unitTitle, sources = ['1'] }: QuizProps) {
+export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
   const router = useRouter();
-  const { completeUnit, recordMistake, clearMistake } = useGamification();
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const { addXP, addGem, addMistake, completeUnit } = useGamification();
+
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [showResult, setShowResult] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const [score, setScore] = useState(0);
-  const [isFinished, setIsFinished] = useState(false);
+  const [questions] = useState(() => [...unitWords].sort(() => Math.random() - 0.5));
 
-  // Generate questions from unit words and reset quiz state
-  useEffect(() => {
-    const generated: Question[] = unitWords.map((word) => {
-      let type: QuestionType = "translate-ko";
-      const hasGender = word["성별/문법 정보"]?.includes("m") || word["성별/문법 정보"]?.includes("f");
+  const generateOptions = useCallback((correctAnswer: string) => {
+    const distractors = unitWords
+      .map(v => v["한국어 의미"])
+      .filter(v => v !== correctAnswer);
+    const shuffledDistractors = distractors.sort(() => Math.random() - 0.5).slice(0, 3);
+    return [...shuffledDistractors, correctAnswer].sort(() => Math.random() - 0.5);
+  }, [unitWords]);
 
-      const rand = Math.random();
-      if (hasGender && rand > 0.8) {
-        type = "gender";
-      } else if (rand > 0.5) {
-        type = "translate-es";
-      } else {
-        type = "translate-ko";
-      }
-
-      let options: string[] = [];
-      let correctAnswer = "";
-      let displayWord = "";
-
-      if (type === "gender") {
-        const info = word["성별/문법 정보"];
-        const isBoth = info.includes("m") && info.includes("f");
-        let targetGender: "m" | "f" = info.includes("m") ? "m" : "f";
-
-        if (isBoth) {
-          targetGender = Math.random() > 0.5 ? "m" : "f";
-        }
-
-        correctAnswer = targetGender === "m" ? "El (Masculine)" : "La (Feminine)";
-        options = ["El (Masculine)", "La (Feminine)"];
-        displayWord = getGenderedForm(word["스페인어 단어"], targetGender);
-      } else if (type === "translate-ko") {
-        correctAnswer = word["한국어 의미"];
-        const distractors = getRandomWords(3, sources, word["스페인어 단어"])
-          .map(w => w["한국어 의미"]);
-        options = [correctAnswer, ...distractors].sort(() => Math.random() - 0.5);
-      } else { // translate-es
-        correctAnswer = word["스페인어 단어"];
-        const distractors = getRandomWords(3, sources, word["스페인어 단어"])
-          .map(w => w["스페인어 단어"]);
-        options = [correctAnswer, ...distractors].sort(() => Math.random() - 0.5);
-      }
-
-      return { word, type, options, correctAnswer, displayWord };
-    });
-
-    setQuestions(generated);
-    setCurrentIndex(0);
-    setSelectedOption(null);
-    setIsCorrect(null);
-    setScore(0);
-    setIsFinished(false);
-  }, [unitId, unitWords, sources]);
+  const options = useMemo(() => {
+    if (questions.length > 0 && currentIndex < questions.length) {
+      return generateOptions(questions[currentIndex]["한국어 의미"]);
+    }
+    return [];
+  }, [currentIndex, questions, generateOptions]);
 
   const handleCheck = (option: string) => {
-    if (isCorrect !== null) return;
-
+    if (selectedOption) return;
+    
     setSelectedOption(option);
-    const correct = option === questions[currentIndex].correctAnswer;
+    const correct = option === questions[currentIndex]["한국어 의미"];
     setIsCorrect(correct);
+
     if (correct) {
-      setScore(s => s + 1);
+      setScore(prev => prev + 1);
+      addXP(10);
     } else {
-      recordMistake(questions[currentIndex].word["스페인어 단어"]);
+      addMistake(questions[currentIndex]["스페인어 단어"]);
     }
   };
 
   const handleNext = () => {
     if (currentIndex < questions.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+      setCurrentIndex(prev => prev + 1);
       setSelectedOption(null);
       setIsCorrect(null);
     } else {
-      // Quiz Finished - Reward XP (10 XP per correct answer)
-      const xpEarned = score * 10;
-      completeUnit(unitId, xpEarned);
-      setIsFinished(true);
+      setShowResult(true);
+      if (unitId !== 'review') {
+        const passThreshold = Math.ceil(questions.length * 0.8);
+        if (score >= passThreshold) {
+          completeUnit(unitId);
+          addGem(20);
+        }
+      }
     }
   };
 
-  if (questions.length === 0) return <div className="flex-center" style={{ height: '100vh' }}>Loading...</div>;
+  if (questions.length === 0) return <div className="flex-center min-h-screen font-800">Cargando...</div>;
 
-  if (isFinished) {
+  if (showResult) {
     return (
-      <div className="container flex-center" style={{ height: '100vh', flexDirection: 'column', gap: '20px' }}>
-        <h2 style={{ fontSize: '32px', fontWeight: '800', color: 'var(--duo-green)' }}>Finished!</h2>
-        <div style={{ fontSize: '24px', textAlign: 'center' }}>
-          Your Score: <br />
-          <span style={{ fontSize: '48px', color: 'var(--duo-blue)' }}>{score} / {questions.length}</span>
-          <p style={{ fontSize: '18px', color: 'var(--duo-orange)', marginTop: '8px' }}>+ {score * 10} XP / + {Math.floor(score / 10)} Gems</p>
+      <div className="container flex-center min-h-screen flex-col pt-40-pb-20">
+        <h2 className="text-main-title text-duo-green mb-20">¡Terminado!</h2>
+        <div className="text-center mb-32">
+          <div className="text-subtitle mb-8">Tu Puntuación:</div>
+          <span className="score-text">
+            {score} / {questions.length}
+          </span>
+          <p className="pass-message">
+            {score === questions.length ? "¡Perfecto! 🌟" : score >= questions.length * 0.8 ? "¡Muy bien! 🔥" : "¡Sigue practicando! 💪"}
+          </p>
         </div>
-        <button
-          className="duo-button duo-button-primary"
+        <button 
           onClick={() => router.push('/')}
+          className="duo-button duo-button-primary w-auto px-40 py-12"
         >
-          Continue
+          CONTINUAR
         </button>
       </div>
     );
   }
 
-  const current = questions[currentIndex];
-  const progress = ((currentIndex + 1) / questions.length) * 100;
+  const currentQuestion = questions[currentIndex];
+  const progress = ((currentIndex) / questions.length) * 100;
 
   return (
-    <div className="container" style={{ padding: '40px 20px', display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      {/* Progress Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
-        <button onClick={() => router.push('/')} style={{ fontSize: '24px', color: 'var(--text-secondary)' }}>✕</button>
-        <div style={{
-          flex: 1,
-          height: '16px',
-          backgroundColor: 'var(--border-light)',
-          borderRadius: '8px',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            width: `${progress}%`,
-            height: '100%',
-            backgroundColor: 'var(--duo-green)',
-            transition: 'width 0.3s'
-          }} />
+    <div className="container flex flex-col min-h-screen p-20-120">
+      {/* Header */}
+      <div className="flex-between gap-16 mb-32">
+        <Link href="/" aria-label="Cerrar lección" className="no-underline">
+          <X className="text-subtitle pointer" />
+        </Link>
+        <div className="flex-1 progress-bar-track">
+          <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
         </div>
       </div>
 
-      {/* Question Area */}
-      <div style={{ flex: 1 }}>
-        <h2 style={{ fontSize: '24px', fontWeight: '800', marginBottom: '32px' }}>
-          {unitTitle && <span style={{ color: 'var(--duo-blue)', marginRight: '8px' }}>{unitTitle}:</span>}
-          {current.type === 'translate-ko'
-            ? 'Translate to Korean'
-            : current.type === 'gender'
-              ? 'Identify the Gender'
-              : 'Choose the correct Spanish word'}
+      <div className="flex-1">
+        <h2 className="text-title mb-32">
+          {unitTitle && <span className="text-duo-blue mr-8">{unitTitle}:</span>}
+          ¿Qué significa esta palabra?
         </h2>
 
-        <div style={{
-          padding: '24px',
-          border: '2px solid var(--border-light)',
-          borderRadius: 'var(--radius-lg)',
-          marginBottom: '32px',
-          fontSize: '24px',
-          fontWeight: '700',
-          textAlign: 'center',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          {/* Textbook Indicator */}
-          <div style={{
-            position: 'absolute',
-            top: '8px',
-            left: current.word["출처"] === "1" ? '8px' : 'auto',
-            right: current.word["출처"] === "2" ? '8px' : 'auto',
-            width: '40px',
-            height: '56px',
-            borderRadius: '4px',
-            overflow: 'hidden',
-            border: '1px solid var(--border-light)',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            opacity: 0.8
-          }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={current.word["출처"] === "2" ? "/holavoca/vol2.jpg" : "/holavoca/vol1.jpg"}
-              alt={`Vol ${current.word["출처"]}`}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+        <div className="quiz-card mb-32">
+          <div className="text-main-title text-es-red mb-8">
+            {currentQuestion["스페인어 단어"]}
           </div>
-
-          <div style={{ marginTop: '12px' }}>
-            {current.type === 'translate-ko'
-              ? current.word["스페인어 단어"]
-              : current.type === 'gender'
-                ? current.displayWord || current.word["스페인어 단어"]
-                : current.word["한국어 의미"]}
-          </div>
+          {currentQuestion["예문"] && (
+            <div className="text-subtitle italic font-16">
+              &quot;{currentQuestion["예문"]}&quot;
+            </div>
+          )}
         </div>
 
-        <div style={{ display: 'grid', gap: '12px' }}>
-          {current.options.map((option) => (
+        <div className="grid-gap-12">
+          {options.map((option) => (
             <button
               key={option}
               onClick={() => handleCheck(option)}
-              className="duo-button duo-button-outline"
-              style={{
-                borderColor: selectedOption === option
-                  ? (isCorrect ? 'var(--duo-green)' : 'var(--es-red)')
-                  : 'var(--border-light)',
-                backgroundColor: selectedOption === option
-                  ? (isCorrect ? '#eefced' : '#fff0f0')
-                  : 'white',
-                color: selectedOption === option
-                  ? (isCorrect ? 'var(--duo-green-dark)' : 'var(--es-red-dark)')
-                  : 'var(--text-main)',
-                borderWidth: '2px'
-              }}
+              className={`duo-button duo-button-outline ${
+                selectedOption === option
+                  ? (isCorrect ? 'correct' : 'incorrect')
+                  : (selectedOption && option === currentQuestion["한국어 의미"] ? 'correct' : '')
+              }`}
+              disabled={!!selectedOption}
             >
               {option}
             </button>
@@ -235,38 +147,39 @@ export default function Quiz({ unitId, unitWords, unitTitle, sources = ['1'] }: 
         </div>
       </div>
 
-      {/* Footer Feedback */}
-      {isCorrect !== null && (
-        <div style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          padding: '24px 20px calc(24px + var(--safe-area-inset-bottom))',
-          backgroundColor: isCorrect ? '#eefced' : '#fff0f0',
-          borderTop: '2px solid',
-          borderColor: isCorrect ? 'var(--duo-green)' : 'var(--duo-red)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <div>
-            <h3 style={{
-              color: isCorrect ? 'var(--duo-green-dark)' : 'var(--duo-red-dark)',
-              fontWeight: '800',
-              fontSize: '20px'
-            }}>
-              {isCorrect ? 'Excellent!' : 'Correct Answer:'}
-            </h3>
-            {!isCorrect && <p style={{ color: 'var(--duo-red-dark)' }}>{current.correctAnswer}</p>}
+      {/* Feedback Bar */}
+      {selectedOption && (
+        <div className={`quiz-feedback-bar ${isCorrect ? 'correct' : 'incorrect'}`}>
+          <div className="container flex-between">
+            <div className="flex-center gap-12">
+              {isCorrect ? (
+                <CheckCircle size={32} className="text-duo-green" />
+              ) : (
+                <XCircle size={32} className="text-es-red" />
+              )}
+              <div>
+                <h3 className={`text-subtitle ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}`}>
+                  {isCorrect ? '¡Excelente!' : 'Solución correcta:'}
+                </h3>
+                {!isCorrect && (
+                  <p className="correct-solution">
+                    {questions[currentIndex]["한국어 의미"]}
+                  </p>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={handleNext}
+              className={`duo-button w-auto px-40 py-12 ${isCorrect ? 'duo-button-primary' : ''}`}
+              style={{ 
+                backgroundColor: isCorrect ? 'var(--duo-green)' : 'var(--es-red)',
+                color: 'white',
+                boxShadow: isCorrect ? '0 4px 0 var(--duo-green-dark)' : '0 4px 0 var(--es-red)'
+              }}
+            >
+              SIGUIENTE
+            </button>
           </div>
-          <button
-            className={`duo-button ${isCorrect ? 'duo-button-primary' : 'duo-button-blue'}`}
-            style={{ width: 'auto', padding: '12px 48px' }}
-            onClick={handleNext}
-          >
-            Got it
-          </button>
         </div>
       )}
     </div>

@@ -16,10 +16,10 @@ test('Verify HolaVoca v1.1 Deployment', async ({ page }) => {
     // 2. Check title and revision
     await expect(page).toHaveTitle(/HolaVoca/);
 
-    // Check for Revision tag "R.1.3.0"
-    const revisionTag = page.locator('text=R.1.3.0');
+    // Check for Revision tag (Current version)
+    const revisionTag = page.locator('text=v1.1.2'); // Current version in constants.ts
     await expect(revisionTag).toBeVisible({ timeout: 30000 });
-    console.log('✅ Revision R.1.3.0 found.');
+    console.log('✅ Version badge found.');
 
     // 2.5 Check Vocabulary (Unit 1 should be beginner)
     // The UI renders "PRINCIPIANTE 1", not "Unit 1"
@@ -36,8 +36,8 @@ test('Verify HolaVoca v1.1 Deployment', async ({ page }) => {
     console.log('Waiting for Leaderboard content...');
 
     try {
-        await expect(page.locator('h2:has-text("Hall of Fame")')).toBeVisible({ timeout: 20000 });
-        console.log('✅ Leaderboard Header "Hall of Fame" found.');
+        await expect(page.locator('h2:has-text("Hall de la Fama")')).toBeVisible({ timeout: 20000 });
+        console.log('✅ Leaderboard Header "Hall de la Fama" found.');
     } catch {
         console.log('❌ Leaderboard Header NOT found. Checking for error state...');
     }
@@ -84,10 +84,8 @@ test('Verify HolaVoca v1.1 Deployment', async ({ page }) => {
     await page.locator('text=PROFILE').click();
 
     // Check if the Sign In button is present
-    const signInBtn = page.locator('text=SIGN IN WITH Google');
-    // Note: The UI has "SIGN IN WITH GOOGLE", but locator might be case sensitive or not depending on settings
-    // Let's use a more robust selector
-    await expect(page.locator('button:has-text("SIGN IN")')).toBeVisible();
+    // The UI has "INICIAR SESIÓN CON GOOGLE"
+    await expect(page.locator('button:has-text("INICIAR SESIÓN")')).toBeVisible();
 
     // Listen for dialogs (alerts)
     page.on('dialog', async dialog => {

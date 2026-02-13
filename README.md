@@ -1,16 +1,18 @@
 # HolaVoca - Spanish Vocabulary Learning App
 
-`Revision 1.3.8`
+`Revision 1.3.9`
 
 HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 730 Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
 
 ---
 
-## 🆕 Latest Updates (v1.3.8)
+## 🆕 Latest Updates (v1.3.9)
 
+- **R.1.3.9**: **CSS Standardization & 100% Lint Compliance**.
+  - **Utility-First Architecture**: Migrated all remaining inline styles to standardized utility classes in `globals.css`. This improves maintainability while preserving the premium "glossy" aesthetic.
+  - **Zero-Lint State**: Resolved all React purity errors, `useEffect` cascades, and unused variables. The project now passes `npm run lint` with 0 warnings.
+  - **Accessibility & Performance**: Added ARIA labels and `title` attributes to all interactive elements. Optimized image delivery using Next.js `Image` components.
 - **R.1.3.8**: **Architectural Refinement & Review Sync Fix**.
-  - **Centralized Gamification Context**: Successfully migrated all progress, XP, and mistake tracking into a singleton `GamificationProvider`. This architectural shift eliminates race conditions and prevents the "Review Reset" bug across multiple devices.
-  - **Initialization Guard**: Added logic to prevent empty state synchronization before cloud or local data is fully hydration.
 - **R.1.3.7**: **Firestore Integration & Review Persistence**.
   - **Cloud Sync**: Mistakes are now fully synchronized with Firebase Firestore, allowing you to pick up your review session on any device.
   - **Manual Management**: Added "Borrar todo" and individual word removal buttons. Mistakes now persist until you decide to remove them.

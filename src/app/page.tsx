@@ -2,7 +2,7 @@
 
 import vocabData from '@/data/vocab.json';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { APP_VERSION } from '@/lib/constants';
 import { getUnits, getTotalWordCount } from '@/utils/vocab';
 import Link from 'next/link';
@@ -46,26 +46,25 @@ const getMotivationalSticker = (idx: number) => {
 };
 
 export default function Home() {
-  const [selectedBooks, setSelectedBooks] = useState<string[]>(['1']);
+  const [selectedBooks, setSelectedBooks] = useState<string[]>(() => {
+    // Lazy initializer to avoid useEffect setState warning
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('selected_books');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          // Error ignored
+        }
+      }
+    }
+    return ['1'];
+  });
   const [activeTab, setActiveTab] = useState<'learn' | 'review' | 'leader' | 'profile'>('learn');
   const { stats, user } = useGamification();
 
-  // Load selection from sessionStorage on mount
-  useEffect(() => {
-    const saved = sessionStorage.getItem('selected_books');
-    if (saved) {
-      try {
-        setSelectedBooks(JSON.parse(saved));
-      } catch (e) {
-        console.error('Failed to parse selected books', e);
-      }
-    }
-  }, []);
+  // Load selection effect removed - now handled in initializer
 
-  // Dynamically fetch units based on selection
-  // In a real app with SSG/SSR, this might need a different approach (e.g. client-side filtering or router refresh)
-  // For this client-side demo, calling it directly in render is okay but better to memoize.
-  // However, getUnits is efficient enough for this demo.
   const units = getUnits(selectedBooks);
   const totalWords = getTotalWordCount(selectedBooks);
 
@@ -73,7 +72,6 @@ export default function Home() {
     setSelectedBooks(prev => {
       let newState;
       if (prev.includes(bookId)) {
-        // Prevent deselecting the last book
         if (prev.length === 1) return prev;
         newState = prev.filter(id => id !== bookId);
       } else {
@@ -99,151 +97,58 @@ export default function Home() {
   };
 
   return (
-    <main className="container" style={{ minHeight: '100vh', backgroundColor: 'var(--bg-soft)', paddingBottom: '140px' }}>
+    <main className="container min-h-screen bg-soft pb-140">
       {/* Premium Header/Stats Bar */}
-      <header style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-        backgroundColor: 'white',
-        borderBottom: '2px solid var(--border-light)',
-        padding: '12px 20px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center'
-      }}>
-        <div style={{ display: 'flex', gap: '20px', alignItems: 'center', width: '100%', maxWidth: '600px' }}>
-          <div style={{ flex: 1, height: '14px', backgroundColor: '#e5e5e5', borderRadius: '7px', overflow: 'hidden' }}>
-            <div style={{
-              width: `${Math.min((stats.xp % 100), 100)}%`,
-              height: '100%',
-              backgroundColor: 'var(--duo-green)',
-              transition: 'width 0.5s'
-            }} />
+      <header className="sticky-header">
+        <div className="flex items-center w-full max-w-600 gap-20">
+          <div className="progress-bar-container h-14 rounded-7">
+            <div 
+              className="progress-bar-inner"
+              style={{ width: `${Math.min((stats.xp % 100), 100)}%` }} 
+            />
           </div>
-          <div style={{ display: 'flex', gap: '12px', fontWeight: '700', fontSize: '18px' }}>
-            <span style={{ color: 'var(--duo-orange)' }}>🔥 {stats.streak}</span>
-            <span style={{ color: 'var(--duo-blue)' }}>💎 {stats.gems}</span>
+          <div className="stat-badge">
+            <span className="text-duo-orange">🔥 {stats.streak}</span>
+            <span className="text-duo-blue">💎 {stats.gems}</span>
           </div>
         </div>
 
-        <div style={{
-          width: '100%',
-          maxWidth: '600px',
-          marginTop: '12px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '16px'
-        }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', position: 'relative' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <h1 style={{ fontSize: '24px', fontWeight: '900', margin: 0, color: 'var(--es-red)', lineHeight: 1.1 }}>HolaVoca</h1>
-              <span style={{
-                fontSize: '10px',
-                fontWeight: '800',
-                color: 'var(--duo-blue)',
-                backgroundColor: '#e0f2fe', // Light blue bg
-                padding: '2px 8px',
-                borderRadius: '12px',
-                letterSpacing: '0.5px',
-                transform: 'translateY(1px)', // Optical alignment
-                border: '1px solid #bae6fd'
-              }}>{APP_VERSION}</span>
+        <div className="flex-center w-full max-w-600 mt-12 gap-16">
+          <div className="flex flex-col items-start relative">
+            <div className="flex items-center gap-8">
+              <h1 className="font-24 font-900 m-0 text-es-red leading-1-1">HolaVoca</h1>
+              <span className="version-badge">{APP_VERSION}</span>
             </div>
             <div
               onClick={handleDownload}
-              style={{
-                fontSize: '11px',
-                fontWeight: '700',
-                color: 'var(--text-secondary)',
-                backgroundColor: 'var(--bg-soft)',
-                padding: '2px 8px',
-                borderRadius: '10px',
-                marginTop: '4px',
-                border: '1px solid var(--border-light)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                cursor: 'pointer',
-                userSelect: 'none',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f1f5f9';
-                e.currentTarget.style.borderColor = 'var(--duo-blue)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--bg-soft)';
-                e.currentTarget.style.borderColor = 'var(--border-light)';
-              }}
+              className="vocab-stash-pill"
             >
-              VOCAB STASH <strong style={{ color: 'var(--es-red)' }}>{totalWords.toLocaleString()}</strong> 📚
+              VOCAB STASH <strong className="text-es-red">{totalWords.toLocaleString()}</strong> 📚
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
+          <div className="flex gap-8 ml-auto">
             <div
               onClick={() => toggleBook('1')}
-              style={{
-                width: '32px',
-                height: '44px',
-                borderRadius: '4px',
-                overflow: 'hidden',
-                border: selectedBooks.includes('1') ? '2px solid var(--duo-blue)' : '1px solid var(--border-light)',
-                cursor: 'pointer',
-                boxShadow: selectedBooks.includes('1') ? '0 0 0 2px rgba(59, 130, 246, 0.3)' : 'none',
-                opacity: selectedBooks.includes('1') ? 1 : 0.4,
-                transition: 'all 0.2s',
-                transform: selectedBooks.includes('1') ? 'scale(1.05)' : 'scale(1)'
-              }}
+              className={`book-cover-mini ${selectedBooks.includes('1') ? 'active' : ''}`}
             >
-              <Image src={vol1} alt="Book 1" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <Image src={vol1} alt="Book 1" className="w-full h-full object-cover" />
             </div>
             <div
               onClick={() => toggleBook('2')}
-              style={{
-                width: '32px',
-                height: '44px',
-                borderRadius: '4px',
-                overflow: 'hidden',
-                border: selectedBooks.includes('2') ? '2px solid var(--duo-blue)' : '1px solid var(--border-light)',
-                cursor: 'pointer',
-                boxShadow: selectedBooks.includes('2') ? '0 0 0 2px rgba(59, 130, 246, 0.3)' : 'none',
-                opacity: selectedBooks.includes('2') ? 1 : 0.4,
-                transition: 'all 0.2s',
-                transform: selectedBooks.includes('2') ? 'scale(1.05)' : 'scale(1)'
-              }}
+              className={`book-cover-mini ${selectedBooks.includes('2') ? 'active' : ''}`}
             >
-              <Image src={vol2} alt="Book 2" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <Image src={vol2} alt="Book 2" className="w-full h-full object-cover" />
             </div>
           </div>
         </div>
       </header>
 
-      <div style={{ padding: '8px' }} />
+      <div className="p-8" />
 
       {activeTab === 'learn' && (
-        <div style={{
-          maxWidth: '600px',
-          margin: '0 auto',
-          padding: '24px 20px 20px 20px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '40px',
-          position: 'relative'
-        }}>
+        <div className="learn-container">
           {/* Connector SVG Background */}
-          <svg style={{
-            position: 'absolute',
-            top: '68px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '240px',
-            height: '100%',
-            zIndex: 0,
-            pointerEvents: 'none'
-          }}>
+          <svg className="connector-svg">
             <path
               d={units.slice(0, 15).map((_, i) => {
                 const x = (120 + (Math.sin(i * 1.2) * 60)).toFixed(2);
@@ -264,99 +169,39 @@ export default function Home() {
             const isLocked = index > stats.completedUnits.length;
             const isCurrent = index === stats.completedUnits.length;
 
+            const unitStatusClass = isLocked ? 'locked' : (isCurrent ? 'current' : (isCompleted ? 'completed' : 'available'));
+
             return (
-              <div key={unit.id} style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                transform: `translateX(${offset}px)`,
-                zIndex: 1,
-                position: 'relative',
-                height: '160px'
-              }}>
+              <div key={unit.id} 
+                className="unit-node-container"
+                style={{ transform: `translateX(${offset}px)` }}
+              >
                 <Link
                   href={isLocked ? '#' : `/quiz/${unit.id}?sources=${selectedBooks.join(',')}`}
                   onClick={(e) => isLocked && e.preventDefault()}
-                  style={{ textDecoration: 'none' }}
+                  className="no-underline"
                 >
                   <button
-                    className="flex-center"
-                    style={{
-                      width: '95px',
-                      height: '88px',
-                      backgroundColor: isLocked ? '#e5e5e5' : (isCurrent ? 'var(--es-red)' : (isCompleted ? 'var(--duo-green)' : 'var(--es-yellow)')),
-                      borderRadius: '50%',
-                      boxShadow: isLocked
-                        ? '0 10px 0 #afafaf'
-                        : (isCurrent ? '0 10px 0 #b91c1c' : (isCompleted ? '0 10px 0 #16a34a' : '0 10px 0 #d97706')),
-                      color: 'white',
-                      fontSize: '40px',
-                      cursor: isLocked ? 'default' : 'pointer',
-                      transition: 'all 0.1s',
-                      position: 'relative',
-                      border: 'none',
-                      ...(isCurrent ? { animation: 'pulse-node 2s infinite ease-in-out' } : {})
-                    }}
+                    className={`unit-button ${unitStatusClass}`}
                   >
                     {getUnitIcon(index, isLocked, isCompleted)}
 
                     {isCurrent && (
-                      <div style={{
-                        position: 'absolute',
-                        top: '-45px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        backgroundColor: 'var(--es-red)',
-                        color: 'white',
-                        padding: '8px 16px',
-                        borderRadius: '12px',
-                        fontSize: '14px',
-                        fontWeight: '800',
-                        whiteSpace: 'nowrap',
-                        boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
-                      }}>
+                      <div className="start-indicator">
                         START!
-                        <div style={{
-                          position: 'absolute',
-                          bottom: '-8px',
-                          left: '50%',
-                          marginLeft: '-8px',
-                          width: 0,
-                          height: 0,
-                          borderLeft: '8px solid transparent',
-                          borderRight: '8px solid transparent',
-                          borderTop: '8px solid var(--es-red)'
-                        }} />
                       </div>
                     )}
                   </button>
                 </Link>
 
-                <div style={{
-                  marginTop: '16px',
-                  textAlign: 'center',
-                  backgroundColor: 'white',
-                  padding: '6px 14px',
-                  borderRadius: '16px',
+                <div className="unit-label-card" style={{
                   border: `3px solid ${isLocked ? 'var(--border-light)' : getLevelColor(index, isLocked)}`,
                   boxShadow: `0 4px 0 ${isLocked ? '#e5e5e5' : 'rgba(0,0,0,0.1)'}`,
-                  minWidth: '110px'
                 }}>
-                  <p style={{
-                    fontWeight: '900',
-                    fontSize: '11px',
-                    color: getLevelColor(index, isLocked),
-                    letterSpacing: '0.5px',
-                    marginBottom: '1px'
-                  }}>
+                  <p className="font-11 font-900 letter-spacing-0-5 mb-1" style={{ color: getLevelColor(index, isLocked) }}>
                     {getLevelTitle(index)} {index + 1}
                   </p>
-                  <p style={{
-                    fontSize: '14px',
-                    fontWeight: '800',
-                    color: isLocked ? '#afafaf' : 'var(--text-main)',
-                    marginTop: '4px'
-                  }}>
+                  <p className={`font-14 font-800 ${isLocked ? 'text-disabled' : 'text-main'} mt-4`}>
                     {getMotivationalSticker(index)}
                   </p>
                 </div>
@@ -379,88 +224,51 @@ export default function Home() {
       `}</style>
 
       {/* Footer Nav */}
-      <nav style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: 'white',
-        borderTop: '2px solid var(--border-light)',
-        height: '70px',
-        display: 'flex',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        paddingBottom: 'var(--safe-area-inset-bottom)',
-        zIndex: 100
-      }}>
+      <nav className="footer-nav">
         <div
           onClick={() => setActiveTab('learn')}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: activeTab === 'learn' ? 'var(--duo-blue)' : 'var(--text-secondary)', cursor: 'pointer' }}
+          className={`nav-item ${activeTab === 'learn' ? 'active' : ''}`}
         >
-          <span style={{ fontSize: '24px' }}>🏠</span>
-          <span style={{ fontSize: '10px', fontWeight: '800' }}>LEARN</span>
+          <span className="font-24">🏠</span>
+          <span className="font-10 font-800">LEARN</span>
         </div>
         <div
           onClick={() => setActiveTab('leader')}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: activeTab === 'leader' ? 'var(--duo-blue)' : 'var(--text-secondary)', cursor: 'pointer' }}
+          className={`nav-item ${activeTab === 'leader' ? 'active' : ''}`}
         >
-          <span style={{ fontSize: '24px' }}>🏆</span>
-          <span style={{ fontSize: '10px', fontWeight: '800' }}>LEADER</span>
+          <span className="font-24">🏆</span>
+          <span className="font-10 font-800">LEADER</span>
         </div>
         <div
           onClick={() => setActiveTab('review')}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: activeTab === 'review' ? 'var(--duo-blue)' : 'var(--text-secondary)', cursor: 'pointer' }}
+          className={`nav-item ${activeTab === 'review' ? 'active' : ''}`}
         >
-          <span style={{ fontSize: '24px' }}>📚</span>
-          <span style={{ fontSize: '10px', fontWeight: '800' }}>REVIEW</span>
+          <span className="font-24">📚</span>
+          <span className="font-10 font-800">REVIEW</span>
         </div>
         <div
           onClick={() => setActiveTab('profile')}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: activeTab === 'profile' ? 'var(--duo-blue)' : 'var(--text-secondary)', cursor: 'pointer' }}
+          className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
         >
-          <span style={{ fontSize: '24px' }}>👤</span>
-          <span style={{ fontSize: '10px', fontWeight: '800' }}>PROFILE</span>
+          <span className="font-24">👤</span>
+          <span className="font-10 font-800">PROFILE</span>
         </div>
-        <div style={{
-          position: 'absolute',
-          bottom: '70px',
-          left: 0,
-          right: 0,
-          textAlign: 'center',
-          padding: '12px 10px',
-          fontSize: '13px',
-          color: 'var(--text-secondary)',
-          backgroundColor: 'var(--bg-soft)',
-          borderTop: '1px solid var(--border-light)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '12px',
-          fontWeight: '700'
-        }}>
-          <div>My Learning Aura: <strong style={{ color: 'var(--es-red)', fontSize: '15px' }}>{stats.xp.toLocaleString()} ✨</strong></div>
-          <div style={{ width: '1px', height: '14px', backgroundColor: 'var(--border-light)' }}></div>
+        
+        <div className="aura-bar">
+          <div>My Learning Aura: <strong className="text-es-red font-15">{stats.xp.toLocaleString()} ✨</strong></div>
+          <div className="separator-v"></div>
           <a
             href="https://github.com/heroyik/holavoca"
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              color: 'var(--text-secondary)',
-              opacity: 0.7,
-              transition: 'opacity 0.2s',
-              cursor: 'pointer'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.opacity = '1'}
-            onMouseOut={(e) => e.currentTarget.style.opacity = '0.7'}
+            aria-label="Repositorio de GitHub"
+            title="GitHub Repository"
+            className="aura-link"
           >
             <Github size={16} />
           </a>
         </div>
       </nav>
-
-
     </main>
   );
 }

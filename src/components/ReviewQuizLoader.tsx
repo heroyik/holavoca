@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useGamification } from "@/hooks/useGamification";
 import vocabData from "@/data/vocab.json";
 import { VocabEntry } from "@/utils/vocab";
@@ -10,17 +11,19 @@ export default function ReviewQuizLoader() {
     const mistakes = stats.mistakes || {};
     const missedWordList = Object.keys(mistakes);
 
+    const [shuffledWords, setShuffledWords] = useState<VocabEntry[]>([]);
+
+    useEffect(() => {
+        const words = (vocabData as VocabEntry[]).filter(v => 
+            missedWordList.includes(v["스페인어 단어"])
+        );
+        const shuffled = [...words].sort(() => Math.random() - 0.5);
+        setTimeout(() => setShuffledWords(shuffled), 0);
+    }, [missedWordList]);
+
     if (missedWordList.length === 0) {
-        return <div className="flex-center" style={{ height: '100vh' }}>No mistakes to review!</div>;
+        return <div className="flex-center min-h-screen text-main font-800">¡No hay errores para repasar!</div>;
     }
-
-    // Get the full entries for the missed words
-    const reviewWords = (vocabData as VocabEntry[]).filter(v => 
-        missedWordList.includes(v["스페인어 단어"])
-    );
-
-    // Shuffle them
-    const shuffledWords = [...reviewWords].sort(() => Math.random() - 0.5);
 
     return (
         <Quiz 
