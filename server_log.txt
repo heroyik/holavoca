@@ -13,3 +13,18 @@
  GET / 200 in 1707ms (compile: 842ms, render: 866ms)
 ✓ Compiled in 63ms
 ✓ Compiled in 48ms
+ GET / 200 in 881ms (compile: 376ms, render: 505ms)
+ GET / 200 in 897ms (compile: 425ms, render: 473ms)
+ GET / 200 in 878ms (compile: 317ms, render: 561ms)
+ GET / 200 in 104ms (compile: 7ms, render: 97ms)
+ GET / 200 in 85ms (compile: 6ms, render: 79ms)
+ GET / 200 in 101ms (compile: 7ms, render: 94ms)
+ GET / 200 in 80ms (compile: 6ms, render: 75ms)
+ GET / 200 in 134ms (compile: 9ms, render: 125ms)
+ GET / 200 in 126ms (compile: 12ms, render: 114ms)
+ GET /quiz/unit-1?sources=1 200 in 1982ms (compile: 1895ms, generate-params: 1401ms, render: 87ms)
+ GET / 200 in 153ms (compile: 10ms, render: 143ms)
+ GET /quiz/unit-1?sources=1 200 in 106ms (compile: 33ms, generate-params: 24ms, render: 73ms)
+✓ Compiled in 69ms
+✓ Compiled in 63ms
+ GET / 200 in 638ms (compile: 152ms, render: 486ms)

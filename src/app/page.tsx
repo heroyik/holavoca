@@ -230,8 +230,8 @@ export default function Home() {
           }}>
             <path
               d={units.slice(0, 15).map((_, i) => {
-                const x = 120 + (Math.sin(i * 1.2) * 60);
-                const y = i * 200;
+                const x = (120 + (Math.sin(i * 1.2) * 60)).toFixed(2);
+                const y = (i * 200).toFixed(2);
                 return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
               }).join(' ')}
               fill="none"
@@ -243,7 +243,7 @@ export default function Home() {
           </svg>
 
           {units.slice(0, 15).map((unit, index) => {
-            const offset = Math.sin(index * 1.2) * 60;
+            const offset = (Math.sin(index * 1.2) * 60).toFixed(2);
             const isCompleted = stats.completedUnits.includes(unit.id);
             const isLocked = index > stats.completedUnits.length;
             const isCurrent = index === stats.completedUnits.length;

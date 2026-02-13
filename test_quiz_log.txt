@@ -1,0 +1,33 @@
+
+Running 1 test using 1 worker
+
+Starting Quiz...
+  ✘  1 e2e\verify-quiz.spec.ts:3:5 › Verify Quiz Stability (4 options bug fix) (6.2s)
+
+
+  1) e2e\verify-quiz.spec.ts:3:5 › Verify Quiz Stability (4 options bug fix) ───────────────────────
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/.*quiz.*/[39m
+    Received string:  [31m"http://localhost:3005/holavoca"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    9 × unexpected value "http://localhost:3005/holavoca"[22m
+
+
+      10 |
+      11 |     // 3. Wait for quiz to load
+    > 12 |     await expect(page).toHaveURL(/.*quiz.*/);
+         |                        ^
+      13 |
+      14 |     // 4. Check for 4 options
+      15 |     console.log('Checking for 4 options...');
+        at C:\Users\heroy\proj\새 폴더\holavoca\e2e\verify-quiz.spec.ts:12:24
+
+    Error Context: test-results\e2e-verify-quiz-Verify-Quiz-Stability-4-options-bug-fix-\error-context.md
+
+  1 failed
+    e2e\verify-quiz.spec.ts:3:5 › Verify Quiz Stability (4 options bug fix) ────────────────────────

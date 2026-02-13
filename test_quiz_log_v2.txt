@@ -1,0 +1,29 @@
+
+Running 1 test using 1 worker
+
+Starting Quiz...
+  ✘  1 e2e\verify-quiz.spec.ts:3:5 › Verify Quiz Stability (4 options bug fix) (30.1s)
+
+
+  1) e2e\verify-quiz.spec.ts:3:5 › Verify Quiz Stability (4 options bug fix) ───────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.duo-node:has-text("1")')[22m
+
+
+       8 |     console.log('Starting Quiz...');
+       9 |     // Click the unit circle which contains the number "1"
+    > 10 |     await page.locator('.duo-node:has-text("1")').click();
+         |                                                   ^
+      11 |
+      12 |     // 3. Wait for quiz to load
+      13 |     await expect(page).toHaveURL(/.*quiz.*/);
+        at C:\Users\heroy\proj\새 폴더\holavoca\e2e\verify-quiz.spec.ts:10:51
+
+    Error Context: test-results\e2e-verify-quiz-Verify-Quiz-Stability-4-options-bug-fix-\error-context.md
+
+  1 failed
+    e2e\verify-quiz.spec.ts:3:5 › Verify Quiz Stability (4 options bug fix) ────────────────────────

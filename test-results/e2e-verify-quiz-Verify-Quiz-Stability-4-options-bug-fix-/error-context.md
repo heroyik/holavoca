@@ -11,10 +11,10 @@
         - generic [ref=e10]:
           - generic [ref=e11]:
             - heading "HolaVoca" [level=1] [ref=e12]
-            - generic [ref=e13]: R.1.2.0
+            - generic [ref=e13]: R.1.3.0
           - generic [ref=e14] [cursor=pointer]:
-            - text: 전체 데이터
-            - strong [ref=e15]: "730"
+            - text: VOCAB STASH
+            - strong [ref=e15]: "547"
             - text: 📚
         - generic [ref=e16]:
           - img "Book 1" [ref=e18] [cursor=pointer]
@@ -23,7 +23,7 @@
       - img
       - generic [ref=e23]:
         - link "⭐ START!" [ref=e24] [cursor=pointer]:
-          - /url: /holavoca/quiz/unit-1
+          - /url: /holavoca/quiz/unit-1?sources=1
           - button "⭐ START!" [ref=e25]:
             - text: ⭐
             - generic [ref=e26]: START!
@@ -145,16 +145,7 @@
         - link [ref=e129] [cursor=pointer]:
           - /url: https://github.com/heroyik/holavoca
           - img [ref=e130]
-  - generic [ref=e137] [cursor=pointer]:
-    - button "Open Next.js Dev Tools" [ref=e138]:
-      - img [ref=e139]
-    - generic [ref=e142]:
-      - button "Open issues overlay" [ref=e143]:
-        - generic [ref=e144]:
-          - generic [ref=e145]: "0"
-          - generic [ref=e146]: "1"
-        - generic [ref=e147]: Issue
-      - button "Collapse issues badge" [ref=e148]:
-        - img [ref=e149]
-  - alert [ref=e151]
+  - button "Open Next.js Dev Tools" [ref=e138] [cursor=pointer]:
+    - img [ref=e139]
+  - alert [ref=e142]
 ```

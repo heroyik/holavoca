@@ -107,5 +107,24 @@ A winding, interactive learning path that visually guides users through 15+ unit
 - **Firestore Security Rules**: Configured for "Public Read / Owner Write" access. This allowing the Global Leaderboard to fetch rankings while ensuring only authenticated users can modify their own progress.
 - **Resilient Data Fetching**: Implemented non-blocking loading handlers in the Leaderboard to ensure the UI remains responsive even during high latency.
 
+### 🌐 Deployment & GitHub Secrets
+
+For the application to function correctly on GitHub Pages, you MUST configure **GitHub Actions Secrets**.
+
+1. Go to your repository on GitHub.
+2. Navigate to **Settings > Secrets and variables > Actions**.
+3. Add the following **Repository Secrets**:
+   - `NEXT_PUBLIC_FIREBASE_API_KEY`
+   - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+   - `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+   - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+   - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+   - `NEXT_PUBLIC_FIREBASE_APP_ID`
+
+> [!IMPORTANT]
+> If you have an **Environment** named `github-pages` configured, make sure the secrets are added to that specific environment.
+
+1. Once the secrets are set, push these changes or manually trigger the **Deploy Next.js site to Pages** workflow.
+
 ---
 ¡Aprende español con HolaVoca! ✨🇪🇸

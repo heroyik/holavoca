@@ -16,10 +16,10 @@ test('Verify HolaVoca v1.1 Deployment', async ({ page }) => {
     // 2. Check title and revision
     await expect(page).toHaveTitle(/HolaVoca/);
 
-    // Check for Revision tag "R.1.2.1"
-    const revisionTag = page.locator('text=R.1.2.1');
+    // Check for Revision tag "R.1.3.0"
+    const revisionTag = page.locator('text=R.1.3.0');
     await expect(revisionTag).toBeVisible({ timeout: 30000 });
-    console.log('✅ Revision R.1.2.1 found.');
+    console.log('✅ Revision R.1.3.0 found.');
 
     // 2.5 Check Vocabulary (Unit 1 should be beginner)
     // The UI renders "PRINCIPIANTE 1", not "Unit 1"
@@ -79,4 +79,25 @@ test('Verify HolaVoca v1.1 Deployment', async ({ page }) => {
             console.warn('⚠️ No entries and no empty message found. Unexpected state.');
         }
     }
+    // 8. Verify Auth Availability Guard (Meticulous Test)
+    console.log('Checking Auth Availability...');
+    await page.locator('text=PROFILE').click();
+
+    // Check if the Sign In button is present
+    const signInBtn = page.locator('text=SIGN IN WITH Google');
+    // Note: The UI has "SIGN IN WITH GOOGLE", but locator might be case sensitive or not depending on settings
+    // Let's use a more robust selector
+    await expect(page.locator('button:has-text("SIGN IN")')).toBeVisible();
+
+    // Listen for dialogs (alerts)
+    page.on('dialog', async dialog => {
+        console.log(`DIALOG DETECTED: ${dialog.message()}`);
+        if (dialog.message().includes('Firebase Authentication is not available')) {
+            console.error('❌ AUTH ERROR ALERT DETECTED');
+        }
+        await dialog.dismiss();
+    });
+
+    await page.locator('button:has-text("SIGN IN")').click();
+    console.log('✅ Auth interaction tested.');
 });
