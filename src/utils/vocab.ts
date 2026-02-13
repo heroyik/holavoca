@@ -5,6 +5,7 @@ export interface VocabEntry {
   "성별/문법 정보": string;
   "한국어 의미": string;
   "출처": string;
+  "예문"?: string;
 }
 
 export interface LearningUnit {

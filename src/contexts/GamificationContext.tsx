@@ -21,11 +21,14 @@ interface GamificationContextType {
   stats: UserStats;
   isInitialized: boolean;
   addXP: (amount: number) => void;
-  completeUnit: (unitId: string, xpEarned: number) => void;
+  completeUnit: (unitId: string, xpEarned?: number) => void;
   unlockProgress: (unitIds: string[], xp: number, gems: number) => void;
   recordMistake: (spanishWord: string) => void;
+  addMistake: (spanishWord: string) => void;
   clearMistake: (spanishWord: string) => void;
+  removeMistake: (spanishWord: string) => void;
   clearAllMistakes: () => void;
+  addGem: (amount: number) => void;
 }
 
 const GamificationContext = createContext<GamificationContextType | undefined>(undefined);
@@ -139,7 +142,11 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     saveStatsLocally({ ...statsRef.current, xp: statsRef.current.xp + amount });
   };
 
-  const completeUnit = (unitId: string, xpEarned: number) => {
+  const addGem = (amount: number) => {
+    saveStatsLocally({ ...statsRef.current, gems: statsRef.current.gems + amount });
+  };
+
+  const completeUnit = (unitId: string, xpEarned: number = 0) => {
     const today = new Date().toISOString().split('T')[0];
     let newStreak = statsRef.current.streak;
 
@@ -206,8 +213,11 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       completeUnit,
       unlockProgress,
       recordMistake,
+      addMistake: recordMistake,
       clearMistake,
-      clearAllMistakes
+      removeMistake: clearMistake,
+      clearAllMistakes,
+      addGem
     }}>
       {children}
     </GamificationContext.Provider>

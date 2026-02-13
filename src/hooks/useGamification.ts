@@ -13,10 +13,13 @@ export function useGamification() {
     stats: context.stats,
     isInitialized: context.isInitialized,
     addXP: context.addXP,
+    addGem: context.addGem,
     completeUnit: context.completeUnit,
     unlockProgress: context.unlockProgress,
     recordMistake: context.recordMistake,
+    addMistake: context.addMistake,
     clearMistake: context.clearMistake,
+    removeMistake: context.removeMistake,
     clearAllMistakes: context.clearAllMistakes
   };
 }
