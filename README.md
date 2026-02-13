@@ -2,7 +2,7 @@
 
 `Revision 1.3.4`
 
-HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 4,300+ Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
+HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 730 Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
 
 ---
 
