@@ -94,8 +94,6 @@ export default function Quiz({ unitId, unitWords, unitTitle, sources = ['1'] }: 
     setIsCorrect(correct);
     if (correct) {
       setScore(s => s + 1);
-      // Optional: Clear mistake if correct during regular quiz or review
-      clearMistake(questions[currentIndex].word["스페인어 단어"]);
     } else {
       recordMistake(questions[currentIndex].word["스페인어 단어"]);
     }

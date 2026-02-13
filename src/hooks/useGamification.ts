@@ -58,7 +58,7 @@ export function useGamification() {
       if (u && db) {
         const userDocRef = doc(db, "users", u.uid);
         const unsubStats = onSnapshot(userDocRef, (snapshot) => {
-          if (snapshot.exists()) {
+          if (snapshot.exists() && !snapshot.metadata.hasPendingWrites) {
             const cloudData = snapshot.data() as UserStats;
             setStats(prev => ({
               ...prev,
@@ -66,7 +66,8 @@ export function useGamification() {
               // Smart merge for progress-based fields
               xp: Math.max(prev.xp, cloudData.xp || 0),
               completedUnits: Array.from(new Set([...prev.completedUnits, ...(cloudData.completedUnits || [])])),
-              mistakes: { ...prev.mistakes, ...(cloudData.mistakes || {}) }
+              // For mistakes, we trust the cloud data for deletion sync
+              mistakes: cloudData.mistakes || {}
             }));
           }
         });
@@ -171,6 +172,14 @@ export function useGamification() {
     saveStats(newStats);
   };
 
+  const clearAllMistakes = () => {
+    const newStats = {
+      ...stats,
+      mistakes: {}
+    };
+    saveStats(newStats);
+  };
+
   return {
     user,
     stats,
@@ -178,6 +187,7 @@ export function useGamification() {
     completeUnit,
     unlockProgress,
     recordMistake,
-    clearMistake
+    clearMistake,
+    clearAllMistakes
   };
 }
