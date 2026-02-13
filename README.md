@@ -129,5 +129,16 @@ For the application to function correctly on GitHub Pages, you MUST configure **
 
 1. Once the secrets are set, push these changes or manually trigger the **Deploy Next.js site to Pages** workflow.
 
+### 🔐 Security: API Key Allowlist
+
+If you have **API Key Restrictions** enabled in the Google Cloud Console (recommended), you must add the following domains to your **HTTP Referrer Allowlist**:
+
+1. Go to [Google Cloud Console > Credentials](https://console.cloud.google.com/apis/credentials).
+2. Click on your **Firebase API Key**.
+3. Under **Website restrictions**, add these patterns:
+    - `https://heroyik.github.io/*` (Your deployment)
+    - `https://holavoca-app-12345.firebaseapp.com/*` (Firebase Auth Handler)
+    - `localhost:3005/*` (Local development)
+
 ---
 ¡Aprende español con HolaVoca! ✨🇪🇸
