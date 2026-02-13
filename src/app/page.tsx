@@ -1,5 +1,7 @@
 "use client";
 
+import vocabData from '@/data/vocab.json';
+
 import { useState } from 'react';
 import { APP_VERSION } from '@/lib/constants';
 import { getUnits, getTotalWordCount } from '@/utils/vocab';
@@ -66,6 +68,20 @@ export default function Home() {
     });
   };
 
+  const handleDownload = () => {
+    const date = new Date().toISOString().split('T')[0];
+    const fileName = `${date}-voca.json`;
+    const jsonString = JSON.stringify(vocabData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.body.appendChild(document.createElement('a'));
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <main className="container" style={{ minHeight: '100vh', backgroundColor: 'var(--bg-soft)', paddingBottom: '140px' }}>
       {/* Premium Header/Stats Bar */}
@@ -119,20 +135,34 @@ export default function Home() {
                 border: '1px solid #bae6fd'
               }}>{APP_VERSION}</span>
             </div>
-            <div style={{
-              fontSize: '11px',
-              fontWeight: '700',
-              color: 'var(--text-secondary)',
-              backgroundColor: 'var(--bg-soft)',
-              padding: '2px 8px',
-              borderRadius: '10px',
-              marginTop: '4px',
-              border: '1px solid var(--border-light)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}>
-              Vocabulary Arsenal <strong style={{ color: 'var(--es-red)' }}>{totalWords.toLocaleString()}</strong> 📚
+            <div 
+              onClick={handleDownload}
+              style={{
+                fontSize: '11px',
+                fontWeight: '700',
+                color: 'var(--text-secondary)',
+                backgroundColor: 'var(--bg-soft)',
+                padding: '2px 8px',
+                borderRadius: '10px',
+                marginTop: '4px',
+                border: '1px solid var(--border-light)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                cursor: 'pointer',
+                userSelect: 'none',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f1f5f9';
+                e.currentTarget.style.borderColor = 'var(--duo-blue)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--bg-soft)';
+                e.currentTarget.style.borderColor = 'var(--border-light)';
+              }}
+            >
+              전체 데이터 <strong style={{ color: 'var(--es-red)' }}>{totalWords.toLocaleString()}</strong> 📚
             </div>
           </div>
           <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>

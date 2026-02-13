@@ -11,9 +11,9 @@ HolaVoca is a premium, gamified Spanish learning platform inspired by modern edu
 - **R.1.2.2**: **Security & Architecture**.
   - **Enhanced Security**: Migrated all Firebase credentials to environment variables (`.env.local`) to prevent accidental exposure.
   - **API Hardening**: Implemented strict Google Cloud API restrictions, limiting keys to specific HTTP referrers (Production/Localhost) and essential services (Firestore, Auth, Installations).
-- **R.1.2.1**: **Textbook Selection Feature**.
-  - **Dynamic Filtering**: added ability to filter vocabulary by **Textbook Volume (Vol 1 / Vol 2)**.
-  - **Interactive Toggles**: Tapping the book covers in the header now toggles their inclusion in the learning path.
+- **R.1.2.1**: **Textbook Selection & Data Download**.
+  - **Textbook Selection**: Added ability to filter vocabulary by **Textbook Volume (Vol 1 / Vol 2)** via interactive book covers.
+  - **Vocabulary Download**: One-tap JSON download feature by clicking the "**전체 데이터**" count in the header.
   - **Visual Feedback**: Selected books are highlighted, while unselected ones are dimmed.
 - **R.1.2.0**: **Vocabulary Overhaul & Robustness**.
   - **Overhauled Vocabulary**: Reorganized learning path to be **Difficulty-Based** (Priority Words -> Complex Words) instead of Alphabetical.
@@ -24,8 +24,7 @@ HolaVoca is a premium, gamified Spanish learning platform inspired by modern edu
   - **Smart Fallback**: If Firestore index is missing, automatically switches to client-side sorting to prevent infinite loading.
   - **UI**: Added "Hall of Fame" title and 👑 Crown icon for 1st place.
   - **Admin**: Strict reset logic for cleaner testing.
-- **R.1.1.5**: **Leaderboard Fallback**. Added robust error handling.
- (v1.1.5) to prevent infinite loading when Firestore indexes are missing.
+- **R.1.1.5**: **Leaderboard Fallback**. Added robust error handling to prevent infinite loading when Firestore indexes are missing.
 - **🛠️ Admin Cheat Codes**: Added a hidden Developer Console for manual stat management (accessible via 5-tap on profile picture). restricted to admin email.
 - **🔓 Level Selector**: Admins can now instantly unlock any level from 1 to 15, automatically calculating XP, Gems, and Unit completions.
 - **🔢 Version Automation**: Centralized version management to ensure the Revision tag always reflects the latest build.
@@ -49,7 +48,7 @@ A winding, interactive learning path that visually guides users through 15+ unit
 
 ### 📚 Premium Aesthetics
 
-- **Vocabulary Arsenal 📚**: Real-time count of total words available (4,300+) prominently displayed in the header.
+- **전체 데이터 📚**: Real-time count of total words available prominently displayed in the header. Click to download the dataset as JSON.
 - **My Learning Aura ✨**: A dedicated XP tracking system relocated to the sticky footer for constant visibility.
 - **Textbook Lightbox**: High-quality thumbnails of "¡Hola, español! 1 & 2" that can be zoomed for detailed viewing.
 
