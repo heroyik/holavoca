@@ -348,7 +348,7 @@ button {
   border-image: linear-gradient(to right, var(--es-red) 0%, var(--es-red) 20%, var(--es-yellow) 20%, var(--es-yellow) 80%, var(--es-red) 80%, var(--es-red) 100%);
   border-image-slice: 1;
   height: 60px;
-  padding: 0 20px;
+  padding: 0 12px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -459,9 +459,14 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   cursor: pointer;
   transition: color 0.2s;
+}
+
+.nav-item span:last-child {
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .aura-bar {
