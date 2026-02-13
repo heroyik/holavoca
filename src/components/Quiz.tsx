@@ -179,7 +179,8 @@ export default function Quiz({ unitId, unitWords, unitTitle, sources = ['1'] }: 
           <div style={{
             position: 'absolute',
             top: '8px',
-            right: '8px',
+            left: current.word["출처"] === "1" ? '8px' : 'auto',
+            right: current.word["출처"] === "2" ? '8px' : 'auto',
             width: '40px',
             height: '56px',
             borderRadius: '4px',
