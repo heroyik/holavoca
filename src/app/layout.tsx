@@ -16,6 +16,8 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
+import { GamificationProvider } from "@/contexts/GamificationContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -23,7 +25,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <GamificationProvider>
+          {children}
+        </GamificationProvider>
+      </body>
     </html>
   );
 }

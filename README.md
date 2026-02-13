@@ -1,15 +1,18 @@
 # HolaVoca - Spanish Vocabulary Learning App
 
-`Revision 1.3.7`
+`Revision 1.3.8`
 
 HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 730 Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
 
 ---
 
-## 🆕 Latest Updates (v1.3.7)
+## 🆕 Latest Updates (v1.3.8)
 
-- **R.1.3.7**: **Enhanced Review Persistence & Cloud Sync**.
-  - **Firestore Integration**: Mistakes are now fully synchronized with Firebase Firestore, allowing you to pick up your review session on any device.
+- **R.1.3.8**: **Architectural Refinement & Review Sync Fix**.
+  - **Centralized Gamification Context**: Successfully migrated all progress, XP, and mistake tracking into a singleton `GamificationProvider`. This architectural shift eliminates race conditions and prevents the "Review Reset" bug across multiple devices.
+  - **Initialization Guard**: Added logic to prevent empty state synchronization before cloud or local data is fully hydration.
+- **R.1.3.7**: **Firestore Integration & Review Persistence**.
+  - **Cloud Sync**: Mistakes are now fully synchronized with Firebase Firestore, allowing you to pick up your review session on any device.
   - **Manual Management**: Added "Borrar todo" and individual word removal buttons. Mistakes now persist until you decide to remove them.
 - **R.1.3.6**: **Mistake Review System**.
   - **Repaso Focused Learning**: New "Review" (Revisión) tab tracks every incorrect answer and shows a mistake counter for each word.
