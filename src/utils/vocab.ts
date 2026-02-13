@@ -33,51 +33,53 @@ export function getUnits(sources: string[] = ['1']): LearningUnit[] {
 
   const allWords = Array.from(uniqueWords.values());
 
-  // 2. Sort by Difficulty Heuristic
-  // Hierarchy: Priority List -> Length -> Deterministic Hash (to mix alphabetical)
-  allWords.sort((a, b) => {
-    const wordA = a["스페인어 단어"].toLowerCase();
-    const wordB = b["스페인어 단어"].toLowerCase();
-
-    // Priority Check
-    const isPriorityA = PRIORITY_WORDS.has(wordA);
-    const isPriorityB = PRIORITY_WORDS.has(wordB);
-
-    if (isPriorityA && !isPriorityB) return -1;
-    if (!isPriorityA && isPriorityB) return 1;
-
-    // Length Check (shorter = easier)
-    if (wordA.length !== wordB.length) {
-      return wordA.length - wordB.length;
+  // 2. Proportional Interleaving (The R.1.3.3 Fix)
+  // Group words by source (volume)
+  const sourceGroups: Record<string, VocabEntry[]> = {};
+  sources.forEach(s => { sourceGroups[s] = []; });
+  allWords.forEach(w => {
+    if (sourceGroups[w["출처"]]) {
+      sourceGroups[w["출처"]].push(w);
     }
-
-    // Interleaving & Deterministic Shuffle
-    // To mix volumes effectively even at same difficulty, we include "출처" in the comparison
-    if (a["출처"] !== b["출처"]) {
-      // Deterministic but semi-random mix:
-      // We want to avoid all Vol 1 then all Vol 2 if they have same length
-      const mixA = (wordA + a["출처"]).split('').reverse().join('');
-      const mixB = (wordB + b["출처"]).split('').reverse().join('');
-      return mixA.localeCompare(mixB);
-    }
-
-    const revA = wordA.split('').reverse().join('');
-    const revB = wordB.split('').reverse().join('');
-    return revA.localeCompare(revB);
   });
+
+  // Sort each group by length
+  Object.values(sourceGroups).forEach(group => {
+    group.sort((a, b) => {
+      const wordA = a["스페인어 단어"].toLowerCase();
+      const wordB = b["스페인어 단어"].toLowerCase();
+      // Length first
+      if (wordA.length !== wordB.length) return wordA.length - wordB.length;
+      // Then deterministic shuffle
+      return wordA.split('').reverse().join('').localeCompare(wordB.split('').reverse().join(''));
+    });
+  });
+
+  // Interleave words from all groups proportionately
+  const interleavedWords: VocabEntry[] = [];
+  const maxGroupSize = Math.max(...Object.values(sourceGroups).map(g => g.length));
+
+  // We iterate through "slots" and fill them from each group
+  for (let i = 0; i < maxGroupSize; i++) {
+    sources.forEach(s => {
+      if (sourceGroups[s][i]) {
+        interleavedWords.push(sourceGroups[s][i]);
+      }
+    });
+  }
 
   // 3. Chunk into units of 20
   const UNIT_SIZE = 20;
-  const totalUnits = Math.ceil(allWords.length / UNIT_SIZE);
+  const totalUnits = Math.ceil(interleavedWords.length / UNIT_SIZE);
 
   for (let i = 0; i < totalUnits; i++) {
     const start = i * UNIT_SIZE;
-    const unitWords = allWords.slice(start, start + UNIT_SIZE);
+    const unitWords = interleavedWords.slice(start, start + UNIT_SIZE);
 
     units.push({
-      id: `unit-${i + 1}`, // Sequential IDs: unit-1, unit-2...
+      id: `unit-${i + 1}`,
       title: `Unit ${i + 1}`,
-      source: "General", // Flattened source
+      source: "Multi",
       words: unitWords,
     });
   }
