@@ -17,9 +17,9 @@ import { Github } from 'lucide-react';
 
 // Gamification Helpers
 const getLevelTitle = (idx: number) => {
-  if (idx < 5) return "PRINCIPIANTE"; // Beginner
-  if (idx < 10) return "INTERMEDIO";   // Intermediate
-  return "AVANZADO";                 // Advanced
+  if (idx < 5) return "BEGINNER";
+  if (idx < 10) return "INTERMEDIATE";
+  return "ADVANCED";
 };
 
 const getUnitIcon = (idx: number, isLocked: boolean, isCompleted: boolean) => {

@@ -74,7 +74,7 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                             {user.displayName}
                         </h2>
                         <p className="text-secondary font-700 mb-24">
-                            ¡Bienvenido de nuevo, Maestro del Español! 🇪🇸
+                            Welcome back, Spanish Master! 🇪🇸
                         </p>
 
                         {/* Hidden Dev Tools - Admin Only */}
@@ -87,7 +87,7 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                                         value={selectedLevel}
                                         onChange={(e) => setSelectedLevel(Number(e.target.value))}
                                         className="select-standard"
-                                        title="Seleccionar nivel para desbloquear"
+                                        title="Select level to unlock"
                                     >
                                         {Array.from({ length: 15 }, (_, i) => i + 1).map(level => (
                                             <option key={level} value={level}>Level {level}</option>
@@ -119,17 +119,17 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                             onClick={handleLogout}
                             className="duo-button bg-danger shadow-danger"
                         >
-                            CERRAR SESIÓN
+                            LOG OUT
                         </button>
                     </>
                 ) : (
                     <>
                         <div className="font-64 mb-16">🔑</div>
                         <h2 className="font-24 font-900 text-main mb-16">
-                            Guarda tu Progreso
+                            Save Your Progress
                         </h2>
                         <p className="text-secondary font-700 mb-32">
-                            ¡Inicia sesión con Google para sincronizar tu XP, racha y rango en la tabla de clasificación global!
+                            Sign in with Google to sync your XP, streak, and rank on the global leaderboard!
                         </p>
                         <button
                             onClick={handleLogin}
@@ -141,7 +141,7 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                                 width={20} 
                                 height={20}
                             />
-                            INICIAR SESIÓN CON GOOGLE
+                            LOG IN WITH GOOGLE
                         </button>
                     </>
                 )}

@@ -800,3 +800,132 @@ button {
 .px-20 { padding-left: 20px; padding-right: 20px; }
 .m-0 { margin: 0; }
 .no-underline { text-decoration: none; }
+
+/* Profile Tab */
+.profile-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.avatar-container {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid white;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  background-color: #f0f0f0;
+  position: relative;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.badge-outline {
+  background: white !important;
+  border: 2px solid var(--border-light) !important;
+  border-radius: 16px;
+  padding: 12px !important;
+  text-align: center;
+}
+
+/* Review Tab */
+.review-content {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.review-card {
+  background: white;
+  border: 2px solid var(--border-light);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.mistake-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mistake-item {
+  background: white;
+  border: 2px solid var(--border-light);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: transform 0.2s ease;
+}
+
+.mistake-item:active {
+  transform: scale(0.98);
+}
+
+.mistake-count {
+  background: #fff5f5;
+  color: var(--es-red);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  border: 1px solid #ffe3e3;
+}
+
+.trash-button {
+  background: none;
+  border: none;
+  color: #afafaf;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.trash-button:hover {
+  background: #fff5f5;
+  color: var(--es-red);
+}
+
+.bg-google {
+  background-color: white !important;
+  color: #3c4043 !important;
+  border: 2px solid #dadce0 !important;
+}
+
+.bg-google:hover {
+  background-color: #f8f9fa !important;
+}
+
+.bg-dev {
+  background-color: #f8fafc;
+}
+
+.border-dev {
+  border: 2px dashed #cbd5e1;
+}
+
+.select-standard {
+  padding: 8px;
+  border-radius: 8px;
+  border: 2px solid var(--border-light);
+  font-family: inherit;
+  font-weight: 700;
+  color: var(--text-main);
+}

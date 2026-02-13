@@ -15,9 +15,9 @@ export default function ReviewTab() {
     return (
       <div className="flex-center min-h-60 flex-col gap-16">
         <div className="font-64">✨</div>
-        <h2 className="text-title">¡Todo despejado!</h2>
+        <h2 className="text-title">All Clear!</h2>
         <p className="text-subtitle text-center px-20">
-          No tienes palabras pendientes de repaso. ¡Sigue así!
+          You have no words pending for review. Keep it up!
         </p>
       </div>
     );
@@ -32,23 +32,23 @@ export default function ReviewTab() {
     <div className="review-content">
       <div className="review-card flex-between">
         <div className="flex-1">
-          <h2 className="text-title m-0">Mis Errores</h2>
+          <h2 className="text-title m-0">My Mistakes</h2>
           <p className="text-small mt-4">
-            Tienes <span className="text-error">{reviewEntries.length}</span> {reviewEntries.length === 1 ? 'palabra' : 'palabras'} por repasar
+            You have <span className="text-error">{reviewEntries.length}</span> {reviewEntries.length === 1 ? 'word' : 'words'} to review
           </p>
         </div>
         <div className="flex-center flex-gap-12">
           <Link href={`/quiz/review`} className="no-underline">
             <button className="duo-button duo-button-primary button-standard">
-              REPASAR
+              REVIEW NOW
             </button>
           </Link>
           <button
             onClick={() => clearAllMistakes()}
             className="button-danger-outline"
-            aria-label="Borrar toda la lista de repaso"
+            aria-label="Clear entire review list"
           >
-            <Trash2 size={16} /> Borrar todo
+            <Trash2 size={16} /> Clear all
           </button>
         </div>
       </div>
@@ -62,12 +62,12 @@ export default function ReviewTab() {
             </div>
             <div className="flex-center gap-12">
               <div className="mistake-count">
-                {mistakes[entry["스페인어 단어"]]} {mistakes[entry["스페인어 단어"]] === 1 ? 'error' : 'errores'}
+                {mistakes[entry["스페인어 단어"]]} {mistakes[entry["스페인어 단어"]] === 1 ? 'error' : 'errors'}
               </div>
               <button
                 onClick={() => removeMistake(entry["스페인어 단어"])}
                 className="trash-button"
-                aria-label={`Eliminar ${entry["스페인어 단어"]} de la lista de repaso`}
+                aria-label={`Remove ${entry["스페인어 단어"]} from review list`}
               >
                 <Trash2 size={16} />
               </button>

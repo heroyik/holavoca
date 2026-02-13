@@ -100,12 +100,12 @@ export default function Leaderboard() {
         };
     }, []);
 
-    if (loading) return <div className="flex-center p-40 text-secondary">Cargando Rankings...</div>;
+    if (loading) return <div className="flex-center p-40 text-secondary">Loading Rankings...</div>;
 
     return (
         <div className="p-20 max-w-600 mx-auto">
             <h2 className="font-24 font-900 text-es-red mb-20 text-center">
-                Hall de la Fama 🏆
+                Hall of Fame 🏆
             </h2>
             <div className="flex flex-col flex-gap-12">
                 {leaders.map((entry, index) => (
@@ -135,7 +135,7 @@ export default function Leaderboard() {
                 ))}
                 {leaders.length === 0 && (
                     <div className="text-center text-secondary p-40">
-                        ¡Sé el primero en unirte a la tabla de clasificación! 🚀
+                        Be the first to join the leaderboard! 🚀
                     </div>
                 )}
             </div>

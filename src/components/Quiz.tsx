@@ -72,26 +72,26 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
     }
   };
 
-  if (questions.length === 0) return <div className="flex-center min-h-screen font-800">Cargando...</div>;
+  if (questions.length === 0) return <div className="flex-center min-h-screen font-800">Loading...</div>;
 
   if (showResult) {
     return (
       <div className="container flex-center min-h-screen flex-col pt-40-pb-20">
-        <h2 className="text-main-title text-duo-green mb-20">¡Terminado!</h2>
+        <h2 className="text-main-title text-duo-green mb-20">Finished!</h2>
         <div className="text-center mb-32">
-          <div className="text-subtitle mb-8">Tu Puntuación:</div>
+          <div className="text-subtitle mb-8">Your Score:</div>
           <span className="score-text">
             {score} / {questions.length}
           </span>
           <p className="pass-message">
-            {score === questions.length ? "¡Perfecto! 🌟" : score >= questions.length * 0.8 ? "¡Muy bien! 🔥" : "¡Sigue practicando! 💪"}
+            {score === questions.length ? "Perfect! 🌟" : score >= questions.length * 0.8 ? "Great job! 🔥" : "Keep practicing! 💪"}
           </p>
         </div>
         <button 
           onClick={() => router.push('/')}
           className="duo-button duo-button-primary w-auto px-40 py-12"
         >
-          CONTINUAR
+          CONTINUE
         </button>
       </div>
     );
@@ -104,7 +104,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
     <div className="container flex flex-col min-h-screen p-20-120">
       {/* Header */}
       <div className="flex-between gap-16 mb-32">
-        <Link href="/" aria-label="Cerrar lección" className="no-underline">
+        <Link href="/" aria-label="Close lesson" className="no-underline">
           <X className="text-subtitle pointer" />
         </Link>
         <div className="flex-1 progress-bar-track">
@@ -115,7 +115,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
       <div className="flex-1">
         <h2 className="text-title mb-32">
           {unitTitle && <span className="text-duo-blue mr-8">{unitTitle}:</span>}
-          ¿Qué significa esta palabra?
+          What does this word mean?
         </h2>
 
         <div className="quiz-card mb-32">
@@ -159,7 +159,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
               )}
               <div>
                 <h3 className={`text-subtitle ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}`}>
-                  {isCorrect ? '¡Excelente!' : 'Solución correcta:'}
+                  {isCorrect ? 'Excellent!' : 'Correct solution:'}
                 </h3>
                 {!isCorrect && (
                   <p className="correct-solution">
@@ -177,7 +177,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
                 boxShadow: isCorrect ? '0 4px 0 var(--duo-green-dark)' : '0 4px 0 var(--es-red)'
               }}
             >
-              SIGUIENTE
+              NEXT
             </button>
           </div>
         </div>
