@@ -51,9 +51,16 @@ export function getUnits(sources: string[] = ['1']): LearningUnit[] {
       return wordA.length - wordB.length;
     }
 
-    // Deterministic Shuffle: Sort by reversed string
-    // e.g. "gato" (otag) vs "perro" (orrep)
-    // This breaks alphabetical clustering effectively while being deterministic.
+    // Interleaving & Deterministic Shuffle
+    // To mix volumes effectively even at same difficulty, we include "출처" in the comparison
+    if (a["출처"] !== b["출처"]) {
+      // Deterministic but semi-random mix:
+      // We want to avoid all Vol 1 then all Vol 2 if they have same length
+      const mixA = (wordA + a["출처"]).split('').reverse().join('');
+      const mixB = (wordB + b["출처"]).split('').reverse().join('');
+      return mixA.localeCompare(mixB);
+    }
+
     const revA = wordA.split('').reverse().join('');
     const revB = wordB.split('').reverse().join('');
     return revA.localeCompare(revB);

@@ -171,13 +171,38 @@ export default function Quiz({ unitId, unitWords, unitTitle, sources = ['1'] }: 
           marginBottom: '32px',
           fontSize: '24px',
           fontWeight: '700',
-          textAlign: 'center'
+          textAlign: 'center',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
-          {current.type === 'translate-ko'
-            ? current.word["스페인어 단어"]
-            : current.type === 'gender'
-              ? current.displayWord || current.word["스페인어 단어"]
-              : current.word["한국어 의미"]}
+          {/* Textbook Indicator */}
+          <div style={{
+            position: 'absolute',
+            top: '8px',
+            right: '8px',
+            width: '40px',
+            height: '56px',
+            borderRadius: '4px',
+            overflow: 'hidden',
+            border: '1px solid var(--border-light)',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            opacity: 0.8
+          }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={current.word["출처"] === "2" ? "/holavoca/vol2.jpg" : "/holavoca/vol1.jpg"}
+              alt={`Vol ${current.word["출처"]}`}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          </div>
+
+          <div style={{ marginTop: '12px' }}>
+            {current.type === 'translate-ko'
+              ? current.word["스페인어 단어"]
+              : current.type === 'gender'
+                ? current.displayWord || current.word["스페인어 단어"]
+                : current.word["한국어 의미"]}
+          </div>
         </div>
 
         <div style={{ display: 'grid', gap: '12px' }}>
