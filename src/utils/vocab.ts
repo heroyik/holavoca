@@ -16,12 +16,15 @@ export interface LearningUnit {
 
 import { PRIORITY_WORDS } from './priorityWords';
 
-export function getUnits(): LearningUnit[] {
+export function getUnits(sources: string[] = ['1']): LearningUnit[] {
   const units: LearningUnit[] = [];
+
+  // Filter data based on provided sources
+  const filteredVocabData = (vocabData as VocabEntry[]).filter(item => sources.includes(item["출처"]));
 
   // 1. Flatten and unique the vocabulary
   const uniqueWords = new Map<string, VocabEntry>();
-  (vocabData as VocabEntry[]).forEach((word) => {
+  filteredVocabData.forEach((word) => {
     const key = word["스페인어 단어"].toLowerCase().trim();
     if (!uniqueWords.has(key)) {
       uniqueWords.set(key, word);
@@ -75,16 +78,16 @@ export function getUnits(): LearningUnit[] {
   return units;
 }
 
-export function getRandomWords(count: number, exclude?: string[]): VocabEntry[] {
-  const allWords = vocabData as VocabEntry[];
+export function getRandomWords(count: number, sources: string[] = ['1'], exclude?: string[]): VocabEntry[] {
+  const allWords = (vocabData as VocabEntry[]).filter(item => sources.includes(item["출처"]));
   const filtered = exclude
     ? allWords.filter(w => !exclude.includes(w["스페인어 단어"]))
     : allWords;
 
   return [...filtered].sort(() => Math.random() - 0.5).slice(0, count);
 }
-export function getTotalWordCount(): number {
-  return (vocabData as VocabEntry[]).length;
+export function getTotalWordCount(sources: string[] = ['1']): number {
+  return (vocabData as VocabEntry[]).filter(item => sources.includes(item["출처"])).length;
 }
 
 /**

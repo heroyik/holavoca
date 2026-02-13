@@ -1,13 +1,20 @@
 # HolaVoca - Spanish Vocabulary Learning App
 
-`Revision 1.1.6`
+`Revision 1.2.2`
 
 HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 4,300+ Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
 
 ---
 
-## 🆕 Latest Updates (v1.1.6)
+## 🆕 Latest Updates (v1.2.2)
 
+- **R.1.2.2**: **Security & Architecture**.
+  - **Enhanced Security**: Migrated all Firebase credentials to environment variables (`.env.local`) to prevent accidental exposure.
+  - **API Hardening**: Implemented strict Google Cloud API restrictions, limiting keys to specific HTTP referrers (Production/Localhost) and essential services (Firestore, Auth, Installations).
+- **R.1.2.1**: **Textbook Selection Feature**.
+  - **Dynamic Filtering**: added ability to filter vocabulary by **Textbook Volume (Vol 1 / Vol 2)**.
+  - **Interactive Toggles**: Tapping the book covers in the header now toggles their inclusion in the learning path.
+  - **Visual Feedback**: Selected books are highlighted, while unselected ones are dimmed.
 - **R.1.2.0**: **Vocabulary Overhaul & Robustness**.
   - **Overhauled Vocabulary**: Reorganized learning path to be **Difficulty-Based** (Priority Words -> Complex Words) instead of Alphabetical.
   - **No Alphabetical Order**: Words within tiers are shuffled to keep learning effective.

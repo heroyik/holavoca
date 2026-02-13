@@ -5,7 +5,6 @@ import { APP_VERSION } from '@/lib/constants';
 import { getUnits, getTotalWordCount } from '@/utils/vocab';
 import Link from 'next/link';
 import Image from 'next/image';
-import { StaticImageData } from 'next/image';
 import { useGamification } from '@/hooks/useGamification';
 import Leaderboard from '@/components/Leaderboard';
 import UserProfile from '@/components/UserProfile';
@@ -44,11 +43,28 @@ const getMotivationalSticker = (idx: number) => {
 };
 
 export default function Home() {
-  const units = getUnits();
-  const totalWords = getTotalWordCount();
-  const { stats, user } = useGamification();
-  const [selectedImage, setSelectedImage] = useState<StaticImageData | null>(null);
+  const [selectedBooks, setSelectedBooks] = useState<string[]>(['1']);
   const [activeTab, setActiveTab] = useState<'learn' | 'leader' | 'profile'>('learn');
+  const { stats, user } = useGamification();
+
+  // Dynamically fetch units based on selection
+  // In a real app with SSG/SSR, this might need a different approach (e.g. client-side filtering or router refresh)
+  // For this client-side demo, calling it directly in render is okay but better to memoize.
+  // However, getUnits is efficient enough for this demo.
+  const units = getUnits(selectedBooks);
+  const totalWords = getTotalWordCount(selectedBooks);
+
+  const toggleBook = (bookId: string) => {
+    setSelectedBooks(prev => {
+      if (prev.includes(bookId)) {
+        // Prevent deselecting the last book
+        if (prev.length === 1) return prev;
+        return prev.filter(id => id !== bookId);
+      } else {
+        return [...prev, bookId];
+      }
+    });
+  };
 
   return (
     <main className="container" style={{ minHeight: '100vh', backgroundColor: 'var(--bg-soft)', paddingBottom: '140px' }}>
@@ -121,14 +137,36 @@ export default function Home() {
           </div>
           <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
             <div
-              onClick={() => setSelectedImage(vol1)}
-              style={{ width: '32px', height: '44px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--border-light)', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+              onClick={() => toggleBook('1')}
+              style={{
+                width: '32px',
+                height: '44px',
+                borderRadius: '4px',
+                overflow: 'hidden',
+                border: selectedBooks.includes('1') ? '2px solid var(--duo-blue)' : '1px solid var(--border-light)',
+                cursor: 'pointer',
+                boxShadow: selectedBooks.includes('1') ? '0 0 0 2px rgba(59, 130, 246, 0.3)' : 'none',
+                opacity: selectedBooks.includes('1') ? 1 : 0.4,
+                transition: 'all 0.2s',
+                transform: selectedBooks.includes('1') ? 'scale(1.05)' : 'scale(1)'
+              }}
             >
               <Image src={vol1} alt="Book 1" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <div
-              onClick={() => setSelectedImage(vol2)}
-              style={{ width: '32px', height: '44px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--border-light)', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+              onClick={() => toggleBook('2')}
+              style={{
+                width: '32px',
+                height: '44px',
+                borderRadius: '4px',
+                overflow: 'hidden',
+                border: selectedBooks.includes('2') ? '2px solid var(--duo-blue)' : '1px solid var(--border-light)',
+                cursor: 'pointer',
+                boxShadow: selectedBooks.includes('2') ? '0 0 0 2px rgba(59, 130, 246, 0.3)' : 'none',
+                opacity: selectedBooks.includes('2') ? 1 : 0.4,
+                transition: 'all 0.2s',
+                transform: selectedBooks.includes('2') ? 'scale(1.05)' : 'scale(1)'
+              }}
             >
               <Image src={vol2} alt="Book 2" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
@@ -368,65 +406,7 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Lightbox / Modal */}
-      {selectedImage && (
-        <div
-          onClick={() => setSelectedImage(null)}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.85)',
-            zIndex: 1000,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: '20px',
-            cursor: 'zoom-out'
-          }}
-        >
-          <div style={{
-            position: 'relative',
-            width: '100%',
-            maxWidth: '350px',
-            aspectRatio: '1/1.4',
-            borderRadius: '16px',
-            overflow: 'hidden',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
-            backgroundColor: 'white'
-          }}>
-            <Image
-              src={selectedImage}
-              alt="Zoomed book"
-              fill
-              style={{ objectFit: 'contain', padding: '10px' }}
-            />
-            <button
-              onClick={(e) => { e.stopPropagation(); setSelectedImage(null); }}
-              style={{
-                position: 'absolute',
-                top: '15px',
-                right: '15px',
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                backgroundColor: 'rgba(255,255,255,0.9)',
-                border: 'none',
-                fontWeight: '800',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-              }}
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
+
     </main>
   );
 }

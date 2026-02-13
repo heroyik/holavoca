@@ -1,0 +1,83 @@
+
+Running 2 tests using 2 workers
+
+Navigating to https://heroyik.github.io/holavoca/ ...
+PAGE LOG: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+PAGE LOG: [HMR] connected
+✅ Initial state verified: 547 words
+✅ Revision R.1.2.1 found.
+✅ Unit 1 (PRINCIPIANTE 1) found.
+Clicking LEADER tab...
+PAGE LOG: A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>
+      <LoadingBoundary name="/" loading={null}>
+        <HTTPAccessFallbackBoundary notFound={<SegmentViewNode>} forbidden={undefined} unauthorized={undefined}>
+          <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<SegmentViewNode>} forbidden={undefined} ...>
+            <RedirectBoundary>
+              <RedirectErrorBoundary router={{...}}>
+                <InnerLayoutRouter url="/holavoca" tree={[...]} params={{}} cacheNode={{rsc:<Fragment>, ...}} ...>
+                  <SegmentViewNode type="page" pagePath="page.tsx">
+                    <SegmentTrieNode>
+                    <ClientPageRoot Component={function Home} serverProvidedParams={{...}}>
+                      <Home params={Promise} searchParams={Promise}>
+                        <main style={{...}} className="jsx-465737...">
+                          <header>
+                          <div>
+                          <div style={{maxWidth:"...", ...}} className="jsx-465737...">
+                            <svg>
+                            <div>
+                            <div>
+                            <div>
+                            <div>
+                            <div>
+                            <div>
+                            <div>
+                            <div
+                              style={{
++                               display: "flex"
+-                               display: "flex"
++                               flexDirection: "column"
++                               alignItems: "center"
++                               transform: "translateX(51.27593448529682px)"
+-                               transform: "translateX(51.2759px)"
++                               zIndex: 1
++                               position: "relative"
+-                               position: "relative"
++                               height: "160px"
+-                               height: "160px"
+-                               flex-direction: "column"
+-                               align-items: "center"
+-                               z-index: "1"
+                              }}
+                              className="jsx-465737d6d65f2f28"
+                            >
+                            ...
+                          ...
+                  ...
+                ...
+
+Waiting for Leaderboard content...
+✅ Vol 2 enabled: 730 words
+✅ Vol 1 disabled: 183 words
+✅ Prevented disabling last book
+  ✓  2 e2e\verify-book-selection.spec.ts:4:5 › Verify Textbook Selection Feature (2.0s)
+PAGE LOG: Leaderboard loaded: 2 entries
+✅ Leaderboard Header "Hall of Fame" found.
+✅ Loading state cleared.
+✅ Found 1st place Crown icon!
+✅ Success! Found 2 leaderboard entries.
+  ✓  1 e2e\verify-deployment.spec.ts:3:5 › Verify HolaVoca v1.1 Deployment (5.8s)
+
+  2 passed (9.5s)

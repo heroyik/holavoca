@@ -1,0 +1,43 @@
+
+Running 2 tests using 2 workers
+
+Navigating to https://heroyik.github.io/holavoca/ ...
+  ✘  1 e2e\verify-book-selection.spec.ts:4:5 › Verify Textbook Selection Feature (3.8s)
+  ✘  2 e2e\verify-deployment.spec.ts:3:5 › Verify HolaVoca v1.1 Deployment (3.7s)
+
+
+  1) e2e\verify-book-selection.spec.ts:4:5 › Verify Textbook Selection Feature ─────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3005/holavoca/
+    Call log:
+    [2m  - navigating to "http://localhost:3005/holavoca/", waiting until "domcontentloaded"[22m
+
+
+      4 | test('Verify Textbook Selection Feature', async ({ page }) => {
+      5 |     // 1. Visit the site
+    > 6 |     await page.goto('http://localhost:3005/holavoca/', { waitUntil: 'domcontentloaded' });
+        |                ^
+      7 |
+      8 |     // 2. Check initial state (Vol 1 selected by default)
+      9 |     // "Vocabulary Arsenal 547 📚"
+        at C:\Users\heroy\proj\새 폴더\holavoca\e2e\verify-book-selection.spec.ts:6:16
+
+  2) e2e\verify-deployment.spec.ts:3:5 › Verify HolaVoca v1.1 Deployment ───────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3005/holavoca/
+    Call log:
+    [2m  - navigating to "http://localhost:3005/holavoca/", waiting until "domcontentloaded"[22m
+
+
+      12 |
+      13 |     // Use domcontentloaded to avoid waiting for long-polling requests
+    > 14 |     await page.goto('http://localhost:3005/holavoca/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+         |                ^
+      15 |
+      16 |     // 2. Check title and revision
+      17 |     await expect(page).toHaveTitle(/HolaVoca/);
+        at C:\Users\heroy\proj\새 폴더\holavoca\e2e\verify-deployment.spec.ts:14:16
+
+  2 failed
+    e2e\verify-book-selection.spec.ts:4:5 › Verify Textbook Selection Feature ──────────────────────
+    e2e\verify-deployment.spec.ts:3:5 › Verify HolaVoca v1.1 Deployment ────────────────────────────

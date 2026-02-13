@@ -16,10 +16,10 @@ test('Verify HolaVoca v1.1 Deployment', async ({ page }) => {
     // 2. Check title and revision
     await expect(page).toHaveTitle(/HolaVoca/);
 
-    // Check for Revision tag "R.1.2.0"
-    const revisionTag = page.locator('text=R.1.2.0');
+    // Check for Revision tag "R.1.2.1"
+    const revisionTag = page.locator('text=R.1.2.1');
     await expect(revisionTag).toBeVisible({ timeout: 30000 });
-    console.log('✅ Revision R.1.2.0 found.');
+    console.log('✅ Revision R.1.2.1 found.');
 
     // 2.5 Check Vocabulary (Unit 1 should be beginner)
     // The UI renders "PRINCIPIANTE 1", not "Unit 1"

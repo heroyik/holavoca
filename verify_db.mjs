@@ -1,13 +1,29 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
+import fs from 'fs';
+import path from 'path';
+
+// Load .env.local manually since we don't have dotenv
+const envPath = path.resolve('.env.local');
+if (fs.existsSync(envPath)) {
+    const envConfig = fs.readFileSync(envPath, 'utf8');
+    envConfig.split('\n').forEach(line => {
+        const match = line.match(/^([^=]+)=(.*)$/);
+        if (match) {
+            const key = match[1].trim();
+            const value = match[2].trim().replace(/^['"]|['"]$/g, ''); // Remove quotes if any
+            process.env[key] = value;
+        }
+    });
+}
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDfwLDAkt5E_cBWvYBHiJCI811tNobdIq0",
-    authDomain: "holavoca-app-12345.firebaseapp.com",
-    projectId: "holavoca-app-12345",
-    storageBucket: "holavoca-app-12345.firebasestorage.app",
-    messagingSenderId: "634220929894",
-    appId: "1:634220929894:web:2f495a296d88ea8f7e5ea7"
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
 const app = initializeApp(firebaseConfig);

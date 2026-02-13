@@ -1,0 +1,13 @@
+
+> holavoca@0.1.0 dev
+> next dev -p 3005
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3005
+- Network:       http://192.168.50.63:3005
+- Environments: .env.local
+
+✓ Starting...
+✓ Ready in 2.4s
+ GET / 200 in 1688ms (compile: 684ms, render: 1004ms)
+ GET / 200 in 1707ms (compile: 842ms, render: 866ms)
