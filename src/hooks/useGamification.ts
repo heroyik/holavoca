@@ -95,9 +95,10 @@ export function useGamification() {
     setStats(newStats);
     localStorage.setItem("holavoca_stats", JSON.stringify(newStats));
 
-    if (user && db) {
+    const firestore = db;
+    if (user && firestore) {
       try {
-        await setDoc(doc(db, "users", user.uid), {
+        await setDoc(doc(firestore, "users", user.uid), {
           ...newStats,
           displayName: user.displayName,
           photoURL: user.photoURL

@@ -35,7 +35,8 @@ export default function Leaderboard() {
             setLoading(true);
             setError(false);
 
-            if (!db) {
+            const firestore = db; // Capture for narrowing
+            if (!firestore) {
                 console.warn("Firestore is not initialized. Switching to DEMO Mode (No DB).");
                 setLeaders(DEMO_LEADERS);
                 setLoading(false);
@@ -53,7 +54,7 @@ export default function Leaderboard() {
             try {
                 // Primary Query: Standard Leaderboard
                 const q = query(
-                    collection(db, "users"),
+                    collection(firestore, "users"),
                     orderBy("xp", "desc"),
                     limit(10)
                 );
@@ -77,7 +78,7 @@ export default function Leaderboard() {
                         try {
                             // Fetch 20 users comfortably (limit to avoid reading whole DB)
                             // Without 'orderBy', this doesn't need an index.
-                            const fallbackQ = query(collection(db, "users"), limit(50));
+                            const fallbackQ = query(collection(firestore, "users"), limit(50));
                             const snapshot = await getDocs(fallbackQ);
                             const entries = snapshot.docs.map(doc => ({
                                 id: doc.id,
