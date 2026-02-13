@@ -1,13 +1,18 @@
 # HolaVoca - Spanish Vocabulary Learning App
 
-`Revision 1.3.10`
+`Revision 1.3.11`
 
 HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 730 Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
 
 ---
 
-## 🆕 Latest Updates (v1.3.10)
+## 🆕 Latest Updates (v1.3.11)
 
+- **R.1.3.11**: **Header Visual Hierarchy & Regression Testing**.
+  - **Enhanced Title Emphasis**: Increased "HolaVoca" title size and weight for better brand focus with Spanish aesthetic.
+  - **Subtle Version Badge**: De-emphasized version info with minimal gray styling for cleaner visual hierarchy.
+  - **Footer Stats Integration**: Moved streak/gems to footer's aura bar for streamlined header design.
+  - **Automated Testing**: Added Playwright regression test suite covering Header, Footer, and Quiz functionality.
 - **R.1.3.10**: **Compact Header Redesign & Icon Repositioning**.
   - **High-Efficiency Header**: Redesigned the top navigation bar into a single horizontal row, reclaiming ~100px of vertical space. 
   - **Icon Repositioning**: Moved streak (🔥) and gem (💎) icons to the left of the progress bar for better visual grouping and flow.
