@@ -1,28 +1,26 @@
+import { Suspense } from "react";
 import { getUnits } from "@/utils/vocab";
-import Quiz from "@/components/Quiz";
-import { notFound } from "next/navigation";
+import QuizLoader from "@/components/QuizLoader";
 
 interface QuizPageProps {
   params: Promise<{
     unitId: string;
   }>;
-  searchParams: Promise<{
-    sources?: string;
-  }>;
 }
 
-export default async function QuizPage({ params, searchParams }: QuizPageProps) {
+export async function generateStaticParams() {
+  const units = getUnits();
+  return units.map((unit) => ({
+    unitId: unit.id,
+  }));
+}
+
+export default async function QuizPage({ params }: QuizPageProps) {
   const { unitId } = await params;
-  const { sources: sourcesStr } = await searchParams;
 
-  const sources = sourcesStr ? sourcesStr.split(',') : ['1'];
-
-  const units = getUnits(sources);
-  const unit = units.find((u) => u.id === unitId);
-
-  if (!unit) {
-    notFound();
-  }
-
-  return <Quiz unitId={unit.id} unitWords={unit.words} unitTitle={unit.title} sources={sources} />;
+  return (
+    <Suspense fallback={<div className="flex-center" style={{ height: '100vh' }}>Loading...</div>}>
+      <QuizLoader unitId={unitId} />
+    </Suspense>
+  );
 }
