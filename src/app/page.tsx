@@ -98,35 +98,36 @@ export default function Home() {
 
   return (
     <main className="container min-h-screen bg-soft pb-140">
-      {/* Premium Header/Stats Bar */}
+      {/* Premium Compact Header */}
       <header className="sticky-header">
-        <div className="flex items-center w-full max-w-600 gap-20">
-          <div className="progress-bar-container h-14 rounded-7">
+        <div className="flex items-center gap-6">
+          <h1 className="font-18 font-900 m-0 text-es-red leading-1-1">HolaVoca</h1>
+          <span className="version-badge font-10">{APP_VERSION.replace('v', '')}</span>
+        </div>
+
+        <div className="header-progress-container">
+          <div className="stat-badge font-14 flex items-center gap-6 px-0 bg-transparent border-none shadow-none">
+            <span className="text-duo-orange">🔥{stats.streak}</span>
+            <span className="text-duo-blue">💎{stats.gems}</span>
+          </div>
+          
+          <div className="header-progress">
             <div 
-              className="progress-bar-inner"
+              className="header-progress-inner"
               style={{ width: `${Math.min((stats.xp % 100), 100)}%` }} 
             />
           </div>
-          <div className="stat-badge">
-            <span className="text-duo-orange">🔥 {stats.streak}</span>
-            <span className="text-duo-blue">💎 {stats.gems}</span>
-          </div>
         </div>
 
-        <div className="flex-center w-full max-w-600 mt-12 gap-16">
-          <div className="flex flex-col items-start relative">
-            <div className="flex items-center gap-8">
-              <h1 className="font-24 font-900 m-0 text-es-red leading-1-1">HolaVoca</h1>
-              <span className="version-badge">{APP_VERSION}</span>
-            </div>
-            <div
-              onClick={handleDownload}
-              className="vocab-stash-pill"
-            >
-              VOCAB STASH <strong className="text-es-red">{totalWords.toLocaleString()}</strong> 📚
-            </div>
+        <div className="flex items-center gap-8">
+          <div
+            onClick={handleDownload}
+            className="vocab-stash-pill mt-0 flex items-center gap-2"
+          >
+            <strong className="text-es-red">{totalWords.toLocaleString()}</strong>📚
           </div>
-          <div className="flex gap-8 ml-auto">
+
+          <div className="flex items-center gap-3">
             <div
               onClick={() => toggleBook('1')}
               className={`book-cover-mini ${selectedBooks.includes('1') ? 'active' : ''}`}

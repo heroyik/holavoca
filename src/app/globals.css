@@ -85,6 +85,13 @@ button {
   justify-content: center;
 }
 
+.flex { display: flex; }
+.flex-row { display: flex; flex-direction: row; }
+.flex-col { display: flex; flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+
 /* Duo Button Style */
 .duo-button {
   padding: 12px 24px;
@@ -335,10 +342,36 @@ button {
   z-index: 200;
   background-color: white;
   border-bottom: 2px solid var(--border-light);
-  padding: 12px 20px;
+  padding: 6px 16px;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+}
+
+.header-progress-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 400px;
+}
+
+.header-progress {
+  flex: 1;
+  height: 6px;
+  background-color: var(--border-light);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.header-progress-inner {
+  height: 100%;
+  background: linear-gradient(90deg, #58cc02, #23ac5e);
+  transition: width 0.3s ease;
+  border-radius: 0 6px 6px 0;
 }
 
 .stat-badge {
@@ -561,6 +594,7 @@ button {
   cursor: pointer;
   user-select: none;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
 .vocab-stash-pill:hover {
@@ -569,8 +603,8 @@ button {
 }
 
 .book-cover-mini {
-  width: 32px;
-  height: 44px;
+  width: 28px;
+  height: 38px;
   border-radius: 4px;
   overflow: hidden;
   border: 1px solid var(--border-light);
