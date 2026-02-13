@@ -16,14 +16,18 @@ let db: Firestore | undefined;
 let googleProvider: GoogleAuthProvider | undefined;
 
 // Defensive initialization for build-time safety and hydration consistency
-if (typeof window !== "undefined" && !!firebaseConfig.apiKey) {
-    try {
-        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-        auth = getAuth(app);
-        db = getFirestore(app);
-        googleProvider = new GoogleAuthProvider();
-    } catch (error) {
-        console.error("Firebase initialization failed:", error);
+if (typeof window !== "undefined") {
+    if (!!firebaseConfig.apiKey) {
+        try {
+            const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            googleProvider = new GoogleAuthProvider();
+        } catch (error) {
+            console.error("Firebase initialization failed:", error);
+        }
+    } else {
+        console.warn("Firebase API Key is missing. Check your NEXT_PUBLIC_FIREBASE_API_KEY environment variable.");
     }
 }
 
