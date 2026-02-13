@@ -2,10 +2,14 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { VocabEntry } from "@/utils/vocab";
+import vocabData from "@/data/vocab.json"; // Import full vocab for distractors
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { X, CheckCircle, XCircle } from "lucide-react";
 import { useGamification } from "@/hooks/useGamification";
+import Image from "next/image";
+import vol1 from "../../public/vol1.jpg";
+import vol2 from "../../public/vol2.jpg";
 
 interface QuizProps {
   unitId: string;
@@ -25,13 +29,17 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [questions] = useState(() => [...unitWords].sort(() => Math.random() - 0.5));
 
+
+
   const generateOptions = useCallback((correctAnswer: string) => {
-    const distractors = unitWords
+    // Use full vocabData for distractors to ensure we always have enough options
+    const allDistractors = (vocabData as VocabEntry[])
       .map(v => v["한국어 의미"])
       .filter(v => v !== correctAnswer);
-    const shuffledDistractors = distractors.sort(() => Math.random() - 0.5).slice(0, 3);
+      
+    const shuffledDistractors = allDistractors.sort(() => Math.random() - 0.5).slice(0, 3);
     return [...shuffledDistractors, correctAnswer].sort(() => Math.random() - 0.5);
-  }, [unitWords]);
+  }, []); // No dependencies needed as vocabData is static import
 
   const options = useMemo(() => {
     if (questions.length > 0 && currentIndex < questions.length) {
@@ -76,7 +84,21 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
 
   if (showResult) {
     return (
-      <div className="container flex-center min-h-screen flex-col pt-40-pb-20">
+      <div className="container flex-center min-h-screen flex-col pt-40-pb-20 relative">
+        {/* Book Source Badge */}
+        {questions.length > 0 && questions[currentIndex] && (
+          <div className="source-badge" data-testid="source-badge">
+            <Image 
+              src={questions[currentIndex]["출처"] === "2" ? "/vol2.jpg" : "/vol1.jpg"} 
+              alt="Book Source" 
+              fill
+              sizes="40px"
+              className="object-cover"
+            />
+          </div>
+        )}
+
+        <div className="w-full max-w-md mb-8 flex justify-between items-center px-4"></div>
         <h2 className="text-main-title text-duo-green mb-20">Finished!</h2>
         <div className="text-center mb-32">
           <div className="text-subtitle mb-8">Your Score:</div>
@@ -101,7 +123,10 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
   const progress = ((currentIndex) / questions.length) * 100;
 
   return (
-    <div className="container flex flex-col min-h-screen p-20-120">
+    <div className="container flex flex-col min-h-screen p-20-120 relative">
+      {/* Book Source Badge */}
+
+
       {/* Header */}
       <div className="flex-between gap-16 mb-32">
         <Link href="/" aria-label="Close lesson" className="no-underline">
@@ -119,6 +144,18 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
         </h2>
 
         <div className="quiz-card mb-32">
+          {/* Book Source Badge inside Card */}
+          {questions.length > 0 && questions[currentIndex] && (
+            <div className="source-badge" data-testid="source-badge">
+              <Image 
+                src={questions[currentIndex]["출처"] === "2" ? vol2 : vol1} 
+                alt="Book Source" 
+                fill
+                sizes="40px"
+                className="object-cover"
+              />
+            </div>
+          )}
           <div className="text-main-title text-es-red mb-8">
             {currentQuestion["스페인어 단어"]}
           </div>

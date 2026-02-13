@@ -3,12 +3,13 @@
 import { useGamification } from "@/hooks/useGamification";
 import vocabData from "@/data/vocab.json";
 import { VocabEntry } from "@/utils/vocab";
-import { Trash2 } from "lucide-react";
+import { Trash2, Brain } from "lucide-react";
 import Link from "next/link";
 
 export default function ReviewTab() {
   const { stats, removeMistake, clearAllMistakes } = useGamification();
   const mistakes = stats.mistakes || {};
+  // ... (keep existing logic) ...
   const missedWordList = Object.keys(mistakes);
 
   if (missedWordList.length === 0) {
@@ -30,25 +31,35 @@ export default function ReviewTab() {
 
   return (
     <div className="review-content">
-      <div className="review-card flex-between">
-        <div className="flex-1">
-          <h2 className="text-title m-0">My Mistakes</h2>
-          <p className="text-small mt-4">
-            You have <span className="text-error">{reviewEntries.length}</span> {reviewEntries.length === 1 ? 'word' : 'words'} to review
-          </p>
+      <div className="review-card-modern">
+        <div className="review-header">
+          <div className="review-header-icon">
+            <Brain size={28} />
+          </div>
+          <h2 className="text-title m-0">Tricky Words</h2>
         </div>
-        <div className="flex-center flex-gap-12">
-          <Link href={`/quiz/review`} className="no-underline">
-            <button className="duo-button duo-button-primary button-standard">
-              REVIEW NOW
+
+        <div className="stat-container">
+          <span className="stat-value">{reviewEntries.length}</span>
+          <span className="stat-label">
+            {reviewEntries.length === 1 ? 'word' : 'words'} need more practice
+          </span>
+        </div>
+
+        <div className="review-actions">
+          <Link href={`/quiz/review`} className="flex-1 no-underline">
+            <button className="duo-button duo-button-primary button-standard w-full button-review-pulse">
+              START REVIEW
             </button>
           </Link>
           <button
             onClick={() => clearAllMistakes()}
-            className="button-danger-outline"
+            className="icon-button-round"
             aria-label="Clear entire review list"
+            title="Clear list"
+            style={{ width: '48px', height: '48px' }}
           >
-            <Trash2 size={16} /> Clear all
+            <Trash2 size={24} />
           </button>
         </div>
       </div>

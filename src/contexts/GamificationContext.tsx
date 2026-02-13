@@ -45,19 +45,27 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       completedUnits: [],
       mistakes: {},
     };
+    return defaultStats;
+  });
+
+  // Client-side hydration
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem("holavoca_stats");
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          return { ...defaultStats, ...parsed, mistakes: parsed.mistakes || {} };
+          setStats(prev => ({ 
+            ...prev, 
+            ...parsed, 
+            mistakes: parsed.mistakes || {} 
+          }));
         } catch (e) {
           console.error("Failed to parse local stats", e);
         }
       }
     }
-    return defaultStats;
-  });
+  }, []);
 
   const statsRef = useRef(stats);
   useEffect(() => {

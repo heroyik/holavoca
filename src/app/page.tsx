@@ -99,44 +99,34 @@ export default function Home() {
   return (
     <main className="container min-h-screen bg-soft pb-140">
       {/* Premium Compact Header */}
-      <header className="sticky-header">
-        <div className="flex items-center gap-6">
-          <h1 className="font-18 font-900 m-0 text-es-red leading-1-1">HolaVoca</h1>
-          <span className="version-badge font-10">{APP_VERSION.replace('v', '')}</span>
+{/* Premium Compact Header - 2 Line Redesign */}
+      <header className="sticky-header spanish-header">
+        <div className="header-left flex items-baseline gap-4">
+          <h1 className="font-22 font-900 m-0 text-es-red leading-1-1 tracking-tight" style={{ letterSpacing: '-0.5px' }}>HolaVoca</h1>
+          <span className="version-badge">{APP_VERSION.replace('v', '')}</span>
         </div>
 
-        <div className="header-progress-container">
-          <div className="stat-badge font-14 flex items-center gap-6 px-0 bg-transparent border-none shadow-none">
-            <span className="text-duo-orange">🔥{stats.streak}</span>
-            <span className="text-duo-blue">💎{stats.gems}</span>
-          </div>
-          
-          <div className="header-progress">
-            <div 
-              className="header-progress-inner"
-              style={{ width: `${Math.min((stats.xp % 100), 100)}%` }} 
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-8">
-          <div
+        <div className="header-right flex items-center gap-12">
+           <div
             onClick={handleDownload}
-            className="vocab-stash-pill mt-0 flex items-center gap-2"
+            className="vocab-stash-pill mt-0 flex items-center gap-2 py-4 px-10 h-32 hover-scale"
+            title="Download JSON"
           >
-            <strong className="text-es-red">{totalWords.toLocaleString()}</strong>📚
+            <strong className="text-es-red font-12">{totalWords.toLocaleString()}</strong>📚
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <div
               onClick={() => toggleBook('1')}
               className={`book-cover-mini ${selectedBooks.includes('1') ? 'active' : ''}`}
+              style={{ width: '28px', height: '38px' }}
             >
               <Image src={vol1} alt="Book 1" className="w-full h-full object-cover" />
             </div>
             <div
               onClick={() => toggleBook('2')}
               className={`book-cover-mini ${selectedBooks.includes('2') ? 'active' : ''}`}
+              style={{ width: '28px', height: '38px' }}
             >
               <Image src={vol2} alt="Book 2" className="w-full h-full object-cover" />
             </div>
@@ -256,6 +246,11 @@ export default function Home() {
         </div>
         
         <div className="aura-bar">
+          <div className="flex items-center gap-3 mr-4">
+            <span className="text-duo-orange font-14 font-700">🔥 {stats.streak}</span>
+            <span className="text-duo-blue font-14 font-700">💎 {stats.gems}</span>
+          </div>
+          <div className="separator-v"></div>
           <div>My Learning Aura: <strong className="text-es-red font-15">{stats.xp.toLocaleString()} ✨</strong></div>
           <div className="separator-v"></div>
           <a
