@@ -2,7 +2,7 @@
 
 import vocabData from '@/data/vocab.json';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { APP_VERSION } from '@/lib/constants';
 import { getUnits, getTotalWordCount } from '@/utils/vocab';
 import Link from 'next/link';
@@ -49,6 +49,18 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'learn' | 'leader' | 'profile'>('learn');
   const { stats, user } = useGamification();
 
+  // Load selection from sessionStorage on mount
+  useEffect(() => {
+    const saved = sessionStorage.getItem('selected_books');
+    if (saved) {
+      try {
+        setSelectedBooks(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to parse selected books', e);
+      }
+    }
+  }, []);
+
   // Dynamically fetch units based on selection
   // In a real app with SSG/SSR, this might need a different approach (e.g. client-side filtering or router refresh)
   // For this client-side demo, calling it directly in render is okay but better to memoize.
@@ -58,13 +70,16 @@ export default function Home() {
 
   const toggleBook = (bookId: string) => {
     setSelectedBooks(prev => {
+      let newState;
       if (prev.includes(bookId)) {
         // Prevent deselecting the last book
         if (prev.length === 1) return prev;
-        return prev.filter(id => id !== bookId);
+        newState = prev.filter(id => id !== bookId);
       } else {
-        return [...prev, bookId];
+        newState = [...prev, bookId];
       }
+      sessionStorage.setItem('selected_books', JSON.stringify(newState));
+      return newState;
     });
   };
 
