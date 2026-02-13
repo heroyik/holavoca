@@ -1,19 +1,25 @@
 # HolaVoca - Spanish Vocabulary Learning App
 
-`Revision 1.2.2`
+`Revision 1.3.0`
 
 HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 4,300+ Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
 
 ---
 
-## 🆕 Latest Updates (v1.2.2)
+## 🆕 Latest Updates (v1.3.0)
 
+- **R.1.3.0**: **Rock-Solid Stability & UI Polish**.
+  - **Stability & Performance**: Fixed React hydration mismatches (Error #418) and background sync logic for smoother performance.
+  - **Build Safety**: Refactored architecture for strictly client-side Firebase initialization, ensuring zero build failures.
+  - **Runtime Resilience**: Added smart guards to prevent crashes if API keys are missing, defaulting to an elegant "Offline/Demo Mode".
+  - **Header UI**: Renamed the stats badge to "**VOCAB STASH**" for a more hip, casual feel.
+  - **CI/CD Integration**: Optimized GitHub Actions workflow to support secure secret injection during production build.
 - **R.1.2.2**: **Security & Architecture**.
   - **Enhanced Security**: Migrated all Firebase credentials to environment variables (`.env.local`) to prevent accidental exposure.
   - **API Hardening**: Implemented strict Google Cloud API restrictions, limiting keys to specific HTTP referrers (Production/Localhost) and essential services (Firestore, Auth, Installations).
 - **R.1.2.1**: **Textbook Selection & Data Download**.
   - **Textbook Selection**: Added ability to filter vocabulary by **Textbook Volume (Vol 1 / Vol 2)** via interactive book covers.
-  - **Vocabulary Download**: One-tap JSON download feature by clicking the "**전체 데이터**" count in the header.
+  - **Vocabulary Download**: One-tap JSON download feature by clicking the "**VOCAB STASH**" count in the header.
   - **Visual Feedback**: Selected books are highlighted, while unselected ones are dimmed.
 - **R.1.2.0**: **Vocabulary Overhaul & Robustness**.
   - **Overhauled Vocabulary**: Reorganized learning path to be **Difficulty-Based** (Priority Words -> Complex Words) instead of Alphabetical.

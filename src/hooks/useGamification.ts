@@ -15,117 +15,96 @@ export interface UserStats {
 
 export function useGamification() {
   const [user, setUser] = useState<User | null>(null);
-  const [stats, setStats] = useState<UserStats>(() => {
-    // Initialize from local storage if available
-    if (typeof window !== 'undefined') {
+  const [stats, setStats] = useState<UserStats>({
+    xp: 0,
+    gems: 0,
+    streak: 0,
+    lastStudyDate: null,
+    completedUnits: [],
+  });
+
+  // Client-side initialization to avoid hydration mismatch (Error #418)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
       const saved = localStorage.getItem("holavoca_stats");
       if (saved) {
         try {
-          return JSON.parse(saved);
+          const parsed = JSON.parse(saved);
+          setStats(parsed);
         } catch (e) {
           console.error("Failed to parse local stats", e);
         }
       }
     }
-    return {
-      xp: 0,
-      gems: 0,
-      streak: 0,
-      lastStudyDate: null,
-      completedUnits: [],
-    };
-  });
+  }, []);
 
-  // Ref to hold latest stats for use in effects/callbacks without triggering re-renders
+  // Use ref to avoid closure issues in async callbacks
   const statsRef = useRef(stats);
-
-  // Update ref whenever stats change
   useEffect(() => {
     statsRef.current = stats;
   }, [stats]);
 
   // Handle Auth State
   useEffect(() => {
+    if (!auth) {
+      console.warn("Firebase Auth is not available. Using Guest Mode.");
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
+      if (u && db) {
+        const userDocRef = doc(db, "users", u.uid);
+        const unsubStats = onSnapshot(userDocRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const cloudData = snapshot.data() as UserStats;
+            setStats(prev => ({
+              ...prev,
+              ...cloudData,
+              // Smart merge for progress-based fields
+              xp: Math.max(prev.xp, cloudData.xp || 0),
+              completedUnits: Array.from(new Set([...prev.completedUnits, ...(cloudData.completedUnits || [])]))
+            }));
+          }
+        });
+        return () => unsubStats();
+      }
     });
     return () => unsubscribe();
   }, []);
 
-  // Handle Cloud Sync
+  // Sync progress to cloud when needed
   useEffect(() => {
-    if (!user) return;
+    // Capture values for timeout narrowing
+    const currentDb = db;
+    const currentUser = user;
+    if (!auth || !currentUser || !currentDb) return;
 
-    const userRef = doc(db, "users", user.uid);
-
-    // Subscribe to cloud changes with Smart Merge
-    const unsubscribe = onSnapshot(userRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const cloudData = docSnap.data() as UserStats;
-        const localStats = statsRef.current; // Use ref to get latest local stats
-
-        // Smart Merge Strategy: Keep the best progress
-        // This handles cases where user studies offline/anon then logs in
-        // or has better progress on this device
-        const mergedStats = {
-          xp: Math.max(cloudData.xp || 0, localStats.xp || 0),
-          gems: Math.max(cloudData.gems || 0, localStats.gems || 0),
-          streak: Math.max(cloudData.streak || 0, localStats.streak || 0),
-          // Keep the latest date
-          lastStudyDate: (new Date(cloudData.lastStudyDate || 0) > new Date(localStats.lastStudyDate || 0))
-            ? cloudData.lastStudyDate
-            : localStats.lastStudyDate,
-          // Union of completed units
-          completedUnits: Array.from(new Set([...(cloudData.completedUnits || []), ...(localStats.completedUnits || [])]))
-        };
-
-        // If local had better stats (or union resulted in update), update cloud immediately
-        // We compare against cloudData to see if the cloud needs an update
-        const cloudNeedsUpdate =
-          mergedStats.xp > (cloudData.xp || 0) ||
-          mergedStats.completedUnits.length > (cloudData.completedUnits?.length || 0) ||
-          mergedStats.streak > (cloudData.streak || 0);
-
-        if (cloudNeedsUpdate) {
-          console.log("Local stats are better/newer. Updating cloud...");
-          setDoc(userRef, {
-            ...mergedStats,
-            displayName: user.displayName,
-            photoURL: user.photoURL
-          }, { merge: true });
-        }
-
-        // Always update local view to the merged result (source of truth)
-        // Check if we actually need to update state to avoid loops/renders
-        if (JSON.stringify(localStats) !== JSON.stringify(mergedStats)) {
-          setStats(mergedStats);
-        }
-      } else {
-        // First time user (doc doesn't exist): push local data to cloud
-        console.log("New cloud user. Pushing local stats...");
-        const localStats = statsRef.current;
-        setDoc(userRef, {
-          ...localStats,
-          displayName: user.displayName,
-          photoURL: user.photoURL
-        });
+    const timer = setTimeout(async () => {
+      try {
+        await setDoc(doc(currentDb, "users", currentUser.uid), statsRef.current, { merge: true });
+        console.log("Progress synced to cloud");
+      } catch (e) {
+        console.error("Cloud sync failed", e);
       }
-    });
-
-    return () => unsubscribe();
-  }, [user]);
+    }, 5000); // Throttled sync
+    return () => clearTimeout(timer);
+  }, [stats, user]);
 
   const saveStats = async (newStats: UserStats) => {
     setStats(newStats);
     localStorage.setItem("holavoca_stats", JSON.stringify(newStats));
 
-    if (user) {
-      const userRef = doc(db, "users", user.uid);
-      await setDoc(userRef, {
-        ...newStats,
-        displayName: user.displayName,
-        photoURL: user.photoURL
-      }, { merge: true });
+    if (user && db) {
+      try {
+        await setDoc(doc(db, "users", user.uid), {
+          ...newStats,
+          displayName: user.displayName,
+          photoURL: user.photoURL
+        }, { merge: true });
+      } catch (e) {
+        console.error("Failed to save stats", e);
+      }
     }
   };
 
@@ -155,20 +134,21 @@ export function useGamification() {
     saveStats(newStats);
   };
 
-  // Admin function to force progress (Strict Set)
-  const unlockProgress = (targetUnits: string[], totalXp: number, totalGems: number) => {
-    // Strict Set for Admin: Replace stats to match the target level exactly
-    // This allows "resetting" to a lower level if needed
+  const unlockProgress = (unitIds: string[], xp: number, gems: number) => {
     const newStats: UserStats = {
       ...stats,
-      xp: totalXp,
-      gems: totalGems,
-      streak: Math.max(stats.streak, 1), // Keep streak or ensure at least 1
-      lastStudyDate: new Date().toISOString().split('T')[0],
-      completedUnits: targetUnits // Replace completed units (removing higher level history)
+      xp,
+      gems,
+      completedUnits: unitIds
     };
     saveStats(newStats);
   };
 
-  return { stats, user, addXP, completeUnit, unlockProgress };
+  return {
+    user,
+    stats,
+    addXP,
+    completeUnit,
+    unlockProgress
+  };
 }

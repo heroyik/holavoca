@@ -1,8 +1,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getAuth, GoogleAuthProvider, Auth } from "firebase/auth";
+import { getFirestore, Firestore } from "firebase/firestore";
 
-// TODO: Replace with your actual Firebase config from the console
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -12,14 +11,20 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-// Initialize Firebase only if API key is present (prevents build-time crashes)
-const isConfigValid = !!firebaseConfig.apiKey;
-const app = isConfigValid
-    ? (getApps().length > 0 ? getApp() : initializeApp(firebaseConfig))
-    : null;
+let auth: Auth | undefined;
+let db: Firestore | undefined;
+let googleProvider: GoogleAuthProvider | undefined;
 
-const auth = app ? getAuth(app) : null as unknown as ReturnType<typeof getAuth>;
-const db = app ? getFirestore(app) : null as unknown as ReturnType<typeof getFirestore>;
-const googleProvider = new GoogleAuthProvider();
+// Defensive initialization for build-time safety and hydration consistency
+if (typeof window !== "undefined" && !!firebaseConfig.apiKey) {
+    try {
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        googleProvider = new GoogleAuthProvider();
+    } catch (error) {
+        console.error("Firebase initialization failed:", error);
+    }
+}
 
 export { auth, db, googleProvider };

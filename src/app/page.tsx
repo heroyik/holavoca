@@ -135,7 +135,7 @@ export default function Home() {
                 border: '1px solid #bae6fd'
               }}>{APP_VERSION}</span>
             </div>
-            <div 
+            <div
               onClick={handleDownload}
               style={{
                 fontSize: '11px',
@@ -162,7 +162,7 @@ export default function Home() {
                 e.currentTarget.style.borderColor = 'var(--border-light)';
               }}
             >
-              전체 데이터 <strong style={{ color: 'var(--es-red)' }}>{totalWords.toLocaleString()}</strong> 📚
+              VOCAB STASH <strong style={{ color: 'var(--es-red)' }}>{totalWords.toLocaleString()}</strong> 📚
             </div>
           </div>
           <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>

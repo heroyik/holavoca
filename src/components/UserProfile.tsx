@@ -17,6 +17,10 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
     const [selectedLevel, setSelectedLevel] = useState(1);
 
     const handleLogin = async () => {
+        if (!auth || !googleProvider) {
+            alert("Firebase Authentication is not available in this environment.");
+            return;
+        }
         try {
             await signInWithPopup(auth, googleProvider);
         } catch (error) {
@@ -25,7 +29,9 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
         }
     };
 
-    const handleLogout = () => signOut(auth);
+    const handleLogout = () => {
+        if (auth) signOut(auth);
+    };
 
     const handleDevTrigger = () => {
         setDevClickCount(prev => prev + 1);

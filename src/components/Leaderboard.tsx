@@ -35,6 +35,13 @@ export default function Leaderboard() {
             setLoading(true);
             setError(false);
 
+            if (!db) {
+                console.warn("Firestore is not initialized. Switching to DEMO Mode (No DB).");
+                setLeaders(DEMO_LEADERS);
+                setLoading(false);
+                return;
+            }
+
             // Timeout fallback (5s for faster offline detection)
             timeoutId = setTimeout(() => {
                 console.warn("Leaderboard timed out. Switching to DEMO Mode (Timeout).");
