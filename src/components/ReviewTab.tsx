@@ -127,10 +127,12 @@ export default function ReviewTab() {
             {top20.map((entry, idx) => {
               const rank = idx + 1;
               const bookImg = entry.book === "2" ? vol2 : vol1;
+              // Pass correct sources so QuizLoader uses the right vocabulary
+              const quizHref = `/quiz/${entry.unitId}?sources=${entry.book}`;
               return (
                 <Link
                   key={entry.word}
-                  href={`/quiz/${entry.unitId}`}
+                  href={quizHref}
                   style={{ textDecoration: "none" }}
                 >
                   <div
@@ -145,7 +147,7 @@ export default function ReviewTab() {
                     onMouseEnter={e => (e.currentTarget.style.background = "#f5f5f5")}
                     onMouseLeave={e => (e.currentTarget.style.background = "#fafafa")}
                   >
-                    {/* ── Row 1: rank · book img · word · fail count ── */}
+                    {/* ── Row 1: rank · word · fail count ── */}
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       {/* Rank circle */}
                       <div
@@ -166,21 +168,7 @@ export default function ReviewTab() {
                         {rank}
                       </div>
 
-                      {/* Book thumbnail — small */}
-                      <Image
-                        src={bookImg}
-                        alt={`Vol.${entry.book}`}
-                        width={20}
-                        height={27}
-                        style={{
-                          objectFit: "cover",
-                          borderRadius: "3px",
-                          flexShrink: 0,
-                          boxShadow: "0 1px 3px rgba(0,0,0,0.18)",
-                        }}
-                      />
-
-                      {/* Spanish word — full, wraps if very long */}
+                      {/* Spanish word — full, no ellipsis */}
                       <div
                         style={{
                           flex: 1,
@@ -216,19 +204,36 @@ export default function ReviewTab() {
                       </div>
                     </div>
 
-                    {/* ── Row 2: meaning · unit badge ── */}
+                    {/* ── Row 2: meaning · [book img + Unit badge] ── */}
                     <div
                       style={{
                         display: "flex",
                         alignItems: "center",
                         gap: "8px",
                         marginTop: "5px",
-                        paddingLeft: "32px", /* align with word above */
+                        paddingLeft: "32px",
                       }}
                     >
+                      {/* Korean meaning */}
                       <span style={{ fontSize: "12px", color: "#6b7280", flex: 1 }}>
                         {entry.meaning}
                       </span>
+
+                      {/* Book thumbnail — height matches Unit badge (~20px) */}
+                      <Image
+                        src={bookImg}
+                        alt={`Vol.${entry.book}`}
+                        width={15}
+                        height={20}
+                        style={{
+                          objectFit: "cover",
+                          borderRadius: "2px",
+                          flexShrink: 0,
+                          boxShadow: "0 1px 3px rgba(0,0,0,0.18)",
+                        }}
+                      />
+
+                      {/* Unit badge */}
                       <span
                         style={{
                           fontSize: "10px",
@@ -239,6 +244,7 @@ export default function ReviewTab() {
                           padding: "2px 6px",
                           whiteSpace: "nowrap",
                           flexShrink: 0,
+                          lineHeight: "16px",
                         }}
                       >
                         Unit {entry.unitNum}
