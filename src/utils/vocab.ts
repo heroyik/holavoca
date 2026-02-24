@@ -17,7 +17,33 @@ export interface LearningUnit {
 
 // PRIORITY_WORDS removed (unused)
 
-export function getUnits(sources: string[] = ['1']): LearningUnit[] {
+const COMMON_COGNATES = [
+  "actor", "hotel", "model", "radio", "taxi", "doctor", "idea", "menu", "pasta", "pizza",
+  "hospital", "internet", "material", "moral", "original", "personal", "plan", "posible", "probable",
+  "banano", "bicicleta", "chocolate", "computadora", "elefante", "familia", "guitarra", "león", "mapa", "mesa",
+  "parque", "teléfono", "tomate", "tren", "universidad", "video", "yoga", "zebra", "animal", "base",
+  "cable", "canal", "clase", "club", "color", "comuna", "control", "crítico", "debate", "decision"
+];
+
+function getDifficultyScore(word: string): number {
+  let score = word.length * 10;
+  
+  // Accents check (á, é, í, ó, ú, ñ)
+  const accents = /[áéíóúñ]/i;
+  if (accents.test(word)) {
+    score += 50;
+  }
+  
+  // Cognate check
+  const cleanWord = word.toLowerCase().split('/')[0].split('(')[0].trim();
+  if (COMMON_COGNATES.includes(cleanWord)) {
+    score -= 100; // Very easy
+  }
+  
+  return score;
+}
+
+export function getUnits(sources: string[] = ['1', '2']): LearningUnit[] {
   const units: LearningUnit[] = [];
 
   // Filter data based on provided sources
@@ -34,48 +60,25 @@ export function getUnits(sources: string[] = ['1']): LearningUnit[] {
 
   const allWords = Array.from(uniqueWords.values());
 
-  // 2. Proportional Interleaving (The R.1.3.3 Fix)
-  // Group words by source (volume)
-  const sourceGroups: Record<string, VocabEntry[]> = {};
-  sources.forEach(s => { sourceGroups[s] = []; });
-  allWords.forEach(w => {
-    if (sourceGroups[w["출처"]]) {
-      sourceGroups[w["출처"]].push(w);
-    }
+  // 2. Sort by Difficulty (v2.0 logic)
+  allWords.sort((a, b) => {
+    const diffA = getDifficultyScore(a["스페인어 단어"]);
+    const diffB = getDifficultyScore(b["스페인어 단어"]);
+    if (diffA !== diffB) return diffA - diffB;
+    // Deterministic tie-break
+    return a["스페인어 단어"].localeCompare(b["스페인어 단어"]);
   });
 
-  // Sort each group by length
-  Object.values(sourceGroups).forEach(group => {
-    group.sort((a, b) => {
-      const wordA = a["스페인어 단어"].toLowerCase();
-      const wordB = b["스페인어 단어"].toLowerCase();
-      // Length first
-      if (wordA.length !== wordB.length) return wordA.length - wordB.length;
-      // Then deterministic shuffle
-      return wordA.split('').reverse().join('').localeCompare(wordB.split('').reverse().join(''));
-    });
-  });
+  // 3. Partition into exactly 15 units
+  const TOTAL_UNITS = 15;
+  const unitSize = Math.ceil(allWords.length / TOTAL_UNITS);
 
-  // Interleave words from all groups proportionately
-  const interleavedWords: VocabEntry[] = [];
-  const maxGroupSize = Math.max(...Object.values(sourceGroups).map(g => g.length));
-
-  // We iterate through "slots" and fill them from each group
-  for (let i = 0; i < maxGroupSize; i++) {
-    sources.forEach(s => {
-      if (sourceGroups[s][i]) {
-        interleavedWords.push(sourceGroups[s][i]);
-      }
-    });
-  }
-
-  // 3. Chunk into units of 20
-  const UNIT_SIZE = 20;
-  const totalUnits = Math.ceil(interleavedWords.length / UNIT_SIZE);
-
-  for (let i = 0; i < totalUnits; i++) {
-    const start = i * UNIT_SIZE;
-    const unitWords = interleavedWords.slice(start, start + UNIT_SIZE);
+  for (let i = 0; i < TOTAL_UNITS; i++) {
+    const start = i * unitSize;
+    const end = Math.min(start + unitSize, allWords.length);
+    const unitWords = allWords.slice(start, end);
+    
+    if (unitWords.length === 0) break;
 
     units.push({
       id: `unit-${i + 1}`,
