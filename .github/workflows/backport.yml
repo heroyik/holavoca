@@ -1,0 +1,56 @@
+name: Auto Backport v1.3
+
+on:
+  pull_request_target:
+    types: [closed]
+    branches:
+      - develop
+
+jobs:
+  backport:
+    name: Backport to v1.3-maintenance
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'backport-v1.3')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Backport
+        run: |
+          git checkout v1.3-maintenance
+          git cherry-pick -x ${{ github.event.pull_request.merge_commit_sha }}
+          git push origin v1.3-maintenance
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify on Success
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "✅ This PR has been automatically backported to `v1.3-maintenance`."
+            })
+
+      - name: Notify on Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "❌ **Backport Failed**: Automatic cherry-pick to `v1.3-maintenance` failed due to conflicts. Please resolve manually."
+            })

@@ -67,6 +67,7 @@ HolaVoca is a premium, gamified Spanish learning platform inspired by modern edu
 - **R.1.1.6**: **Leaderboard Polish**.
   - **Smart Fallback**: If Firestore index is missing, automatically switches to client-side sorting to prevent infinite loading.
   - **R.1.3.14**: Updated v1.4.0 Upgrade Proposal with "Failed Word Count" and "Free Level Access" (Unlock all levels) settings.
+- **R.1.3.15**: Implemented Automatic Backporting via GitHub Actions (v2.x -> v1.x sync for bug fixes).
   - **UI**: Added "Hall of Fame" title and 👑 Crown icon for 1st place.
   - **Admin**: Strict reset logic for cleaner testing.
 - **R.1.1.5**: **Leaderboard Fallback**. Added robust error handling to prevent infinite loading when Firestore indexes are missing.
