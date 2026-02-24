@@ -90,7 +90,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
       addXP(10);
     } else {
       setHasMistakes(true);
-      addMistake(questions[currentIndex]["스페인어 단어"]);
+      addMistake(questions[currentIndex]["스페인어 단어"], unitId);
     }
   };
 
@@ -98,7 +98,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
     if (selectedOption) return;
     
     setHasMistakes(true);
-    addMistake(questions[currentIndex]["스페인어 단어"]);
+    addMistake(questions[currentIndex]["스페인어 단어"], unitId);
     setIsCorrect(false);
     setSelectedOption("DONT_KNOW");
   };

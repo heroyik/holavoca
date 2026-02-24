@@ -13,6 +13,11 @@ export interface UserStats {
   completedUnits: string[];
   masteredUnits: string[]; // Units completed with 0 mistakes
   mistakes: Record<string, number>;
+  unitStats?: Record<string, {
+    failedWords: number;
+    attempts: number;
+    isMastered: boolean;
+  }>;
   displayName?: string;
   photoURL?: string;
   settings?: {
@@ -30,8 +35,8 @@ interface GamificationContextType {
   addXP: (amount: number) => void;
   completeUnit: (unitId: string, xpEarned?: number, isPerfect?: boolean) => void;
   unlockProgress: (unitIds: string[], xp: number, gems: number) => void;
-  recordMistake: (spanishWord: string) => void;
-  addMistake: (spanishWord: string) => void;
+  recordMistake: (spanishWord: string, unitId?: string) => void;
+  addMistake: (spanishWord: string, unitId?: string) => void;
   clearMistake: (spanishWord: string) => void;
   removeMistake: (spanishWord: string) => void;
   clearAllMistakes: () => void;
@@ -49,6 +54,7 @@ const defaultStats: UserStats = {
   completedUnits: [],
   masteredUnits: [],
   mistakes: {},
+  unitStats: {},
   settings: {
     soundEnabled: true,
     hapticsEnabled: true,
@@ -73,6 +79,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
             ...prev, 
             ...parsed, 
             mistakes: parsed.mistakes || {},
+            unitStats: parsed.unitStats || {},
             settings: {
               ...defaultStats.settings,
               ...(parsed.settings || {}),
@@ -188,6 +195,8 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     const currentCompleted = statsRef.current.completedUnits || [];
     const currentMastered = statsRef.current.masteredUnits || [];
 
+    const currentUnitStats = statsRef.current.unitStats?.[unitId] || { failedWords: 0, attempts: 0, isMastered: false };
+    
     const newStats: UserStats = {
       ...statsRef.current,
       xp: statsRef.current.xp + xpEarned,
@@ -200,6 +209,14 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       masteredUnits: isPerfect && !currentMastered.includes(unitId)
         ? [...currentMastered, unitId]
         : currentMastered,
+      unitStats: {
+        ...(statsRef.current.unitStats || {}),
+        [unitId]: {
+          ...currentUnitStats,
+          attempts: currentUnitStats.attempts + 1,
+          isMastered: isPerfect || currentUnitStats.isMastered,
+        }
+      }
     };
     saveStatsLocally(newStats);
   };
@@ -214,14 +231,25 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     saveStatsLocally(newStats);
   };
 
-  const recordMistake = (spanishWord: string) => {
+  const recordMistake = (spanishWord: string, unitId?: string) => {
     const currentMistakes = statsRef.current.mistakes || {};
+    const newUnitStats = { ...(statsRef.current.unitStats || {}) };
+    
+    if (unitId) {
+      const uStat = newUnitStats[unitId] || { failedWords: 0, attempts: 0, isMastered: false };
+      newUnitStats[unitId] = {
+        ...uStat,
+        failedWords: uStat.failedWords + 1
+      };
+    }
+
     saveStatsLocally({
       ...statsRef.current,
       mistakes: {
         ...currentMistakes,
         [spanishWord]: (currentMistakes[spanishWord] || 0) + 1
-      }
+      },
+      unitStats: newUnitStats
     });
   };
 

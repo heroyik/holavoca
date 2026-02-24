@@ -16,10 +16,14 @@ import vol2 from '../../public/vol2.jpg';
 import { Github } from 'lucide-react';
 
 // Gamification Helpers
+const getLevelTier = (idx: number) => {
+  if (idx < 5) return "beginner";
+  if (idx < 10) return "intermediate";
+  return "advanced";
+};
+
 const getLevelTitle = (idx: number) => {
-  if (idx < 5) return "BEGINNER";
-  if (idx < 10) return "INTERMEDIATE";
-  return "ADVANCED";
+  return getLevelTier(idx).toUpperCase();
 };
 
 const getUnitIcon = (idx: number, isLocked: boolean, isCompleted: boolean, isMastered: boolean) => {
@@ -155,15 +159,20 @@ export default function Home() {
 
           {units.slice(0, 15).map((unit, index) => {
             const offset = (Math.sin(index * 1.2) * 60).toFixed(2);
-            const isCompleted = stats.completedUnits.includes(unit.id);
-            const isMastered = stats.masteredUnits?.includes(unit.id);
+            const isCompleted = !!stats.completedUnits?.includes(unit.id);
+            const isMastered = !!(stats.masteredUnits?.includes(unit.id) || stats.unitStats?.[unit.id]?.isMastered);
             
             // Bypass logic if unlockAllLevels is enabled
             const unlockAll = stats.settings?.unlockAllLevels ?? false;
-            const isLocked = !unlockAll && index > stats.completedUnits.length;
-            const isCurrent = !unlockAll && index === stats.completedUnits.length;
+            const isLocked = !unlockAll && index > (stats.completedUnits?.length ?? 0);
+            const isCurrent = !unlockAll && index === (stats.completedUnits?.length ?? 0);
 
-            const unitStatusClass = isLocked ? 'locked' : (isCurrent ? 'current' : (isMastered ? 'mastered' : (isCompleted ? 'completed' : 'available')));
+            const tier = getLevelTier(index);
+            const unitStatusClass = isLocked ? 'locked' : (isMastered ? 'mastered' : (isCurrent ? 'current' : (isCompleted ? 'completed' : 'available')));
+            const combinedClass = `${unitStatusClass} ${isLocked ? '' : tier}`;
+            
+            const failCount = stats.unitStats?.[unit.id]?.failedWords || 0;
+            const showFailBadge = !isCompleted && !isLocked && failCount > 0;
 
             return (
               <div key={unit.id} 
@@ -176,9 +185,15 @@ export default function Home() {
                   className="no-underline"
                 >
                   <button
-                    className={`unit-button ${unitStatusClass}`}
+                    className={`unit-button ${combinedClass}`}
                   >
                     {getUnitIcon(index, isLocked, isCompleted, isMastered)}
+
+                    {showFailBadge && (
+                      <div className="fail-badge">
+                        {failCount}
+                      </div>
+                    )}
 
                     {isCurrent && (
                       <div className="start-indicator">
@@ -188,8 +203,7 @@ export default function Home() {
                   </button>
                 </Link>
 
-                <div className="unit-label-card" style={{
-                  border: `3px solid ${isLocked ? 'var(--border-light)' : getLevelColor(index, isLocked)}`,
+                <div className={`unit-label-card tier-${tier}`} style={{
                   boxShadow: `0 4px 0 ${isLocked ? '#e5e5e5' : 'rgba(0,0,0,0.1)'}`,
                 }}>
                   <p className="font-11 font-900 letter-spacing-0-5 mb-1" style={{ color: getLevelColor(index, isLocked) }}>

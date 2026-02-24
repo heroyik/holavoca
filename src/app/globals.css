@@ -1146,3 +1146,50 @@ input:checked + .slider {
 input:checked + .slider:before {
   transform: translateX(24px);
 }
+
+/* Tiered Snake Path & Mastery Styles */
+.unit-button.beginner {
+  background-color: var(--es-red);
+  box-shadow: 0 6px 0 var(--es-red-dark);
+}
+
+.unit-button.intermediate {
+  background-color: #3b82f6;
+  box-shadow: 0 6px 0 #2563eb;
+}
+
+.unit-button.advanced {
+  background-color: var(--es-yellow);
+  box-shadow: 0 6px 0 #d97706;
+}
+
+.unit-button.mastered {
+  background-color: #ffd700 !important;
+  box-shadow: 0 6px 0 #b8860b !important;
+  border: 4px solid #fff !important;
+  animation: gold-glow 2s infinite alternate;
+}
+
+@keyframes gold-glow {
+  from { box-shadow: 0 6px 0 #b8860b, 0 0 10px rgba(255, 215, 0, 0.5); }
+  to { box-shadow: 0 6px 0 #b8860b, 0 0 25px rgba(255, 215, 0, 0.9); }
+}
+
+.fail-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--es-red);
+  color: white;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  z-index: 10;
+}
+
+.unit-label-card.tier-beginner { border-color: var(--es-red); }
+.unit-label-card.tier-intermediate { border-color: #3b82f6; }
+.unit-label-card.tier-advanced { border-color: var(--es-yellow); }
