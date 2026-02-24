@@ -89,14 +89,13 @@ export default function Home() {
     const date = new Date().toISOString().split('T')[0];
     const fileName = `${date}-voca.json`;
     const jsonString = JSON.stringify(vocabData, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.body.appendChild(document.createElement('a'));
-    link.href = url;
+    const dataUrl = `data:application/json;charset=utf-8,${encodeURIComponent(jsonString)}`;
+    const link = document.createElement('a');
+    link.href = dataUrl;
     link.download = fileName;
+    document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   };
 
   return (
