@@ -168,6 +168,14 @@ For the application to function correctly on GitHub Pages, you MUST configure **
 
 If you have **API Key Restrictions** enabled in the Google Cloud Console (recommended), you must add the following domains to your **HTTP Referrer Allowlist**:
 
+## 🗺 Roadmap & Strategy
+
+Check out our future plans and technical upgrade strategy:
+
+- [v1.4.0 Upgrade Proposal](file:///Users/ikyoon/proj/holavoca/strategy/upgrade_proposal.md)
+
+---
+
 1. Go to [Google Cloud Console > Credentials](https://console.cloud.google.com/apis/credentials).
 2. Click on your **Firebase API Key**.
 3. Under **Website restrictions**, add these patterns:
