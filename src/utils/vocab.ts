@@ -69,11 +69,59 @@ function getDifficultyScore(word: string): number {
   return score;
 }
 
-export function getUnits(sources: string[] = ['1', '2']): LearningUnit[] {
+/**
+ * Simple Levenshtein distance for cognate detection
+ */
+function getLevenshteinDistance(a: string, b: string): number {
+  const matrix: number[][] = [];
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1, // substitution
+          matrix[i][j - 1] + 1,     // insertion
+          matrix[i - 1][j] + 1      // deletion
+        );
+      }
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
+export function isEasyCognate(spanishWord: string, koreanMeaning: string): boolean {
+  const cleanSpanish = spanishWord.toLowerCase().split('/')[0].split('(')[0].trim();
+  
+  // 1. Check curated list
+  if (COMMON_COGNATES.includes(cleanSpanish)) return true;
+
+  // 2. Heuristic check: Many English cognates end in -ción (tion), -dad (ty), -mente (ly), etc.
+  // Since we don't have English translations in the JSON (only Korean), 
+  // and the user specifically asked for "English Cognates", 
+  // we might need to assume the Spanish word itself looks like English.
+  // Common patterns for Spanish/English cognates:
+  if (cleanSpanish.endsWith('ción') || cleanSpanish.endsWith('dad') || cleanSpanish.endsWith('al') || cleanSpanish.endsWith('ble')) {
+      // These are very likely cognates if they are long enough
+      if (cleanSpanish.length > 5) return true;
+  }
+
+  return false;
+}
+
+export function getUnits(sources: string[] = ['1', '2'], excludeEasy: boolean = false): LearningUnit[] {
   const units: LearningUnit[] = [];
 
   // Filter data based on provided sources
-  const filteredVocabData = (vocabData as VocabEntry[]).filter(item => sources.includes(item["출처"]));
+  let filteredVocabData = (vocabData as VocabEntry[]).filter(item => sources.includes(item["출처"]));
+
+  // Apply easy cognate filter if requested
+  if (excludeEasy) {
+    filteredVocabData = filteredVocabData.filter(item => !isEasyCognate(item["스페인어 단어"], item["한국어 의미"]));
+  }
 
   // 1. Flatten and unique the vocabulary
   const uniqueWords = new Map<string, VocabEntry>();

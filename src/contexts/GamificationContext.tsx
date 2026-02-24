@@ -18,6 +18,8 @@ export interface UserStats {
   settings?: {
     soundEnabled: boolean;
     hapticsEnabled: boolean;
+    excludeEasyWords: boolean;
+    unlockAllLevels: boolean;
   };
 }
 
@@ -50,6 +52,8 @@ const defaultStats: UserStats = {
   settings: {
     soundEnabled: true,
     hapticsEnabled: true,
+    excludeEasyWords: false,
+    unlockAllLevels: false,
   },
 };
 
@@ -116,6 +120,8 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
                 settings: {
                   soundEnabled: cloudData.settings?.soundEnabled ?? defaultStats.settings!.soundEnabled,
                   hapticsEnabled: cloudData.settings?.hapticsEnabled ?? defaultStats.settings!.hapticsEnabled,
+                  excludeEasyWords: cloudData.settings?.excludeEasyWords ?? defaultStats.settings!.excludeEasyWords,
+                  unlockAllLevels: cloudData.settings?.unlockAllLevels ?? defaultStats.settings!.unlockAllLevels,
                 },
               };
               

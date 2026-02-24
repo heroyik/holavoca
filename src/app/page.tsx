@@ -63,9 +63,8 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'learn' | 'review' | 'leader' | 'profile'>('learn');
   const { stats, user } = useGamification();
 
-  // Load selection effect removed - now handled in initializer
-
-  const units = getUnits(selectedBooks);
+  // Updated units calculation to respect excludeEasyWords setting
+  const units = getUnits(selectedBooks, stats.settings?.excludeEasyWords);
   const totalWords = getTotalWordCount(selectedBooks);
 
   const toggleBook = (bookId: string) => {
@@ -158,8 +157,11 @@ export default function Home() {
             const offset = (Math.sin(index * 1.2) * 60).toFixed(2);
             const isCompleted = stats.completedUnits.includes(unit.id);
             const isMastered = stats.masteredUnits?.includes(unit.id);
-            const isLocked = index > stats.completedUnits.length;
-            const isCurrent = index === stats.completedUnits.length;
+            
+            // Bypass logic if unlockAllLevels is enabled
+            const unlockAll = stats.settings?.unlockAllLevels ?? false;
+            const isLocked = !unlockAll && index > stats.completedUnits.length;
+            const isCurrent = !unlockAll && index === stats.completedUnits.length;
 
             const unitStatusClass = isLocked ? 'locked' : (isCurrent ? 'current' : (isMastered ? 'mastered' : (isCompleted ? 'completed' : 'available')));
 

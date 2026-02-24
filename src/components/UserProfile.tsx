@@ -36,7 +36,7 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
         if (auth) signOut(auth);
     };
 
-    const toggleSetting = (key: 'soundEnabled' | 'hapticsEnabled') => {
+    const toggleSetting = (key: 'soundEnabled' | 'hapticsEnabled' | 'excludeEasyWords' | 'unlockAllLevels') => {
         if (stats.settings) {
             updateSettings({ [key]: !stats.settings[key] });
         }
@@ -83,8 +83,12 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                         {/* Settings Section */}
                         <div className="settings-section">
                             <h3 className="font-18 font-900 text-main mb-16 text-left">Settings</h3>
+                            
                             <div className="settings-item">
-                                <span className="font-16 font-700">Sound Effects</span>
+                                <div className="flex flex-col">
+                                    <span className="font-16 font-700">Sound Effects</span>
+                                    <span className="font-12 text-secondary">Audio feedback in quiz</span>
+                                </div>
                                 <label className="toggle-switch">
                                     <input 
                                         type="checkbox" 
@@ -94,13 +98,47 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                                     <span className="slider"></span>
                                 </label>
                             </div>
+
                             <div className="settings-item">
-                                <span className="font-16 font-700">Haptic Feedback</span>
+                                <div className="flex flex-col">
+                                    <span className="font-16 font-700">Haptic Feedback</span>
+                                    <span className="font-12 text-secondary">Vibration on interactions</span>
+                                </div>
                                 <label className="toggle-switch">
                                     <input 
                                         type="checkbox" 
                                         checked={stats.settings?.hapticsEnabled ?? true} 
                                         onChange={() => toggleSetting('hapticsEnabled')}
+                                    />
+                                    <span className="slider"></span>
+                                </label>
+                            </div>
+
+                            <div className="settings-item">
+                                <div className="flex flex-col">
+                                    <span className="font-16 font-700">Exclude Easy Cognates</span>
+                                    <span className="font-12 text-secondary">Hide words similar to English</span>
+                                </div>
+                                <label className="toggle-switch">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={stats.settings?.excludeEasyWords ?? false} 
+                                        onChange={() => toggleSetting('excludeEasyWords')}
+                                    />
+                                    <span className="slider"></span>
+                                </label>
+                            </div>
+
+                            <div className="settings-item">
+                                <div className="flex flex-col">
+                                    <span className="font-16 font-700">Unlock All Levels</span>
+                                    <span className="font-12 text-secondary">Start any level freely</span>
+                                </div>
+                                <label className="toggle-switch">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={stats.settings?.unlockAllLevels ?? false} 
+                                        onChange={() => toggleSetting('unlockAllLevels')}
                                     />
                                     <span className="slider"></span>
                                 </label>
