@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import { User, onAuthStateChanged } from "firebase/auth";
-import { doc, setDoc, onSnapshot } from "firebase/firestore";
+import { doc, setDoc, onSnapshot, collection, increment, updateDoc, setDoc as fsSetDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 export interface UserStats {
@@ -251,6 +251,13 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       },
       unitStats: newUnitStats
     });
+
+    // Fire-and-forget: increment global word fail count in Firestore
+    if (db) {
+      const wordRef = doc(db, "globalWordStats", encodeURIComponent(spanishWord));
+      fsSetDoc(wordRef, { failCount: increment(1), word: spanishWord }, { merge: true })
+        .catch((e) => console.warn("[GlobalStats] Failed to increment:", e));
+    }
   };
 
   const clearMistake = (spanishWord: string) => {
