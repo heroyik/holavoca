@@ -89,7 +89,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
         {questions.length > 0 && questions[currentIndex] && (
           <div className="source-badge" data-testid="source-badge">
             <Image 
-              src={questions[currentIndex]["출처"] === "2" ? "/vol2.jpg" : "/vol1.jpg"} 
+              src={questions[currentIndex]["출처"] === "2" ? vol2 : vol1} 
               alt="Book Source" 
               fill
               sizes="40px"

@@ -1,28 +1,34 @@
-# HolaVoca - Spanish Vocabulary Learning App
+# 🇪🇸 HolaVoca (R.1.3.13)- Spanish Vocabulary Learning App
 
-`Revision 1.3.12`
+`Revision 1.3.13`
 
 HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 730 Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
 
 ---
 
-## 🆕 Latest Updates (v1.3.12)
+## 🆕 Latest Updates
 
-- **R.1.3.12**: **Mobile Layout Optimization (Galaxy S25)**.
-  - **Balanced Header Spacing**: Adjusted header padding to 12px on both sides for perfect left-right symmetry on mobile devices.
-  - **Footer Text Consistency**: Unified footer navigation text size (13px) to match "My Learning Aura" for visual harmony.
-  - **Compact Footer**: Reduced icon-text gap from 4px to 2px for a tighter, more professional mobile footer.
+### [R.1.3.13] - 2024-02-24
+
+- **Fix**: Resolved broken book source badge image on the Quiz Results screen.
+- **Optimization**: Standardized static asset imports for better base path compatibility.
+
+### [R.1.3.12] - 2024-02-13.3.12**: **Mobile Layout Optimization (Galaxy S25)**
+
+- **Balanced Header Spacing**: Adjusted header padding to 12px on both sides for perfect left-right symmetry on mobile devices.
+- **Footer Text Consistency**: Unified footer navigation text size (13px) to match "My Learning Aura" for visual harmony.
+- **Compact Footer**: Reduced icon-text gap from 4px to 2px for a tighter, more professional mobile footer.
 - **R.1.3.11**: **Header Visual Hierarchy & Regression Testing**.
   - **Enhanced Title Emphasis**: Increased "HolaVoca" title size and weight for better brand focus with Spanish aesthetic.
   - **Subtle Version Badge**: De-emphasized version info with minimal gray styling for cleaner visual hierarchy.
   - **Footer Stats Integration**: Moved streak/gems to footer's aura bar for streamlined header design.
   - **Automated Testing**: Added Playwright regression test suite covering Header, Footer, and Quiz functionality.
 - **R.1.3.10**: **Compact Header Redesign & Icon Repositioning**.
-  - **High-Efficiency Header**: Redesigned the top navigation bar into a single horizontal row, reclaiming ~100px of vertical space. 
+  - **High-Efficiency Header**: Redesigned the top navigation bar into a single horizontal row, reclaiming ~100px of vertical space.
   - **Icon Repositioning**: Moved streak (🔥) and gem (💎) icons to the left of the progress bar for better visual grouping and flow.
   - **Integrated Progress Bar**: Replaced the absolute-positioned progress bar with a refined flexible container bar.
 - **R.1.3.9**: **CSS Standardization & 100% Lint Compliance**.
-  - **Utility-First Architecture**: Migrated all remaining inline styles to standardized utility classes in `globals.css`. 
+  - **Utility-First Architecture**: Migrated all remaining inline styles to standardized utility classes in `globals.css`.
   - **Zero-Lint State**: Resolved all React purity errors, `useEffect` cascades, and production build type gaps.
 - **R.1.3.8**: **Architectural Refinement & Review Sync Fix**.
 - **R.1.3.7**: **Firestore Integration & Review Persistence**.
