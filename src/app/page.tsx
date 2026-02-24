@@ -85,11 +85,31 @@ export default function Home() {
     });
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     const date = new Date().toISOString().split('T')[0];
     const fileName = `${date}-voca.json`;
     const jsonString = JSON.stringify(vocabData, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
+
+    // Chrome 86+: use File System Access API for reliable filename support
+    if ('showSaveFilePicker' in window) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const fileHandle = await (window as any).showSaveFilePicker({
+          suggestedName: fileName,
+          types: [{ description: 'JSON file', accept: { 'application/json': ['.json'] } }],
+        });
+        const writable = await fileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        return;
+      } catch {
+        // User cancelled the dialog — do nothing
+        return;
+      }
+    }
+
+    // Fallback for Safari, Firefox, mobile
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -97,7 +117,6 @@ export default function Home() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    // Delay revoke so browser has time to start the download
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 

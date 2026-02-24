@@ -9,10 +9,17 @@ test('should download vocabulary JSON when clicking the total word count pill', 
   // 2. Wait for the Download JSON button to appear (Firebase auth may take a moment)
   await page.waitForSelector('[title="Download JSON"]', { timeout: 20000 });
 
-  // 3. Set up download listener BEFORE clicking
+  // 3. Remove showSaveFilePicker so headless Chromium uses the blob URL fallback
+  //    (Headless Chrome doesn't support File System Access API)
+  await page.evaluate(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (window as any).showSaveFilePicker;
+  });
+
+  // 4. Set up download listener BEFORE clicking
   const downloadPromise = page.waitForEvent('download');
 
-  // 4. Click the word count pill (title="Download JSON")
+  // 5. Click the word count pill (title="Download JSON")
   await page.click('[title="Download JSON"]');
 
   const download = await downloadPromise;
