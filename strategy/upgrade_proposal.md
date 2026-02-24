@@ -40,10 +40,8 @@ Analysis and technical plan for the next version of the Spanish learning app.
 
 ## 3. User Customization (Profile Tab)
 
-### "Easy Spanish" (English Cognates) Toggle
-
-- **Concept**: Some words are nearly identical to English (e.g., *actor*, *model*, *hotel*).
-- **Toggle**: Add an ON/OFF switch in the Profile tab: "Exclude easy cognates".
+- **Easy Spanish** (English Cognates) Toggle: Add an ON/OFF switch in the Profile tab: "Exclude easy cognates".
+- **Free Level Access**: Add a toggle in the Profile tab: "Unlock all levels". When enabled, users can start any level from 1 to 15 regardless of whether lower levels were cleared.
 - **Similarity Logic**: Use a simplified Levenshtein distance or a curated list of ~50 common cognates.
 
 ## 4. Enhanced Variety & Engagement
@@ -66,6 +64,7 @@ Analysis and technical plan for the next version of the Spanish learning app.
     - Update `generateOptions` to weight distractors by POS.
     - Add "Don't Know" button and logic.
 4. **`UserProfile.tsx`**:
-    - Build the settings UI section.
+    - Build the settings UI section (Cognates toggle, Unlock all levels toggle).
 5. **`LevelMap` (Snake Path)**:
     - Update the UI to render the cumulative failure count for attempted units.
+    - Implement conditional locking logic based on the "Unlock all levels" setting.
