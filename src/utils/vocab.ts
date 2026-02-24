@@ -8,6 +8,8 @@ export interface VocabEntry {
   "예문"?: string;
 }
 
+export type POS = 'noun' | 'verb' | 'adjective' | 'other';
+
 export interface LearningUnit {
   id: string;
   title: string;
@@ -15,7 +17,31 @@ export interface LearningUnit {
   words: VocabEntry[];
 }
 
-// PRIORITY_WORDS removed (unused)
+/**
+ * Heuristic to guess the Part Of Speech (POS) of a Spanish word
+ */
+export function guessPOS(entry: VocabEntry): POS {
+  const genderInfo = (entry["성별/문법 정보"] || "").toLowerCase();
+  const koreanMeaning = (entry["한국어 의미"] || "").trim();
+  const spanishWord = (entry["스페인어 단어"] || "").toLowerCase();
+
+  // 1. Verbs: Korean meaning usually ends with '다' in this dataset
+  if (koreanMeaning.endsWith("다")) {
+    return 'verb';
+  }
+
+  // 2. Nouns: Explicitly marked with gender m or f
+  if (genderInfo.includes('m') || genderInfo.includes('f')) {
+    return 'noun';
+  }
+
+  // 3. Adjectives: Often have forms like o/a or /a but not marked as nouns
+  if (spanishWord.includes('/') || spanishWord.includes('(')) {
+    return 'adjective';
+  }
+
+  return 'other';
+}
 
 const COMMON_COGNATES = [
   "actor", "hotel", "model", "radio", "taxi", "doctor", "idea", "menu", "pasta", "pizza",

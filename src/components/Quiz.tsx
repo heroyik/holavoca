@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
-import { VocabEntry } from "@/utils/vocab";
+import { VocabEntry, guessPOS } from "@/utils/vocab";
 import vocabData from "@/data/vocab.json"; // Import full vocab for distractors
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -22,6 +22,21 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
   const router = useRouter();
   const { addXP, addGem, addMistake, completeUnit } = useGamification();
 
+  // Memoize grouped vocabulary by POS to optimize generation
+  const vocabByPOS = useMemo(() => {
+    const groups: Record<string, VocabEntry[]> = {
+      noun: [],
+      verb: [],
+      adjective: [],
+      other: []
+    };
+    (vocabData as VocabEntry[]).forEach(entry => {
+      const pos = guessPOS(entry);
+      groups[pos].push(entry);
+    });
+    return groups;
+  }, []);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
@@ -29,21 +44,35 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [questions] = useState(() => [...unitWords].sort(() => Math.random() - 0.5));
 
-
-
-  const generateOptions = useCallback((correctAnswer: string) => {
-    // Use full vocabData for distractors to ensure we always have enough options
-    const allDistractors = (vocabData as VocabEntry[])
-      .map(v => v["한국어 의미"])
-      .filter(v => v !== correctAnswer);
+  const generateOptions = useCallback((currentEntry: VocabEntry) => {
+    const correctAnswer = currentEntry["한국어 의미"];
+    const pos = guessPOS(currentEntry);
+    
+    // 1. Try to get 3 distractors from the same POS
+    const samePOSDistractors = vocabByPOS[pos]
+      .filter(v => v["한국어 의미"] !== correctAnswer)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3);
       
-    const shuffledDistractors = allDistractors.sort(() => Math.random() - 0.5).slice(0, 3);
-    return [...shuffledDistractors, correctAnswer].sort(() => Math.random() - 0.5);
-  }, []); // No dependencies needed as vocabData is static import
+    let finalDistractors = samePOSDistractors.map(v => v["한국어 의미"]);
+
+    // 2. Fallback if not enough same-POS words (unlikely with this dataset but safe)
+    if (finalDistractors.length < 3) {
+      const fallbackDistractors = (vocabData as VocabEntry[])
+        .filter(v => v["한국어 의미"] !== correctAnswer && !finalDistractors.includes(v["한국어 의미"]))
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3 - finalDistractors.length)
+        .map(v => v["한국어 의미"]);
+      
+      finalDistractors = [...finalDistractors, ...fallbackDistractors];
+    }
+    
+    return [correctAnswer, ...finalDistractors].sort(() => Math.random() - 0.5);
+  }, [vocabByPOS]); 
 
   const options = useMemo(() => {
     if (questions.length > 0 && currentIndex < questions.length) {
-      return generateOptions(questions[currentIndex]["한국어 의미"]);
+      return generateOptions(questions[currentIndex]);
     }
     return [];
   }, [currentIndex, questions, generateOptions]);
