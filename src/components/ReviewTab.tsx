@@ -4,22 +4,8 @@ import { useGamification } from "@/hooks/useGamification";
 import { useGlobalTop20 } from "@/hooks/useGlobalTop20";
 import vocabData from "@/data/vocab.json";
 import { VocabEntry } from "@/utils/vocab";
-import { Trash2, Brain, Globe, Trophy, RefreshCw } from "lucide-react";
+import { Trash2, Brain, Globe, Frown, RefreshCw } from "lucide-react";
 import Link from "next/link";
-
-// ── Medal colours for top 3 ───────────────────────────────────────────────────
-const MEDAL: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
-
-// ── Helper: rank badge background ─────────────────────────────────────────────
-function rankBg(rank: number) {
-  if (rank === 1) return "#FFD700";
-  if (rank === 2) return "#C0C0C0";
-  if (rank === 3) return "#CD7F32";
-  return "#e5e7eb";
-}
-function rankColor(rank: number) {
-  return rank <= 3 ? "#000" : "#374151";
-}
 
 export default function ReviewTab() {
   const { stats, removeMistake, clearAllMistakes } = useGamification();
@@ -102,16 +88,19 @@ export default function ReviewTab() {
         </div>
       )}
 
-      {/* ── Global TOP 20 Hardest Words ─────────────────────────────────────── */}
+      {/* ── Global TOP 20 ─────────────────────────────────────────────────── */}
       <div className="review-card-modern" style={{ marginTop: "24px" }}>
         <div className="review-header">
-          <div className="review-header-icon" style={{ background: "linear-gradient(135deg,#f59e0b,#ef4444)" }}>
+          <div
+            className="review-header-icon"
+            style={{ background: "linear-gradient(135deg,#f59e0b,#ef4444)" }}
+          >
             <Globe size={24} color="#fff" />
           </div>
           <div className="flex-1">
-            <h2 className="text-title m-0">Global TOP 20</h2>
+            <h2 className="text-title m-0">Wall of Pain 😤</h2>
             <p className="text-small" style={{ margin: 0, color: "#6b7280" }}>
-              Most missed words by all learners
+              words everyone&#39;s fumbling rn
             </p>
           </div>
           <button
@@ -127,7 +116,7 @@ export default function ReviewTab() {
 
         {top20Loading && (
           <div className="flex-center py-24" style={{ gap: "8px", color: "#9ca3af" }}>
-            <span className="text-small">Loading global stats…</span>
+            <span className="text-small">Loading…</span>
           </div>
         )}
 
@@ -153,23 +142,23 @@ export default function ReviewTab() {
                   className="mistake-item flex-between"
                   style={{ alignItems: "center", gap: "12px" }}
                 >
-                  {/* Rank badge */}
+                  {/* Rank badge — uniform circle for all ranks */}
                   <div
                     style={{
                       minWidth: "32px",
                       height: "32px",
                       borderRadius: "50%",
-                      background: rankBg(rank),
-                      color: rankColor(rank),
+                      background: "#f3f4f6",
+                      color: "#374151",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       fontWeight: 900,
-                      fontSize: rank <= 3 ? "16px" : "13px",
+                      fontSize: "13px",
                       flexShrink: 0,
                     }}
                   >
-                    {rank <= 3 ? MEDAL[rank] : rank}
+                    {rank}
                   </div>
 
                   {/* Word info */}
@@ -178,12 +167,12 @@ export default function ReviewTab() {
                     <div className="text-small">{entry.meaning}</div>
                   </div>
 
-                  {/* Fail count */}
+                  {/* Fail count — mistake/failure icon */}
                   <div
                     className="mistake-count"
                     style={{ display: "flex", alignItems: "center", gap: "4px" }}
                   >
-                    <Trophy size={12} />
+                    <Frown size={12} />
                     {entry.totalCount}
                   </div>
                 </div>
