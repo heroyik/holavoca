@@ -4,7 +4,7 @@ import { useGamification } from "@/hooks/useGamification";
 import { useGlobalTop20 } from "@/hooks/useGlobalTop20";
 import vocabData from "@/data/vocab.json";
 import { VocabEntry } from "@/utils/vocab";
-import { Trash2, Brain, Globe, Frown, RefreshCw } from "lucide-react";
+import { Trash2, Brain, Frown, RefreshCw } from "lucide-react";
 import Link from "next/link";
 
 export default function ReviewTab() {
@@ -91,12 +91,6 @@ export default function ReviewTab() {
       {/* ── Global TOP 20 ─────────────────────────────────────────────────── */}
       <div className="review-card-modern" style={{ marginTop: "24px" }}>
         <div className="review-header">
-          <div
-            className="review-header-icon"
-            style={{ background: "linear-gradient(135deg,#f59e0b,#ef4444)" }}
-          >
-            <Globe size={24} color="#fff" />
-          </div>
           <div className="flex-1">
             <h2 className="text-title m-0">Wall of Pain 😤</h2>
             <p className="text-small" style={{ margin: 0, color: "#6b7280" }}>
@@ -161,16 +155,27 @@ export default function ReviewTab() {
                     {rank}
                   </div>
 
-                  {/* Word info */}
-                  <div className="flex-1">
-                    <div className="text-subtitle text-es-red">{entry.word}</div>
+                  {/* Word info — min-width:0 prevents flex overflow */}
+                  <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
+                    <div
+                      className="text-subtitle text-es-red"
+                      style={{ wordBreak: "break-word", overflowWrap: "break-word" }}
+                    >
+                      {entry.word}
+                    </div>
                     <div className="text-small">{entry.meaning}</div>
                   </div>
 
-                  {/* Fail count — mistake/failure icon */}
+                  {/* Fail count — flex-shrink:0 keeps badge always visible */}
                   <div
                     className="mistake-count"
-                    style={{ display: "flex", alignItems: "center", gap: "4px" }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      flexShrink: 0,
+                      whiteSpace: "nowrap",
+                    }}
                   >
                     <Frown size={12} />
                     {entry.totalCount}
