@@ -174,6 +174,7 @@ If you have **API Key Restrictions** enabled in the Google Cloud Console (recomm
 Check out our future plans and technical upgrade strategy:
 
 - [v1.4.0 Upgrade Proposal](file:///Users/ikyoon/proj/holavoca/strategy/upgrade_proposal.md)
+- [v1.4.0 Test Automation Plan](file:///Users/ikyoon/proj/holavoca/strategy/testplan.md)
 
 ---
 
