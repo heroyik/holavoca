@@ -5,8 +5,9 @@ import { VocabEntry, guessPOS } from "@/utils/vocab";
 import vocabData from "@/data/vocab.json"; // Import full vocab for distractors
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { X, CheckCircle, XCircle } from "lucide-react";
+import { X, CheckCircle, XCircle, Frown } from "lucide-react";
 import { useGamification } from "@/hooks/useGamification";
+import { useGlobalTop20 } from "@/hooks/useGlobalTop20";
 import Image from "next/image";
 import vol1 from "../../public/vol1.jpg";
 import vol2 from "../../public/vol2.jpg";
@@ -21,6 +22,14 @@ interface QuizProps {
 export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
   const router = useRouter();
   const { addXP, addGem, addMistake, completeUnit } = useGamification();
+
+  // Wall of Pain lookup (session-cached, no extra Firestore reads)
+  const { top20 } = useGlobalTop20();
+  const wallOfPainMap = useMemo(() => {
+    const map = new Map<string, number>();
+    top20.forEach((entry, idx) => map.set(entry.word, idx + 1));
+    return map;
+  }, [top20]);
 
   // Memoize grouped vocabulary by POS to optimize generation
   const vocabByPOS = useMemo(() => {
@@ -204,6 +213,30 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
               &quot;{currentQuestion["예문"]}&quot;
             </div>
           )}
+          {/* Wall of Pain badge — shown when word is in global TOP 20 */}
+          {(() => {
+            const painRank = wallOfPainMap.get(currentQuestion["스페인어 단어"]);
+            if (!painRank) return null;
+            return (
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  marginTop: "10px",
+                  background: "#fee2e2",
+                  color: "#dc2626",
+                  borderRadius: "10px",
+                  padding: "4px 10px",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                }}
+              >
+                <Frown size={13} />
+                Wall of Pain #{painRank}
+              </div>
+            );
+          })()}
         </div>
         <div className="grid-gap-12">
           {options.map((option) => (
