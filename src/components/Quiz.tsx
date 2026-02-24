@@ -42,6 +42,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
   const [showResult, setShowResult] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [hasMistakes, setHasMistakes] = useState(false);
   const [questions] = useState(() => [...unitWords].sort(() => Math.random() - 0.5));
 
   const generateOptions = useCallback((currentEntry: VocabEntry) => {
@@ -88,8 +89,18 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
       setScore(prev => prev + 1);
       addXP(10);
     } else {
+      setHasMistakes(true);
       addMistake(questions[currentIndex]["스페인어 단어"]);
     }
+  };
+
+  const handleDontKnow = () => {
+    if (selectedOption) return;
+    
+    setHasMistakes(true);
+    addMistake(questions[currentIndex]["스페인어 단어"]);
+    setIsCorrect(false);
+    setSelectedOption("DONT_KNOW");
   };
 
   const handleNext = () => {
@@ -102,7 +113,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
       if (unitId !== 'review') {
         const passThreshold = Math.ceil(questions.length * 0.8);
         if (score >= passThreshold) {
-          completeUnit(unitId);
+          completeUnit(unitId, 0, !hasMistakes);
           addGem(20);
         }
       }
@@ -194,7 +205,6 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
             </div>
           )}
         </div>
-
         <div className="grid-gap-12">
           {options.map((option) => (
             <button
@@ -211,6 +221,16 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
             </button>
           ))}
         </div>
+
+        {!selectedOption && (
+          <button
+            onClick={handleDontKnow}
+            className="duo-button duo-button-outline w-full mt-24 text-subtitle"
+            style={{ borderColor: '#afafaf', color: '#777' }}
+          >
+            No Lo Sé (Don&apos;t Know)
+          </button>
+        )}
       </div>
 
       {/* Feedback Bar */}
@@ -225,9 +245,9 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
               )}
               <div>
                 <h3 className={`text-subtitle ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}`}>
-                  {isCorrect ? 'Excellent!' : 'Correct solution:'}
+                  {selectedOption === "DONT_KNOW" ? 'Don’t worry! Keep learning.' : (isCorrect ? 'Excellent!' : 'Correct solution:')}
                 </h3>
-                {!isCorrect && (
+                {(!isCorrect || selectedOption === "DONT_KNOW") && (
                   <p className="correct-solution">
                     {questions[currentIndex]["한국어 의미"]}
                   </p>

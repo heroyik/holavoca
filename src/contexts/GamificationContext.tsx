@@ -11,6 +11,7 @@ export interface UserStats {
   streak: number;
   lastStudyDate: string | null;
   completedUnits: string[];
+  masteredUnits: string[]; // Units completed with 0 mistakes
   mistakes: Record<string, number>;
   displayName?: string;
   photoURL?: string;
@@ -21,7 +22,7 @@ interface GamificationContextType {
   stats: UserStats;
   isInitialized: boolean;
   addXP: (amount: number) => void;
-  completeUnit: (unitId: string, xpEarned?: number) => void;
+  completeUnit: (unitId: string, xpEarned?: number, isPerfect?: boolean) => void;
   unlockProgress: (unitIds: string[], xp: number, gems: number) => void;
   recordMistake: (spanishWord: string) => void;
   addMistake: (spanishWord: string) => void;
@@ -43,6 +44,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       streak: 0,
       lastStudyDate: null,
       completedUnits: [],
+      masteredUnits: [],
       mistakes: {},
     };
     return defaultStats;
@@ -97,6 +99,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
                 ...cloudData,
                 xp: Math.max(prev.xp, cloudData.xp || 0),
                 completedUnits: Array.from(new Set([...prev.completedUnits, ...(cloudData.completedUnits || [])])),
+                masteredUnits: Array.from(new Set([...(prev.masteredUnits || []), ...(cloudData.masteredUnits || [])])),
                 mistakes: mergedMistakes || {}
               };
               
@@ -154,7 +157,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     saveStatsLocally({ ...statsRef.current, gems: statsRef.current.gems + amount });
   };
 
-  const completeUnit = (unitId: string, xpEarned: number = 0) => {
+  const completeUnit = (unitId: string, xpEarned: number = 0, isPerfect: boolean = false) => {
     const today = new Date().toISOString().split('T')[0];
     let newStreak = statsRef.current.streak;
 
@@ -162,15 +165,21 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       newStreak += 1;
     }
 
+    const currentCompleted = statsRef.current.completedUnits || [];
+    const currentMastered = statsRef.current.masteredUnits || [];
+
     const newStats: UserStats = {
       ...statsRef.current,
       xp: statsRef.current.xp + xpEarned,
       gems: statsRef.current.gems + Math.floor(xpEarned / 10),
       streak: newStreak,
       lastStudyDate: today,
-      completedUnits: statsRef.current.completedUnits.includes(unitId)
-        ? statsRef.current.completedUnits
-        : [...statsRef.current.completedUnits, unitId],
+      completedUnits: currentCompleted.includes(unitId)
+        ? currentCompleted
+        : [...currentCompleted, unitId],
+      masteredUnits: isPerfect && !currentMastered.includes(unitId)
+        ? [...currentMastered, unitId]
+        : currentMastered,
     };
     saveStatsLocally(newStats);
   };

@@ -22,10 +22,10 @@ const getLevelTitle = (idx: number) => {
   return "ADVANCED";
 };
 
-const getUnitIcon = (idx: number, isLocked: boolean, isCompleted: boolean) => {
+const getUnitIcon = (idx: number, isLocked: boolean, isCompleted: boolean, isMastered: boolean) => {
   if (isLocked) return '🔒';
+  if (isMastered) return '👑';
   if (isCompleted) return '✅';
-  if (idx === 4 || idx === 9 || idx === 14) return '👑'; // Milestone
   return '⭐';
 };
 
@@ -157,10 +157,11 @@ export default function Home() {
           {units.slice(0, 15).map((unit, index) => {
             const offset = (Math.sin(index * 1.2) * 60).toFixed(2);
             const isCompleted = stats.completedUnits.includes(unit.id);
+            const isMastered = stats.masteredUnits?.includes(unit.id);
             const isLocked = index > stats.completedUnits.length;
             const isCurrent = index === stats.completedUnits.length;
 
-            const unitStatusClass = isLocked ? 'locked' : (isCurrent ? 'current' : (isCompleted ? 'completed' : 'available'));
+            const unitStatusClass = isLocked ? 'locked' : (isCurrent ? 'current' : (isMastered ? 'mastered' : (isCompleted ? 'completed' : 'available')));
 
             return (
               <div key={unit.id} 
@@ -175,7 +176,7 @@ export default function Home() {
                   <button
                     className={`unit-button ${unitStatusClass}`}
                   >
-                    {getUnitIcon(index, isLocked, isCompleted)}
+                    {getUnitIcon(index, isLocked, isCompleted, isMastered)}
 
                     {isCurrent && (
                       <div className="start-indicator">

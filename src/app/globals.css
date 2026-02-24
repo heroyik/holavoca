@@ -748,9 +748,9 @@ button {
   cursor: pointer;
 }
 
-.unit-button.available {
-  background-color: var(--es-yellow);
-  box-shadow: 0 10px 0 #d97706;
+.unit-button.mastered {
+  background-color: var(--es-gold);
+  box-shadow: 0 10px 0 #cc9c00;
   cursor: pointer;
 }
 
