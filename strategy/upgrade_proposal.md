@@ -52,6 +52,7 @@ Analysis and technical plan for the next version of the Spanish learning app.
 
 - Update the Snake Path to show more visual variety per level (different colors or icons for difficulty tiers).
 - Add "Mastery" indicators for levels completed with 0 mistakes.
+- **Failed Word Count**: For levels that were attempted but not cleared, display the number of incorrect words (including "Don't Know" selections) on the level icon/card. Hide this for unattempted levels.
 
 ## Technical Implementation Steps
 
@@ -66,3 +67,5 @@ Analysis and technical plan for the next version of the Spanish learning app.
     - Add "Don't Know" button and logic.
 4. **`UserProfile.tsx`**:
     - Build the settings UI section.
+5. **`LevelMap` (Snake Path)**:
+    - Update the UI to render the cumulative failure count for attempted units.
