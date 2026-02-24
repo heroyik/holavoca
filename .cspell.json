@@ -1,0 +1,40 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "Voca",
+    "HolaVoca",
+    "gamified",
+    "Gamified",
+    "Firestore",
+    "Lightbox",
+    "Distractors",
+    "distractors",
+    "español",
+    "Aprende",
+    "Borrar",
+    "Repaso",
+    "Revisión",
+    "Repasar",
+    "ahora",
+    "señorita",
+    "Levenshtein",
+    "masteredUnits",
+    "unitStats",
+    "failedWords",
+    "unlockAllLevels",
+    "cognate",
+    "cognates",
+    "turbo",
+    "basepath",
+    "basePath",
+    "tailwindcss",
+    "lucide"
+  ],
+  "ignorePaths": [
+    "node_modules",
+    ".next",
+    "*.json",
+    "*.lock"
+  ]
+}
