@@ -2,15 +2,17 @@
 
 import vocabData from '@/data/vocab.json';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { APP_VERSION } from '@/lib/constants';
 import { getUnits, getTotalWordCount } from '@/utils/vocab';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useGamification } from '@/hooks/useGamification';
+import { useRank } from '@/hooks/useRank';
 import Leaderboard from '@/components/Leaderboard';
 import UserProfile from '@/components/UserProfile';
 import ReviewTab from '@/components/ReviewTab';
+import RankToast from '@/components/RankToast';
 import vol1 from '../../public/vol1.jpg';
 import vol2 from '../../public/vol2.jpg';
 import { Github } from 'lucide-react';
@@ -66,6 +68,11 @@ export default function Home() {
   });
   const [activeTab, setActiveTab] = useState<'learn' | 'review' | 'leader' | 'profile'>('learn');
   const { stats, user } = useGamification();
+  const { rank, total, rankDelta, refresh: refreshRank, clearDelta } = useRank(user?.uid ?? null, stats.xp);
+
+  const handleQuizComplete = useCallback(() => {
+    refreshRank();
+  }, [refreshRank]);
 
   // Updated units calculation to respect excludeEasyWords setting
   const units = getUnits(selectedBooks, stats.settings?.excludeEasyWords);
@@ -131,6 +138,26 @@ export default function Home() {
         </div>
 
         <div className="header-right flex items-center gap-12">
+          {/* Live rank badge — only shown when authenticated and rank is known */}
+          {user && rank !== null && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "3px",
+                background: rank === 1 ? "linear-gradient(135deg,#fbbf24,#f59e0b)" : "#f3f4f6",
+                color: rank === 1 ? "#fff" : "#374151",
+                borderRadius: "10px",
+                padding: "3px 8px",
+                fontSize: "11px",
+                fontWeight: 800,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {rank === 1 ? "👑" : "🏅"} #{rank}
+              {total > 0 && <span style={{ opacity: 0.6, fontSize: "10px" }}>&nbsp;of {total}</span>}
+            </div>
+          )}
            <div
             onClick={handleDownload}
             className="vocab-stash-pill mt-0 flex items-center gap-2 py-4 px-10 h-32 hover-scale"
@@ -243,6 +270,9 @@ export default function Home() {
       {activeTab === 'review' && <ReviewTab />}
       {activeTab === 'leader' && <Leaderboard />}
       {activeTab === 'profile' && <UserProfile user={user} stats={stats} />}
+
+      {/* Rank toast — shown after rank improvement */}
+      <RankToast rank={rank} rankDelta={rankDelta} onDismiss={clearDelta} />
 
       <style jsx global>{`
         @keyframes pulse-node {

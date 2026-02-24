@@ -1,16 +1,21 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { VocabEntry, guessPOS } from "@/utils/vocab";
 import vocabData from "@/data/vocab.json"; // Import full vocab for distractors
+import deleSentences from "@/data/dele_sentences.json";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { X, CheckCircle, XCircle, Frown } from "lucide-react";
+import { X, CheckCircle, XCircle, HelpCircle, Frown } from "lucide-react";
 import { useGamification } from "@/hooks/useGamification";
 import { useGlobalTop20 } from "@/hooks/useGlobalTop20";
+import { useRank } from "@/hooks/useRank";
 import Image from "next/image";
 import vol1 from "../../public/vol1.jpg";
 import vol2 from "../../public/vol2.jpg";
+
+type DeleSentenceMap = Record<string, { sentence: string; translation: string }>;
+const DELE: DeleSentenceMap = deleSentences as DeleSentenceMap;
 
 interface QuizProps {
   unitId: string;
@@ -21,7 +26,10 @@ interface QuizProps {
 
 export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
   const router = useRouter();
-  const { addXP, addGem, addMistake, completeUnit } = useGamification();
+  const { addXP, addGem, addMistake, completeUnit, user, stats } = useGamification();
+
+  // 6.2 — Live rank refresh after quiz ends
+  const { refresh: refreshRank } = useRank(user?.uid ?? null, stats.xp);
 
   // Wall of Pain lookup (session-cached, no extra Firestore reads)
   const { top20 } = useGlobalTop20();
@@ -53,6 +61,13 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [hasMistakes, setHasMistakes] = useState(false);
   const [questions] = useState(() => [...unitWords].sort(() => Math.random() - 0.5));
+
+  // Refresh rank when quiz finishes (6.2)
+  useEffect(() => {
+    if (showResult) {
+      refreshRank();
+    }
+  }, [showResult, refreshRank]);
 
   const generateOptions = useCallback((currentEntry: VocabEntry) => {
     const correctAnswer = currentEntry["한국어 의미"];
@@ -170,12 +185,16 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
 
   const currentQuestion = questions[currentIndex];
   const progress = ((currentIndex) / questions.length) * 100;
+  const painRank = wallOfPainMap.get(currentQuestion["스페인어 단어"]);
+  const isDontKnow = selectedOption === "DONT_KNOW";
+
+  // 6.4 — DELE sentence lookup
+  const deleSentence = isCorrect
+    ? DELE[currentQuestion["스페인어 단어"]] ?? null
+    : null;
 
   return (
     <div className="container flex flex-col min-h-screen p-20-120 relative">
-      {/* Book Source Badge */}
-
-
       {/* Header */}
       <div className="flex-between gap-16 mb-32">
         <Link href="/" aria-label="Close lesson" className="no-underline">
@@ -213,30 +232,26 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
               &quot;{currentQuestion["예문"]}&quot;
             </div>
           )}
-          {/* Wall of Pain badge — shown when word is in global TOP 20 */}
-          {(() => {
-            const painRank = wallOfPainMap.get(currentQuestion["스페인어 단어"]);
-            if (!painRank) return null;
-            return (
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  marginTop: "10px",
-                  background: "#fee2e2",
-                  color: "#dc2626",
-                  borderRadius: "10px",
-                  padding: "4px 10px",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                }}
-              >
-                <Frown size={13} />
-                Wall of Pain #{painRank}
-              </div>
-            );
-          })()}
+          {/* 6.2 — Wall of Pain badge */}
+          {painRank && (
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                marginTop: "10px",
+                background: "#fee2e2",
+                color: "#dc2626",
+                borderRadius: "10px",
+                padding: "4px 10px",
+                fontSize: "12px",
+                fontWeight: 700,
+              }}
+            >
+              <Frown size={13} />
+              Wall of Pain #{painRank}
+            </div>
+          )}
         </div>
         <div className="grid-gap-12">
           {options.map((option) => (
@@ -255,20 +270,25 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
           ))}
         </div>
 
+        {/* 6.3 — Funnier No Lo Sé button */}
         {!selectedOption && (
           <button
             onClick={handleDontKnow}
-            className="duo-button duo-button-outline w-full mt-24 text-subtitle"
+            className="duo-button duo-button-outline btn-nolo w-full mt-24 text-subtitle"
             style={{ borderColor: '#afafaf', color: '#777' }}
           >
-            No Lo Sé (Don&apos;t Know)
+            <HelpCircle size={16} style={{ display: "inline", marginRight: "6px", verticalAlign: "middle" }} />
+            No Lo Sé... (I have no idea!)
           </button>
         )}
       </div>
 
-      {/* Feedback Bar */}
+      {/* 6.3 + 6.4 — Feedback Bar */}
       {selectedOption && (
-        <div className={`quiz-feedback-bar ${isCorrect ? 'correct' : 'incorrect'}`}>
+        <div
+          className={`quiz-feedback-bar ${isCorrect ? 'correct' : 'incorrect'}`}
+          style={isDontKnow ? { background: "#fff0f0", borderColor: "#fecaca" } : undefined}
+        >
           <div className="container flex-between">
             <div className="flex-center gap-12">
               {isCorrect ? (
@@ -277,13 +297,40 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
                 <XCircle size={32} className="text-es-red" />
               )}
               <div>
-                <h3 className={`text-subtitle ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}`}>
-                  {selectedOption === "DONT_KNOW" ? 'Don’t worry! Keep learning.' : (isCorrect ? 'Excellent!' : 'Correct solution:')}
+                {/* 6.3 — Friendlier message for "don't know" */}
+                <h3
+                  className={`text-subtitle ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}`}
+                  style={isDontKnow ? { color: "#dc2626" } : undefined}
+                >
+                  {isDontKnow
+                    ? "😅 That's okay! Here's the answer:"
+                    : isCorrect
+                    ? "✅ ¡Correcto!"
+                    : "Correct solution:"}
                 </h3>
-                {(!isCorrect || selectedOption === "DONT_KNOW") && (
+                {(!isCorrect || isDontKnow) && (
                   <p className="correct-solution">
                     {questions[currentIndex]["한국어 의미"]}
                   </p>
+                )}
+                {/* 6.4 — DELE contextual sentence */}
+                {isCorrect && deleSentence && (
+                  <div
+                    style={{
+                      marginTop: "8px",
+                      background: "#f0fdf4",
+                      border: "1px solid #bbf7d0",
+                      borderRadius: "8px",
+                      padding: "8px 10px",
+                      fontSize: "12px",
+                      color: "#166534",
+                    }}
+                  >
+                    <div style={{ fontWeight: 700, marginBottom: "2px" }}>
+                      💬 &quot;{deleSentence.sentence}&quot;
+                    </div>
+                    <div style={{ opacity: 0.75 }}>({deleSentence.translation})</div>
+                  </div>
                 )}
               </div>
             </div>
@@ -301,6 +348,21 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
           </div>
         </div>
       )}
+
+      {/* 6.3 — No Lo Sé jiggle animation */}
+      <style>{`
+        @keyframes jiggle {
+          0%  { transform: rotate(0deg); }
+          20% { transform: rotate(-3deg); }
+          40% { transform: rotate(3deg); }
+          60% { transform: rotate(-3deg); }
+          80% { transform: rotate(3deg); }
+          100%{ transform: rotate(0deg); }
+        }
+        .btn-nolo:hover {
+          animation: jiggle 0.4s ease;
+        }
+      `}</style>
     </div>
   );
 }
