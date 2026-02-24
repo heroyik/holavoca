@@ -123,11 +123,10 @@ export default function ReviewTab() {
         )}
 
         {!top20Loading && top20.length > 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {top20.map((entry, idx) => {
               const rank = idx + 1;
               const bookImg = entry.book === "2" ? vol2 : vol1;
-              const bookLabel = `Vol.${entry.book}`;
               return (
                 <Link
                   key={entry.word}
@@ -136,104 +135,114 @@ export default function ReviewTab() {
                 >
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
                       background: "#fafafa",
                       border: "1px solid #f0f0f0",
-                      borderRadius: "14px",
-                      padding: "10px 14px",
+                      borderRadius: "12px",
+                      padding: "9px 12px",
                       transition: "background 0.15s",
                       cursor: "pointer",
                     }}
                     onMouseEnter={e => (e.currentTarget.style.background = "#f5f5f5")}
                     onMouseLeave={e => (e.currentTarget.style.background = "#fafafa")}
                   >
-                    {/* Rank circle */}
-                    <div
-                      style={{
-                        minWidth: "28px",
-                        height: "28px",
-                        borderRadius: "50%",
-                        background: rank <= 3 ? "#fef3c7" : "#f3f4f6",
-                        color: rank <= 3 ? "#92400e" : "#6b7280",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontWeight: 800,
-                        fontSize: "12px",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {rank}
-                    </div>
-
-                    {/* Book thumbnail */}
-                    <Image
-                      src={bookImg}
-                      alt={bookLabel}
-                      width={32}
-                      height={42}
-                      style={{
-                        objectFit: "cover",
-                        borderRadius: "4px",
-                        flexShrink: 0,
-                        boxShadow: "0 1px 4px rgba(0,0,0,0.15)",
-                      }}
-                    />
-
-                    {/* Word info */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                    {/* ── Row 1: rank · book img · word · fail count ── */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      {/* Rank circle */}
                       <div
                         style={{
+                          width: "24px",
+                          height: "24px",
+                          borderRadius: "50%",
+                          background: rank <= 3 ? "#fef3c7" : "#f3f4f6",
+                          color: rank <= 3 ? "#92400e" : "#6b7280",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontWeight: 800,
+                          fontSize: "11px",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {rank}
+                      </div>
+
+                      {/* Book thumbnail — small */}
+                      <Image
+                        src={bookImg}
+                        alt={`Vol.${entry.book}`}
+                        width={20}
+                        height={27}
+                        style={{
+                          objectFit: "cover",
+                          borderRadius: "3px",
+                          flexShrink: 0,
+                          boxShadow: "0 1px 3px rgba(0,0,0,0.18)",
+                        }}
+                      />
+
+                      {/* Spanish word — full, wraps if very long */}
+                      <div
+                        style={{
+                          flex: 1,
                           fontWeight: 700,
                           fontSize: "15px",
                           color: "#dc2626",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
+                          wordBreak: "break-word",
+                          overflowWrap: "break-word",
+                          minWidth: 0,
                         }}
                       >
                         {entry.word}
                       </div>
-                      <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "1px" }}>
-                        {entry.meaning}
-                      </div>
-                      {/* Book + unit badge */}
-                      <div style={{ marginTop: "4px" }}>
-                        <span
-                          style={{
-                            fontSize: "10px",
-                            fontWeight: 600,
-                            color: "#7c3aed",
-                            background: "#ede9fe",
-                            borderRadius: "6px",
-                            padding: "2px 6px",
-                          }}
-                        >
-                          {bookLabel} · Unit {entry.unitNum}
-                        </span>
+
+                      {/* Fail count badge */}
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "3px",
+                          flexShrink: 0,
+                          background: "#fee2e2",
+                          color: "#dc2626",
+                          borderRadius: "8px",
+                          padding: "3px 8px",
+                          fontSize: "13px",
+                          fontWeight: 700,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        <Frown size={11} />
+                        {entry.totalCount}
                       </div>
                     </div>
 
-                    {/* Fail count */}
+                    {/* ── Row 2: meaning · unit badge ── */}
                     <div
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "3px",
-                        flexShrink: 0,
-                        background: "#fee2e2",
-                        color: "#dc2626",
-                        borderRadius: "10px",
-                        padding: "4px 9px",
-                        fontSize: "13px",
-                        fontWeight: 700,
-                        whiteSpace: "nowrap",
+                        gap: "8px",
+                        marginTop: "5px",
+                        paddingLeft: "32px", /* align with word above */
                       }}
                     >
-                      <Frown size={11} />
-                      {entry.totalCount}
+                      <span style={{ fontSize: "12px", color: "#6b7280", flex: 1 }}>
+                        {entry.meaning}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: 600,
+                          color: "#7c3aed",
+                          background: "#ede9fe",
+                          borderRadius: "6px",
+                          padding: "2px 6px",
+                          whiteSpace: "nowrap",
+                          flexShrink: 0,
+                        }}
+                      >
+                        Unit {entry.unitNum}
+                      </span>
                     </div>
                   </div>
                 </Link>
