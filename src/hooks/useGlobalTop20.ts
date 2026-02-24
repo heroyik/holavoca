@@ -1,20 +1,54 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { collection, query, getDocs } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import vocabData from "@/data/vocab.json";
+import { VocabEntry } from "@/utils/vocab";
 
 export interface GlobalWordStat {
   word: string;
   meaning: string;
-  totalCount: number; // seedCount + failCount
+  totalCount: number;
+  book: string;   // "1" or "2"
+  unitId: string; // "unit-X"
+  unitNum: number;
 }
 
-/**
- * Fetches the global TOP 20 hardest words from Firestore.
- * Fetched once per session (cached in module-level variable).
- * Read cost: 1 collection read (up to 730 documents max) per session.
- */
+// ── Unit lookup (mirrors getUnits logic from vocab.ts) ──────────────────────
+function getDifficultyScore(word: string): number {
+  let score = word.length * 10;
+  if (/[áéíóúñ]/i.test(word)) score += 50;
+  return score;
+}
+
+function buildWordUnitMap(): Map<string, { book: string; unitNum: number }> {
+  const uniqueWords = new Map<string, VocabEntry>();
+  (vocabData as VocabEntry[]).forEach((w) => {
+    const key = w["스페인어 단어"].toLowerCase().trim();
+    if (!uniqueWords.has(key)) uniqueWords.set(key, w);
+  });
+  const allWords = Array.from(uniqueWords.values()).sort((a, b) => {
+    const da = getDifficultyScore(a["스페인어 단어"]);
+    const db = getDifficultyScore(b["스페인어 단어"]);
+    return da !== db ? da - db : a["스페인어 단어"].localeCompare(b["스페인어 단어"]);
+  });
+
+  const TOTAL_UNITS = 15;
+  const unitSize = Math.ceil(allWords.length / TOTAL_UNITS);
+  const map = new Map<string, { book: string; unitNum: number }>();
+  allWords.forEach((w, idx) => {
+    map.set(w["스페인어 단어"], {
+      book: w["출처"],
+      unitNum: Math.floor(idx / unitSize) + 1,
+    });
+  });
+  return map;
+}
+
+const wordUnitMap = buildWordUnitMap();
+
+// ── Session cache ────────────────────────────────────────────────────────────
 let sessionCache: GlobalWordStat[] | null = null;
 
 export function useGlobalTop20() {
@@ -23,27 +57,24 @@ export function useGlobalTop20() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchTop20 = useCallback(async () => {
-    if (sessionCache) {
-      setTop20(sessionCache);
-      setLoading(false);
-      return;
-    }
-    if (!db) {
-      setLoading(false);
-      return;
-    }
+    if (sessionCache) { setTop20(sessionCache); setLoading(false); return; }
+    if (!db) { setLoading(false); return; }
     try {
       setLoading(true);
       const snap = await getDocs(collection(db, "globalWordStats"));
       const all: GlobalWordStat[] = snap.docs.map((d) => {
         const data = d.data();
+        const wordStr: string = data.word ?? decodeURIComponent(d.id);
+        const meta = wordUnitMap.get(wordStr) ?? { book: "1", unitNum: 1 };
         return {
-          word: data.word ?? decodeURIComponent(d.id),
+          word: wordStr,
           meaning: data.meaning ?? "",
           totalCount: (data.seedCount ?? 0) + (data.failCount ?? 0),
+          book: meta.book,
+          unitId: `unit-${meta.unitNum}`,
+          unitNum: meta.unitNum,
         };
       });
-      // Sort by totalCount descending, take top 20
       all.sort((a, b) => b.totalCount - a.totalCount);
       const result = all.slice(0, 20);
       sessionCache = result;
@@ -56,9 +87,7 @@ export function useGlobalTop20() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchTop20();
-  }, [fetchTop20]);
+  useEffect(() => { fetchTop20(); }, [fetchTop20]);
 
   return { top20, loading, error, refresh: fetchTop20 };
 }

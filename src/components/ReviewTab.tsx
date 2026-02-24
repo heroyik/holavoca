@@ -4,12 +4,15 @@ import { useGamification } from "@/hooks/useGamification";
 import { useGlobalTop20 } from "@/hooks/useGlobalTop20";
 import vocabData from "@/data/vocab.json";
 import { VocabEntry } from "@/utils/vocab";
-import { Trash2, Brain, Frown, RefreshCw } from "lucide-react";
+import { Trash2, Brain, Frown } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+import vol1 from "../../public/vol1.jpg";
+import vol2 from "../../public/vol2.jpg";
 
 export default function ReviewTab() {
   const { stats, removeMistake, clearAllMistakes } = useGamification();
-  const { top20, loading: top20Loading, error: top20Error, refresh } = useGlobalTop20();
+  const { top20, loading: top20Loading, error: top20Error } = useGlobalTop20();
 
   const mistakes = stats.mistakes || {};
   const missedWordList = Object.keys(mistakes);
@@ -88,28 +91,21 @@ export default function ReviewTab() {
         </div>
       )}
 
-      {/* ── Global TOP 20 ─────────────────────────────────────────────────── */}
+      {/* ── Wall of Pain ──────────────────────────────────────────────────── */}
       <div className="review-card-modern" style={{ marginTop: "24px" }}>
-        <div className="review-header">
-          <div className="flex-1">
-            <h2 className="text-title m-0">Wall of Pain 😤</h2>
-            <p className="text-small" style={{ margin: 0, color: "#6b7280" }}>
-              words everyone&#39;s fumbling rn
-            </p>
-          </div>
-          <button
-            onClick={refresh}
-            className="icon-button-round"
-            aria-label="Refresh global stats"
-            title="Refresh"
-            style={{ width: "36px", height: "36px" }}
-          >
-            <RefreshCw size={16} />
-          </button>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+          <h2 className="text-title m-0" style={{ letterSpacing: "-0.5px" }}>
+            Wall of Pain
+          </h2>
+          <span style={{ fontSize: "22px", lineHeight: 1 }}>😤</span>
         </div>
+        <p className="text-small" style={{ margin: "0 0 16px", color: "#9ca3af" }}>
+          words everyone&#39;s fumbling rn
+        </p>
 
         {top20Loading && (
-          <div className="flex-center py-24" style={{ gap: "8px", color: "#9ca3af" }}>
+          <div className="flex-center py-24" style={{ color: "#9ca3af" }}>
             <span className="text-small">Loading…</span>
           </div>
         )}
@@ -122,65 +118,125 @@ export default function ReviewTab() {
 
         {!top20Loading && !top20Error && top20.length === 0 && (
           <div className="text-small text-center py-16" style={{ color: "#9ca3af" }}>
-            No global data yet. Be the first to practise!
+            No global data yet.
           </div>
         )}
 
         {!top20Loading && top20.length > 0 && (
-          <div className="mistake-list" style={{ marginTop: "12px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             {top20.map((entry, idx) => {
               const rank = idx + 1;
+              const bookImg = entry.book === "2" ? vol2 : vol1;
+              const bookLabel = `Vol.${entry.book}`;
               return (
-                <div
+                <Link
                   key={entry.word}
-                  className="mistake-item flex-between"
-                  style={{ alignItems: "center", gap: "12px" }}
+                  href={`/quiz/${entry.unitId}`}
+                  style={{ textDecoration: "none" }}
                 >
-                  {/* Rank badge — uniform circle for all ranks */}
                   <div
                     style={{
-                      minWidth: "32px",
-                      height: "32px",
-                      borderRadius: "50%",
-                      background: "#f3f4f6",
-                      color: "#374151",
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "center",
-                      fontWeight: 900,
-                      fontSize: "13px",
-                      flexShrink: 0,
+                      gap: "12px",
+                      background: "#fafafa",
+                      border: "1px solid #f0f0f0",
+                      borderRadius: "14px",
+                      padding: "10px 14px",
+                      transition: "background 0.15s",
+                      cursor: "pointer",
                     }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "#f5f5f5")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "#fafafa")}
                   >
-                    {rank}
-                  </div>
-
-                  {/* Word info — min-width:0 prevents flex overflow */}
-                  <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
+                    {/* Rank circle */}
                     <div
-                      className="text-subtitle text-es-red"
-                      style={{ wordBreak: "break-word", overflowWrap: "break-word" }}
+                      style={{
+                        minWidth: "28px",
+                        height: "28px",
+                        borderRadius: "50%",
+                        background: rank <= 3 ? "#fef3c7" : "#f3f4f6",
+                        color: rank <= 3 ? "#92400e" : "#6b7280",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontWeight: 800,
+                        fontSize: "12px",
+                        flexShrink: 0,
+                      }}
                     >
-                      {entry.word}
+                      {rank}
                     </div>
-                    <div className="text-small">{entry.meaning}</div>
-                  </div>
 
-                  {/* Fail count — flex-shrink:0 keeps badge always visible */}
-                  <div
-                    className="mistake-count"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      flexShrink: 0,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    <Frown size={12} />
-                    {entry.totalCount}
+                    {/* Book thumbnail */}
+                    <Image
+                      src={bookImg}
+                      alt={bookLabel}
+                      width={32}
+                      height={42}
+                      style={{
+                        objectFit: "cover",
+                        borderRadius: "4px",
+                        flexShrink: 0,
+                        boxShadow: "0 1px 4px rgba(0,0,0,0.15)",
+                      }}
+                    />
+
+                    {/* Word info */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontWeight: 700,
+                          fontSize: "15px",
+                          color: "#dc2626",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {entry.word}
+                      </div>
+                      <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "1px" }}>
+                        {entry.meaning}
+                      </div>
+                      {/* Book + unit badge */}
+                      <div style={{ marginTop: "4px" }}>
+                        <span
+                          style={{
+                            fontSize: "10px",
+                            fontWeight: 600,
+                            color: "#7c3aed",
+                            background: "#ede9fe",
+                            borderRadius: "6px",
+                            padding: "2px 6px",
+                          }}
+                        >
+                          {bookLabel} · Unit {entry.unitNum}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Fail count */}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "3px",
+                        flexShrink: 0,
+                        background: "#fee2e2",
+                        color: "#dc2626",
+                        borderRadius: "10px",
+                        padding: "4px 9px",
+                        fontSize: "13px",
+                        fontWeight: 700,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      <Frown size={11} />
+                      {entry.totalCount}
+                    </div>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
