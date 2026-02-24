@@ -175,6 +175,7 @@ Check out our future plans and technical upgrade strategy:
 
 - [v1.4.0 Upgrade Proposal](file:///Users/ikyoon/proj/holavoca/strategy/upgrade_proposal.md)
 - [v1.4.0 Test Automation Plan](file:///Users/ikyoon/proj/holavoca/strategy/testplan.md)
+- [v2.0 Transition & Workflow Guide](file:///Users/ikyoon/proj/holavoca/strategy/v2.0_workflow.md)
 
 ---
 
