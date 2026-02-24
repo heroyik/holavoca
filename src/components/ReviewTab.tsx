@@ -73,9 +73,12 @@ export default function ReviewTab() {
                   <div className="text-small">{entry["한국어 의미"]}</div>
                 </div>
                 <div className="flex-center gap-12">
-                  <div className="mistake-count">
-                    {mistakes[entry["스페인어 단어"]]}{" "}
-                    {mistakes[entry["스페인어 단어"]] === 1 ? "error" : "errors"}
+                  <div
+                    className="mistake-count"
+                    style={{ display: "flex", alignItems: "center", gap: "3px" }}
+                  >
+                    <Frown size={12} />
+                    {mistakes[entry["스페인어 단어"]]}
                   </div>
                   <button
                     onClick={() => removeMistake(entry["스페인어 단어"])}
