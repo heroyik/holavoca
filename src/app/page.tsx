@@ -138,26 +138,6 @@ export default function Home() {
         </div>
 
         <div className="header-right flex items-center gap-12">
-          {/* Live rank badge — only shown when authenticated and rank is known */}
-          {user && rank !== null && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "3px",
-                background: rank === 1 ? "linear-gradient(135deg,#fbbf24,#f59e0b)" : "#f3f4f6",
-                color: rank === 1 ? "#fff" : "#374151",
-                borderRadius: "10px",
-                padding: "3px 8px",
-                fontSize: "11px",
-                fontWeight: 800,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {rank === 1 ? "👑" : "🏅"} #{rank}
-              {total > 0 && <span style={{ opacity: 0.6, fontSize: "10px" }}>&nbsp;of {total}</span>}
-            </div>
-          )}
           <div
             onClick={handleDownload}
             className="vocab-stash-pill mt-0 flex items-center gap-2 py-4 px-10 h-32 hover-scale"
@@ -189,6 +169,28 @@ export default function Home() {
 
       {activeTab === 'learn' && (
         <div className="learn-container">
+          {/* Live rank badge relocated from header to avoid overlap on small screens */}
+          {user && rank !== null && (
+            <div
+              className="mt-8 mb-16"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                background: rank === 1 ? "linear-gradient(135deg,#fbbf24,#f59e0b)" : "#f3f4f6",
+                color: rank === 1 ? "#fff" : "#374151",
+                borderRadius: "12px",
+                padding: "6px 14px",
+                fontSize: "13px",
+                fontWeight: 900,
+                boxShadow: rank === 1 ? "0 4px 12px rgba(251,191,36,0.3)" : "none",
+                zIndex: 10,
+              }}
+            >
+              {rank === 1 ? "👑" : "🏅"} RANK #{rank}
+              {total > 0 && <span style={{ opacity: 0.6, fontSize: "11px", fontWeight: 700 }}>&nbsp;of {total} globally</span>}
+            </div>
+          )}
           {/* Connector SVG Background */}
           <svg className="connector-svg">
             <path
