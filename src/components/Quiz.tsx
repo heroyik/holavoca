@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo, useEffect } from "react";
+import { useSound } from "@/hooks/useSound";
 import { VocabEntry, guessPOS } from "@/utils/vocab";
 import vocabData from "@/data/vocab.json"; // Import full vocab for distractors
 import deleSentences from "@/data/dele_sentences.json";
@@ -27,6 +28,9 @@ interface QuizProps {
 export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
   const router = useRouter();
   const { addXP, addGem, addMistake, completeUnit, user, stats } = useGamification();
+
+  // Sound hook — preloaded + Chrome Android unlock
+  const { play: playSound } = useSound(stats.settings?.soundEnabled ?? true);
 
   // 6.2 — Live rank refresh after quiz ends
   const { refresh: refreshRank } = useRank(user?.uid ?? null, stats.xp);
@@ -144,18 +148,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
     triggerHaptic("error");
   };
 
-  const playSound = (type: "correct" | "incorrect" | "cheer") => {
-    if (!stats.settings?.soundEnabled) return;
-    try {
-      const soundFile = type === "cheer"
-        ? `cheer${Math.floor(Math.random() * 5) + 1}.mp3`
-        : `${type}.mp3`;
-      const audio = new Audio(`/sounds/${soundFile}`);
-      audio.play().catch(e => console.warn("Audio play blocked or file missing:", e));
-    } catch (e) {
-      console.error("Audio initialization failed:", e);
-    }
-  };
+  // playSound is now provided by useSound hook above
 
   const triggerHaptic = (type: "success" | "error" | "combo") => {
     if (!stats.settings?.hapticsEnabled || typeof navigator === 'undefined' || !navigator.vibrate) return;
