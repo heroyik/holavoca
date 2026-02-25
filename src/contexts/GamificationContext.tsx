@@ -42,7 +42,9 @@ interface GamificationContextType {
   clearAllMistakes: () => void;
   addGem: (amount: number) => void;
   updateSettings: (settings: Partial<NonNullable<UserStats['settings']>>) => void;
+  updateProfile: (profile: Partial<Pick<UserStats, 'displayName' | 'photoURL'>>) => void;
 }
+
 
 const GamificationContext = createContext<GamificationContextType | undefined>(undefined);
 
@@ -159,8 +161,8 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       try {
         await setDoc(doc(currentDb, "users", currentUser.uid), {
           ...statsRef.current,
-          displayName: currentUser.displayName,
-          photoURL: currentUser.photoURL
+          displayName: statsRef.current.displayName || currentUser.displayName,
+          photoURL: statsRef.current.photoURL || currentUser.photoURL
         }, { merge: true });
         console.log("[GamificationProvider] Progress synced to cloud");
       } catch (e) {
@@ -287,6 +289,14 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     saveStatsLocally(updatedStats);
   };
 
+  const updateProfile = (profile: Partial<Pick<UserStats, 'displayName' | 'photoURL'>>) => {
+    const updatedStats: UserStats = {
+      ...statsRef.current,
+      ...profile,
+    };
+    saveStatsLocally(updatedStats);
+  };
+
   return (
     <GamificationContext.Provider value={{
       user,
@@ -301,7 +311,8 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       removeMistake: clearMistake,
       clearAllMistakes,
       addGem,
-      updateSettings
+      updateSettings,
+      updateProfile
     }}>
       {children}
     </GamificationContext.Provider>

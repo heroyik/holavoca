@@ -21,6 +21,8 @@ export function useGamification() {
     clearMistake: context.clearMistake,
     removeMistake: context.removeMistake,
     clearAllMistakes: context.clearAllMistakes,
-    updateSettings: context.updateSettings
+    updateSettings: context.updateSettings,
+    updateProfile: context.updateProfile
   };
 }
+

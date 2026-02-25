@@ -16,9 +16,12 @@ interface UserProfileProps {
 }
 
 export default function UserProfile({ user, stats }: UserProfileProps) {
-    const { unlockProgress, updateSettings } = useGamification();
+    const { unlockProgress, updateSettings, updateProfile } = useGamification();
     const [devClickCount, setDevClickCount] = useState(0);
     const [selectedLevel, setSelectedLevel] = useState(1);
+    const [adminName, setAdminName] = useState(stats.displayName || user?.displayName || '');
+    const [adminPhoto, setAdminPhoto] = useState(stats.photoURL || user?.photoURL || '');
+
 
     const handleLogin = async () => {
         if (!auth || !googleProvider) {
@@ -52,24 +55,24 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                             onClick={() => setDevClickCount(prev => prev + 1)}
                             className="avatar-container w-100 h-100 rounded-full relative mb-16 overflow-hidden flex-center"
                             style={{
-                                backgroundColor: user.photoURL ? 'transparent' : getAvatarColor(user.uid),
+                                backgroundColor: (stats.photoURL || user.photoURL) ? 'transparent' : getAvatarColor(user.uid),
                                 color: 'white',
                                 fontWeight: 900,
                                 fontSize: '48px'
                             }}
                         >
-                            {user.photoURL ? (
+                            {(stats.photoURL || user.photoURL) ? (
                                 <Image
-                                    src={user.photoURL}
-                                    alt={user.displayName || 'User'}
+                                    src={stats.photoURL || user.photoURL || ''}
+                                    alt={stats.displayName || user.displayName || 'User'}
                                     fill
                                     className="object-cover"
                                 />
                             ) : (
-                                <span>{getInitial(user.displayName || undefined)}</span>
+                                <span>{getInitial(stats.displayName || user.displayName || undefined)}</span>
                             )}
                         </div>
-                        <h2 className="font-24 font-900 text-main mb-4">{user.displayName}</h2>
+                        <h2 className="font-24 font-900 text-main mb-4">{stats.displayName || user.displayName}</h2>
                         <p className="text-secondary font-700 mb-24">Spanish Enthusiast 🇪🇸</p>
 
                         <div className="stat-grid">
@@ -95,29 +98,66 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                         {user.email === 'heroyik@gmail.com' && devClickCount >= 5 && (
                             <div className="mt-32 p-16 bg-dev border-dev rounded-12 text-left">
                                 <p className="font-14 font-800 text-duo-green mb-12">🔧 DEV CONSOLE</p>
-                                <div className="flex items-center gap-8">
-                                    <select
-                                        value={selectedLevel}
-                                        onChange={(e) => setSelectedLevel(Number(e.target.value))}
-                                        className="select-standard flex-1"
-                                    >
-                                        {Array.from({ length: 15 }, (_, i) => i + 1).map(level => (
-                                            <option key={level} value={level}>Unlock to Level {level}</option>
-                                        ))}
-                                    </select>
+                                
+                                <div className="space-y-12 mb-20">
+                                    <div className="flex flex-col gap-4">
+                                        <label className="font-12 font-800 uppercase text-secondary">Admin Name</label>
+                                        <input 
+                                            type="text" 
+                                            value={adminName}
+                                            onChange={(e) => setAdminName(e.target.value)}
+                                            className="input-standard py-8 px-12"
+                                            placeholder="Display Name"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col gap-4">
+                                        <label className="font-12 font-800 uppercase text-secondary">Admin Photo URL</label>
+                                        <input 
+                                            type="text" 
+                                            value={adminPhoto}
+                                            onChange={(e) => setAdminPhoto(e.target.value)}
+                                            className="input-standard py-8 px-12 font-11"
+                                            placeholder="https://image-url"
+                                        />
+                                    </div>
                                     <button
                                         onClick={() => {
-                                            const units = getUnits();
-                                            unlockProgress(units.slice(0, selectedLevel).map(u => u.id), selectedLevel * 500, selectedLevel * 50);
-                                            setDevClickCount(0);
+                                            updateProfile({ displayName: adminName, photoURL: adminPhoto });
+                                            alert("Admin profile updated! Please wait for sync.");
                                         }}
-                                        className="duo-button duo-button-primary w-auto py-8"
+                                        className="duo-button duo-button-secondary py-8"
                                     >
-                                        GO
+                                        Update Profile Metadata
                                     </button>
+                                </div>
+
+                                <div className="border-t border-glass pt-16 mt-16">
+                                    <label className="font-12 font-800 uppercase text-secondary mb-8 block">Progression Tools</label>
+                                    <div className="flex items-center gap-8">
+                                        <select
+                                            value={selectedLevel}
+                                            onChange={(e) => setSelectedLevel(Number(e.target.value))}
+                                            className="select-standard flex-1"
+                                        >
+                                            {Array.from({ length: 15 }, (_, i) => i + 1).map(level => (
+                                                <option key={level} value={level}>Unlock to Level {level}</option>
+                                            ))}
+                                        </select>
+                                        <button
+                                            onClick={() => {
+                                                const units = getUnits();
+                                                unlockProgress(units.slice(0, selectedLevel).map(u => u.id), selectedLevel * 500, selectedLevel * 50);
+                                                setDevClickCount(0);
+                                            }}
+                                            className="duo-button duo-button-primary w-auto py-8"
+                                        >
+                                            GO
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         )}
+
 
                         <button
                             onClick={handleLogout}
