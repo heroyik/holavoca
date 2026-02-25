@@ -34,7 +34,7 @@ interface GamificationContextType {
   isInitialized: boolean;
   addXP: (amount: number) => void;
   completeUnit: (unitId: string, xpEarned?: number, isPerfect?: boolean) => void;
-  unlockProgress: (unitIds: string[], xp: number, gems: number) => void;
+  unlockProgress: (unitIds: string[], xp?: number, gems?: number) => void;
   recordMistake: (spanishWord: string, unitId?: string) => void;
   addMistake: (spanishWord: string, unitId?: string) => void;
   clearMistake: (spanishWord: string) => void;
