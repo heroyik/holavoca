@@ -24,73 +24,96 @@ const SOUND_FILES: Record<string, string> = {
  * - Prefixes assets with BASE_PATH to avoid 404s.
  * - AudioContext must be resumed inside a user gesture handler for Safari.
  */
+/**
+ * Global Singleton for Audio state to persist across page navigations.
+ * This ensures sounds are only loaded once and are ready immediately.
+ */
+let globalCtx: AudioContext | null = null;
+const globalBuffers: Record<string, AudioBuffer> = {};
+let globalUnlocked = false;
+let isPreloadingStarted = false;
+
+const getGlobalContext = (): AudioContext | null => {
+  if (typeof window === "undefined") return null;
+  if (!globalCtx) {
+    const AC =
+      window.AudioContext ||
+      (window as any).webkitAudioContext;
+    if (!AC) return null;
+    globalCtx = new AC();
+  }
+  return globalCtx;
+};
+
+const preloadAllBuffers = async () => {
+  if (isPreloadingStarted) return;
+  isPreloadingStarted = true;
+
+  const ctx = getGlobalContext();
+  if (!ctx) return;
+
+  await Promise.allSettled(
+    Object.entries(SOUND_FILES).map(async ([key, src]) => {
+      if (globalBuffers[key]) return;
+      try {
+        const res = await fetch(src);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const arrayBuf = await res.arrayBuffer();
+        const audioBuf = await ctx.decodeAudioData(arrayBuf);
+        globalBuffers[key] = audioBuf;
+        console.log(`[useSound] Preloaded: ${key}`);
+      } catch (err) {
+        console.warn(`[useSound] Failed to preload ${key}:`, err);
+      }
+    })
+  );
+};
+
+// Start preloading immediately if in browser
+if (typeof window !== "undefined") {
+  preloadAllBuffers();
+}
+
+/**
+ * WebAudio API-based sound hook for maximum browser compatibility.
+ */
 export function useSound(enabled: boolean) {
-  const ctxRef = useRef<AudioContext | null>(null);
-  const buffersRef = useRef<Record<string, AudioBuffer>>({});
-  const unlockedRef = useRef(false);
-
-  const getContext = useCallback((): AudioContext | null => {
-    if (typeof window === "undefined") return null;
-    if (!ctxRef.current) {
-      const AC =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext?: typeof AudioContext })
-          .webkitAudioContext;
-      if (!AC) return null;
-      ctxRef.current = new AC();
-    }
-    return ctxRef.current;
-  }, []);
-
-  const loadBuffers = useCallback(async () => {
-    const ctx = getContext();
+  // We still use a ref for local tracking inside the component if needed,
+  // but rely on global state for the heavy lifting.
+  
+  const unlock = useCallback(async () => {
+    const ctx = getGlobalContext();
     if (!ctx) return;
 
-    await Promise.allSettled(
-      Object.entries(SOUND_FILES).map(async ([key, src]) => {
-        if (buffersRef.current[key]) return;
-        try {
-          const res = await fetch(src);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const arrayBuf = await res.arrayBuffer();
-          const audioBuf = await ctx.decodeAudioData(arrayBuf);
-          buffersRef.current[key] = audioBuf;
-        } catch (err) {
-          console.warn(`[useSound] Failed to load ${key} from ${src}:`, err);
-        }
-      })
-    );
-  }, [getContext]);
+    // Resume context within user gesture (CRITICAL for Safari)
+    if (ctx.state !== "running") {
+      await ctx.resume().catch((e) => console.warn("[useSound] Resume failed:", e));
+    }
+
+    if (!globalUnlocked) {
+      globalUnlocked = true;
+      console.log("[useSound] AudioContext Unlocked");
+      // Re-trigger buffer loading just in case it missed the context window
+      preloadAllBuffers();
+    }
+  }, []);
 
   useEffect(() => {
-    const unlock = async () => {
-      const ctx = getContext();
-      if (!ctx) return;
-
-      // Resume context within user gesture (CRITICAL for Safari)
-      if (ctx.state === "suspended" || ctx.state === "interrupted") {
-        await ctx.resume().catch((e) => console.warn("[useSound] Resume failed:", e));
-      }
-
-      if (unlockedRef.current) return;
-      unlockedRef.current = true;
-      
-      // Load buffers immediately after unlock
-      await loadBuffers();
-    };
-
     const handleGesture = () => {
       unlock();
     };
 
+    // Use multiple events for capture
     document.addEventListener("touchstart", handleGesture, { once: false, passive: true });
     document.addEventListener("mousedown", handleGesture, { once: false });
+    document.addEventListener("click", handleGesture, { once: false });
 
     return () => {
       document.removeEventListener("touchstart", handleGesture);
       document.removeEventListener("mousedown", handleGesture);
+      document.removeEventListener("click", handleGesture);
     };
-  }, [getContext, loadBuffers]);
+  }, [unlock]);
 
   const play = useCallback(
     async (type: SoundType) => {
@@ -103,18 +126,18 @@ export function useSound(enabled: boolean) {
       }
 
       try {
-        const ctx = getContext();
+        const ctx = getGlobalContext();
         if (!ctx) return;
 
-        // Ensure context is running - some browsers re-suspend it
+        // Auto-resume fallback (essential for some mobile browsers)
         if (ctx.state !== "running") {
           await ctx.resume().catch(() => {});
         }
 
-        const buffer = buffersRef.current[key];
+        const buffer = globalBuffers[key];
         if (!buffer) {
-          // Fallback: try loading if missing, though it might be too late for this trigger
-          loadBuffers();
+          console.warn(`[useSound] Skipping play - ${key} not buffered yet.`);
+          preloadAllBuffers(); // Lazy-retry
           return;
         }
 
@@ -131,7 +154,7 @@ export function useSound(enabled: boolean) {
         console.warn(`[useSound] play failed (${key}):`, err);
       }
     },
-    [enabled, getContext, loadBuffers]
+    [enabled]
   );
 
   return { play };
