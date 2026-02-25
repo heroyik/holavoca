@@ -196,3 +196,33 @@ Analysis and technical plan for the next version of the Spanish learning app.
 - Each entry written to `/leaderboard/{userId}` with fields: `displayName`, `xp`, `gems`, `streak`.
 - Current real user(s) are included in the board — seed script checks for existing UIDs and skips them.
 - **This script is run exactly once** and then archived. Never re-run to avoid duplicate seeding.
+
+---
+
+## Phase 7: Immersion & Accessibility
+
+### 7-1. Spanish Sound & Haptic Feedback
+
+**Goal**: Provide immediate sensory feedback to reinforce learning and engagement.
+
+- **Audio Assets**: Generated Spanish TTS voices for "¡Correcto!" and "¡Incorrecto!" using `gTTS`.
+- **Haptic Logic**: Implemented `navigator.vibrate` patterns for supported Android devices:
+  - Correct answer: Single 50ms vibration.
+  - Incorrect answer: [100ms, 50ms, 100ms] error pattern.
+- **Settings Integration**: Toggles in the Profile tab allow users to enable/disable Sound and Haptics independently. Settings persist via local storage and cloud sync.
+
+### 7-2. Combo Cheering Effect
+
+**Goal**: Encourage prolonged correct-answer streaks with dynamic audio and haptic rewards.
+
+- **Streak Tracking**: A `comboCount` state tracks consecutive correct answers.
+- **Cheering Audio**: After 3+ consecutive correct answers, a random Spanish cheering phrase is played (e.g., "¡Excelente!", "¡Increíble!", "¡Fantástico!").
+- **Enhanced Haptics**: Trigger a "Triple Burst" vibration pattern `[50, 30, 50, 30, 50]` to signify milestone achievement.
+
+### 7-3. Responsive Integrity (Galaxy S25)
+
+**Goal**: Ensure a pixel-perfect layout and navigation on ultra-narrow modern displays (360px).
+
+- **Header Optimization**: Moved the Rank Badge from the header to the learning container to prevent overlap with book selection icons.
+- **Toggle Fixes**: Added `flex-shrink: 0` to settings toggles to prevent compression when label text is long.
+- **Verification**: Verified via Playwright E2E tests (`ui_map.spec.ts`) on a 360x780 viewport.
