@@ -7,7 +7,7 @@ import vocabData from "@/data/vocab.json"; // Import full vocab for distractors
 import deleSentences from "@/data/dele_sentences.json";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { X, CheckCircle, XCircle, HelpCircle, Frown } from "lucide-react";
+import { X, Frown } from "lucide-react";
 import { useGamification } from "@/hooks/useGamification";
 import { useGlobalTop20 } from "@/hooks/useGlobalTop20";
 import { useRank } from "@/hooks/useRank";
@@ -234,8 +234,13 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
         <Link href="/" aria-label="Close lesson" className="no-underline">
           <X className="text-subtitle pointer" />
         </Link>
-        <div className="flex-1 progress-bar-track">
-          <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
+        <div className="flex-1 flex items-center gap-12">
+          <div className="flex-1 progress-bar-track">
+            <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
+          </div>
+          <span className="text-small font-800" style={{ color: 'var(--text-secondary)', minWidth: '45px', textAlign: 'right' }}>
+            {currentIndex + 1} / {questions.length}
+          </span>
         </div>
       </div>
 

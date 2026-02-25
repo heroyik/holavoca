@@ -154,7 +154,7 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                                                     }
                                                 } else {
                                                     const units = getUnits();
-                                                    unlockProgress(units.slice(0, selectedLevel).map(u => u.id), selectedLevel * 500, selectedLevel * 50);
+                                                    unlockProgress(units.slice(0, selectedLevel).map(u => u.id));
                                                     setDevClickCount(0);
                                                 }
                                             }}

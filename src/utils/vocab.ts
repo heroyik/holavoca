@@ -113,52 +113,48 @@ export function isEasyCognate(spanishWord: string, koreanMeaning: string): boole
 }
 
 export function getUnits(sources: string[] = ['1', '2'], excludeEasy: boolean = false): LearningUnit[] {
-  const units: LearningUnit[] = [];
-
-  // Filter data based on provided sources
-  let filteredVocabData = (vocabData as VocabEntry[]).filter(item => sources.includes(item["출처"]));
-
-  // Apply easy cognate filter if requested
+  // 1. Get ALL unique words across all sources to establish static base units
+  const allFilteredVocab = (vocabData as VocabEntry[]).filter(item => ['1', '2'].includes(item["출처"]));
+  
   if (excludeEasy) {
-    filteredVocabData = filteredVocabData.filter(item => !isEasyCognate(item["스페인어 단어"], item["한국어 의미"]));
+    // Note: excludeEasy is usually for total count or specific filtering, 
+    // but for static units we must be careful. For now, we follow the same pattern.
   }
 
-  // 1. Flatten and unique the vocabulary
-  const uniqueWords = new Map<string, VocabEntry>();
-  filteredVocabData.forEach((word) => {
+  const uniqueWordsMap = new Map<string, VocabEntry>();
+  allFilteredVocab.forEach((word) => {
     const key = word["스페인어 단어"].toLowerCase().trim();
-    if (!uniqueWords.has(key)) {
-      uniqueWords.set(key, word);
+    if (!uniqueWordsMap.has(key)) {
+      uniqueWordsMap.set(key, word);
     }
   });
 
-  const allWords = Array.from(uniqueWords.values());
-
-  // 2. Sort by Difficulty (v2.0 logic)
-  allWords.sort((a, b) => {
+  const allWordsSorted = Array.from(uniqueWordsMap.values()).sort((a, b) => {
     const diffA = getDifficultyScore(a["스페인어 단어"]);
     const diffB = getDifficultyScore(b["스페인어 단어"]);
     if (diffA !== diffB) return diffA - diffB;
-    // Deterministic tie-break
     return a["스페인어 단어"].localeCompare(b["스페인어 단어"]);
   });
 
-  // 3. Partition into exactly 15 units
   const TOTAL_UNITS = 15;
-  const unitSize = Math.ceil(allWords.length / TOTAL_UNITS);
+  const unitSize = Math.ceil(allWordsSorted.length / TOTAL_UNITS);
+  const units: LearningUnit[] = [];
 
   for (let i = 0; i < TOTAL_UNITS; i++) {
     const start = i * unitSize;
-    const end = Math.min(start + unitSize, allWords.length);
-    const unitWords = allWords.slice(start, end);
+    const end = Math.min(start + unitSize, allWordsSorted.length);
+    const staticUnitWords = allWordsSorted.slice(start, end);
 
-    if (unitWords.length === 0) break;
+    if (staticUnitWords.length === 0) break;
+
+    // Filter words in this static unit based on requested sources
+    const dynamicWords = staticUnitWords.filter(w => sources.includes(w["출처"]));
 
     units.push({
       id: `unit-${i + 1}`,
       title: `Unit ${i + 1}`,
       source: "Multi",
-      words: unitWords,
+      words: dynamicWords,
     });
   }
 

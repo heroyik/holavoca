@@ -15,10 +15,30 @@ export default function ReviewTab() {
   const { top20, loading: top20Loading, error: top20Error } = useGlobalTop20();
 
   const mistakes = stats.mistakes || {};
-  const missedWordList = Object.keys(mistakes);
-  const reviewEntries = (vocabData as VocabEntry[]).filter((v) =>
-    missedWordList.includes(v["스페인어 단어"])
-  );
+  
+  // Grouping logic to handle data inconsistency (duplicates in vocab and variant keys in mistakes)
+  const groupedMistakesMap = new Map<string, { entry: VocabEntry; totalCount: number }>();
+  
+  (vocabData as VocabEntry[]).forEach((v) => {
+    const word = v["스페인어 단어"];
+    const normalized = word.trim();
+    
+    // Sum counts for all keys that match this word (trimmed)
+    let totalCount = 0;
+    Object.entries(mistakes).forEach(([mKey, mCount]) => {
+      if (mKey.trim() === normalized) {
+        totalCount += mCount;
+      }
+    });
+
+    if (totalCount > 0) {
+      if (!groupedMistakesMap.has(normalized)) {
+        groupedMistakesMap.set(normalized, { entry: v, totalCount });
+      }
+    }
+  });
+
+  const reviewEntries = Array.from(groupedMistakesMap.values());
 
   return (
     <div className="review-content">
@@ -66,7 +86,7 @@ export default function ReviewTab() {
           </div>
 
           <div className="mistake-list">
-            {reviewEntries.map((entry) => (
+            {reviewEntries.map(({ entry, totalCount }) => (
               <div key={entry["스페인어 단어"]} className="mistake-item flex-between">
                 <div className="flex-1">
                   <div className="text-subtitle text-es-red">{entry["스페인어 단어"]}</div>
@@ -78,7 +98,7 @@ export default function ReviewTab() {
                     style={{ display: "flex", alignItems: "center", gap: "3px" }}
                   >
                     <Frown size={12} />
-                    {mistakes[entry["스페인어 단어"]]}
+                    {totalCount}
                   </div>
                   <button
                     onClick={() => removeMistake(entry["스페인어 단어"])}

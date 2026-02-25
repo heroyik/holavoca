@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import { User, onAuthStateChanged } from "firebase/auth";
-import { doc, setDoc, onSnapshot, collection, increment, updateDoc, setDoc as fsSetDoc } from "firebase/firestore";
+import { doc, setDoc, onSnapshot, increment, setDoc as fsSetDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 export interface UserStats {
@@ -164,7 +164,17 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
         await setDoc(doc(currentDb, "users", currentUser.uid), {
           ...statsRef.current,
           displayName: statsRef.current.displayName || currentUser.displayName,
-          photoURL: statsRef.current.photoURL || currentUser.photoURL
+          photoURL: (function() {
+            const currentPhoto = statsRef.current.photoURL;
+            const authPhoto = currentUser.photoURL;
+            if (!currentPhoto) return authPhoto;
+            // If both are Google URLs, allow update to stay in sync with Google Account
+            if (authPhoto && currentPhoto.includes('googleusercontent.com') && authPhoto.includes('googleusercontent.com')) {
+              return authPhoto;
+            }
+            // Otherwise preserve custom or existing photo
+            return currentPhoto;
+          })()
         }, { merge: true });
         console.log("[GamificationProvider] Progress synced to cloud");
       } catch (e) {
@@ -225,17 +235,18 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     saveStatsLocally(newStats);
   };
 
-  const unlockProgress = (unitIds: string[], xp: number, gems: number) => {
+  const unlockProgress = (unitIds: string[], xp?: number, gems?: number) => {
     const newStats: UserStats = {
       ...statsRef.current,
-      xp,
-      gems,
+      xp: xp ?? statsRef.current.xp,
+      gems: gems ?? statsRef.current.gems,
       completedUnits: unitIds
     };
     saveStatsLocally(newStats);
   };
 
   const recordMistake = (spanishWord: string, unitId?: string) => {
+    const word = spanishWord.trim();
     const currentMistakes = statsRef.current.mistakes || {};
     const newUnitStats = { ...(statsRef.current.unitStats || {}) };
 
@@ -251,22 +262,23 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       ...statsRef.current,
       mistakes: {
         ...currentMistakes,
-        [spanishWord]: (currentMistakes[spanishWord] || 0) + 1
+        [word]: (currentMistakes[word] || 0) + 1
       },
       unitStats: newUnitStats
     });
 
     // Fire-and-forget: increment global word fail count in Firestore
     if (db) {
-      const wordRef = doc(db, "globalWordStats", encodeURIComponent(spanishWord));
-      fsSetDoc(wordRef, { failCount: increment(1), word: spanishWord }, { merge: true })
+      const wordRef = doc(db, "globalWordStats", encodeURIComponent(word));
+      fsSetDoc(wordRef, { failCount: increment(1), word: word }, { merge: true })
         .catch((e) => console.warn("[GlobalStats] Failed to increment:", e));
     }
   };
 
   const clearMistake = (spanishWord: string) => {
+    const word = spanishWord.trim();
     const currentMistakes = { ...statsRef.current.mistakes };
-    delete currentMistakes[spanishWord];
+    delete currentMistakes[word];
     saveStatsLocally({
       ...statsRef.current,
       mistakes: currentMistakes

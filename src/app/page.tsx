@@ -15,7 +15,27 @@ import ReviewTab from '@/components/ReviewTab';
 import RankToast from '@/components/RankToast';
 import vol1 from '../../public/vol1.jpg';
 import vol2 from '../../public/vol2.jpg';
-import { Github } from 'lucide-react';
+import { 
+  Github, 
+  ThumbsUp, 
+  Check, 
+  Lock, 
+  MessageSquare, 
+  User, 
+  Coffee, 
+  ShoppingBag, 
+  MapPin, 
+  Activity, 
+  Heart, 
+  Star, 
+  Book, 
+  Music, 
+  Camera, 
+  Sun, 
+  Award, 
+  Shield, 
+  Target 
+} from 'lucide-react';
 
 // Gamification Helpers
 const getLevelTier = (idx: number) => {
@@ -26,13 +46,6 @@ const getLevelTier = (idx: number) => {
 
 const getLevelTitle = (idx: number) => {
   return getLevelTier(idx).toUpperCase();
-};
-
-const getUnitIcon = (idx: number, isLocked: boolean, isCompleted: boolean, isMastered: boolean) => {
-  if (isLocked) return '🔒';
-  if (isMastered) return '👍';
-  if (isCompleted) return '✅';
-  return '⭐';
 };
 
 const getLevelColor = (idx: number, isLocked: boolean) => {
@@ -218,8 +231,21 @@ export default function Home() {
             const unitStatusClass = isLocked ? 'locked' : (isMastered ? 'mastered' : (isCurrent ? 'current' : (isCompleted ? 'completed' : 'available')));
             const combinedClass = `${unitStatusClass} ${isLocked ? '' : tier}`;
 
-            const failCount = stats.unitStats?.[unit.id]?.failedWords || 0;
-            const showFailBadge = !isCompleted && !isLocked && failCount > 0;
+            const vol1FailCount = stats.mistakes ? unit.words.filter(w => w["출처"] === "1" && stats.mistakes[w["스페인어 단어"].toLowerCase().trim()]).length : 0;
+            const vol2FailCount = stats.mistakes ? unit.words.filter(w => w["출처"] === "2" && stats.mistakes[w["스페인어 단어"].toLowerCase().trim()]).length : 0;
+            const totalFailCount = vol1FailCount + vol2FailCount;
+            const showFailBadge = !isLocked && totalFailCount > 0;
+
+            const getUnitIcon = (index: number, locked: boolean, completed: boolean, mastered: boolean) => {
+              if (locked) return <Lock size={24} className="text-white opacity-50" />;
+              if (mastered) return <ThumbsUp size={32} className="text-white" fill="currentColor" />;
+              if (completed) return <Check size={32} className="text-white" strokeWidth={4} />;
+              
+              // Standard level icons
+              const icons = [MessageSquare, User, Coffee, ShoppingBag, MapPin, Activity, Heart, Star, Book, Music, Camera, Sun, Award, Shield, Target];
+              const Icon = icons[index % icons.length];
+              return <Icon size={24} className="text-white" />;
+            };
 
             return (
               <div key={unit.id}
@@ -237,8 +263,10 @@ export default function Home() {
                     {getUnitIcon(index, isLocked, isCompleted, isMastered)}
 
                     {showFailBadge && (
-                      <div className="fail-badge">
-                        {failCount}
+                      <div className="fail-badge-dual">
+                        <div className="fail-badge-circle" />
+                        {vol1FailCount > 0 && <span className="vol-count vol1-count">{vol1FailCount}</span>}
+                        {vol2FailCount > 0 && <span className="vol-count vol2-count">{vol2FailCount}</span>}
                       </div>
                     )}
 
