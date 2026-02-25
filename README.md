@@ -20,6 +20,7 @@ HolaVoca is a premium, gamified Spanish learning platform inspired by modern edu
   - **Thumbs Up Mastery**: Mastered units (0 mistakes remaining) now display a prominent 👍 icon.
   - **Dual-Volume Mistake Badges**: Unit nodes now show twin counters — **Vol 1 mistakes (top-right)** and **Vol 2 mistakes (top-left)** — for clear learning focus.
 - **Safari Audio Compatibility**: Finalized migration to **WebAudio API**, ensuring perfectly synchronized sound across iOS/macOS Safari and Chrome.
+- **Real-time Cloud Sync**: Replaced the 5-second throttled auto-sync with immediate, asynchronous Firestore writes. Settings and mistake deletions now persist instantly.
 - **Developer Console Upgrades**: Added specialized tools for admin (`heroyik@gmail.com`) to manually manage profile metadata and initialize learning progression.
 
 ---

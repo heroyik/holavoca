@@ -152,42 +152,33 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     return () => unsubscribeAuth();
   }, []);
 
-  // Throttled Auto-Sync
-  useEffect(() => {
+  const syncStatsToCloud = async (newStats: UserStats) => {
     if (!user || !db || !isInitialized) return;
-
-    const currentDb = db;
-    const currentUser = user;
-
-    const timer = setTimeout(async () => {
-      try {
-        await setDoc(doc(currentDb, "users", currentUser.uid), {
-          ...statsRef.current,
-          displayName: statsRef.current.displayName || currentUser.displayName,
-          photoURL: (function() {
-            const currentPhoto = statsRef.current.photoURL;
-            const authPhoto = currentUser.photoURL;
-            if (!currentPhoto) return authPhoto;
-            // If both are Google URLs, allow update to stay in sync with Google Account
-            if (authPhoto && currentPhoto.includes('googleusercontent.com') && authPhoto.includes('googleusercontent.com')) {
-              return authPhoto;
-            }
-            // Otherwise preserve custom or existing photo
-            return currentPhoto;
-          })()
-        }, { merge: true });
-        console.log("[GamificationProvider] Progress synced to cloud");
-      } catch (e) {
-        console.error("[GamificationProvider] Cloud sync failed", e);
-      }
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, [stats, user, isInitialized]);
+    
+    try {
+      await setDoc(doc(db, "users", user.uid), {
+        ...newStats,
+        displayName: newStats.displayName || user.displayName,
+        photoURL: (function() {
+          const currentPhoto = newStats.photoURL;
+          const authPhoto = user.photoURL;
+          if (!currentPhoto) return authPhoto;
+          if (authPhoto && currentPhoto.includes('googleusercontent.com') && authPhoto.includes('googleusercontent.com')) {
+            return authPhoto;
+          }
+          return currentPhoto;
+        })()
+      }, { merge: true });
+      console.log("[GamificationProvider] Progress synced to cloud");
+    } catch (e) {
+      console.error("[GamificationProvider] Cloud sync failed", e);
+    }
+  };
 
   const saveStatsLocally = (newStats: UserStats) => {
     setStats(newStats);
     localStorage.setItem("holavoca_stats", JSON.stringify(newStats));
+    syncStatsToCloud(newStats);
   };
 
   const addXP = (amount: number) => {
@@ -275,21 +266,30 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const clearMistake = (spanishWord: string) => {
+  const clearMistake = async (spanishWord: string) => {
     const word = spanishWord.trim();
     const currentMistakes = { ...statsRef.current.mistakes };
     delete currentMistakes[word];
-    saveStatsLocally({
+    
+    const newStats = {
       ...statsRef.current,
       mistakes: currentMistakes
-    });
+    };
+    
+    saveStatsLocally(newStats);
+    statsRef.current = newStats;
+    console.log("[GamificationProvider] Mistake cleared:", word);
   };
 
-  const clearAllMistakes = () => {
-    saveStatsLocally({
+  const clearAllMistakes = async () => {
+    const newStats = {
       ...statsRef.current,
       mistakes: {}
-    });
+    };
+    
+    saveStatsLocally(newStats);
+    statsRef.current = newStats;
+    console.log("[GamificationProvider] All mistakes cleared");
   };
 
   const updateSettings = (newSettings: Partial<NonNullable<UserStats['settings']>>) => {
