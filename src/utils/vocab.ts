@@ -1,14 +1,14 @@
-import vocabData from '@/data/vocab.json';
+import vocabData from "@/data/vocab.json";
 
 export interface VocabEntry {
   "스페인어 단어": string;
   "성별/문법 정보": string;
   "한국어 의미": string;
-  "출처": string;
-  "예문"?: string;
+  출처: string;
+  예문?: string;
 }
 
-export type POS = 'noun' | 'verb' | 'adjective' | 'other';
+export type POS = "noun" | "verb" | "adjective" | "other";
 
 export interface LearningUnit {
   id: string;
@@ -27,28 +27,105 @@ export function guessPOS(entry: VocabEntry): POS {
 
   // 1. Verbs: Korean meaning usually ends with '다' in this dataset
   if (koreanMeaning.endsWith("다")) {
-    return 'verb';
+    return "verb";
   }
 
   // 2. Nouns: Explicitly marked with gender m or f
-  if (genderInfo.includes('m') || genderInfo.includes('f')) {
-    return 'noun';
+  if (genderInfo.includes("m") || genderInfo.includes("f")) {
+    return "noun";
   }
 
   // 3. Adjectives: Often have forms like o/a or /a but not marked as nouns
-  if (spanishWord.includes('/') || spanishWord.includes('(')) {
-    return 'adjective';
+  if (spanishWord.includes("/") || spanishWord.includes("(")) {
+    return "adjective";
   }
 
-  return 'other';
+  return "other";
 }
 
 const COMMON_COGNATES = [
-  "actor", "hotel", "model", "radio", "taxi", "doctor", "idea", "menu", "pasta", "pizza",
-  "hospital", "internet", "material", "moral", "original", "personal", "plan", "posible", "probable",
-  "banano", "bicicleta", "chocolate", "computadora", "elefante", "familia", "guitarra", "león", "mapa", "mesa",
-  "parque", "teléfono", "tomate", "tren", "universidad", "video", "yoga", "zebra", "animal", "base",
-  "cable", "canal", "clase", "club", "color", "comuna", "control", "crítico", "debate", "decision"
+  "actor",
+  "hotel",
+  "model",
+  "radio",
+  "taxi",
+  "doctor",
+  "idea",
+  "menu",
+  "pasta",
+  "pizza",
+  "hospital",
+  "internet",
+  "material",
+  "moral",
+  "original",
+  "personal",
+  "plan",
+  "posible",
+  "probable",
+  "banano",
+  "bicicleta",
+  "chocolate",
+  "computadora",
+  "elefante",
+  "familia",
+  "guitarra",
+  "león",
+  "mapa",
+  "mesa",
+  "parque",
+  "teléfono",
+  "tomate",
+  "tren",
+  "universidad",
+  "video",
+  "yoga",
+  "zebra",
+  "animal",
+  "base",
+  "cable",
+  "canal",
+  "clase",
+  "club",
+  "color",
+  "comuna",
+  "control",
+  "crítico",
+  "debate",
+  "decision",
+  // New easy cognates
+  "golf",
+  "tenis",
+  "béisbol",
+  "fútbol",
+  "baloncesto",
+  "básquetbol",
+  "café",
+  "té",
+  "banana",
+  "menú",
+  "hamburguesa",
+  "sándwich",
+  "ensalada",
+  "sopa",
+  "banco",
+  "bar",
+  "restaurante",
+  "supermercado",
+  "televisión",
+  "tele",
+  "cámara",
+  "autobús",
+  "piano",
+  "sofá",
+  "problema",
+  "programa",
+  "papel",
+  "doctora",
+  "actriz",
+  "tigre",
+  "metro",
+  "coche",
 ];
 
 function getDifficultyScore(word: string): number {
@@ -61,7 +138,7 @@ function getDifficultyScore(word: string): number {
   }
 
   // Cognate check
-  const cleanWord = word.toLowerCase().split('/')[0].split('(')[0].trim();
+  const cleanWord = word.toLowerCase().split("/")[0].split("(")[0].trim();
   if (COMMON_COGNATES.includes(cleanWord)) {
     score -= 100; // Very easy
   }
@@ -84,8 +161,8 @@ function getLevenshteinDistance(a: string, b: string): number {
       } else {
         matrix[i][j] = Math.min(
           matrix[i - 1][j - 1] + 1, // substitution
-          matrix[i][j - 1] + 1,     // insertion
-          matrix[i - 1][j] + 1      // deletion
+          matrix[i][j - 1] + 1, // insertion
+          matrix[i - 1][j] + 1, // deletion
         );
       }
     }
@@ -93,18 +170,30 @@ function getLevenshteinDistance(a: string, b: string): number {
   return matrix[b.length][a.length];
 }
 
-export function isEasyCognate(spanishWord: string, koreanMeaning: string): boolean {
-  const cleanSpanish = spanishWord.toLowerCase().split('/')[0].split('(')[0].trim();
+export function isEasyCognate(
+  spanishWord: string,
+  koreanMeaning: string,
+): boolean {
+  const cleanSpanish = spanishWord
+    .toLowerCase()
+    .split("/")[0]
+    .split("(")[0]
+    .trim();
 
   // 1. Check curated list
   if (COMMON_COGNATES.includes(cleanSpanish)) return true;
 
   // 2. Heuristic check: Many English cognates end in -ción (tion), -dad (ty), -mente (ly), etc.
-  // Since we don't have English translations in the JSON (only Korean), 
-  // and the user specifically asked for "English Cognates", 
+  // Since we don't have English translations in the JSON (only Korean),
+  // and the user specifically asked for "English Cognates",
   // we might need to assume the Spanish word itself looks like English.
   // Common patterns for Spanish/English cognates:
-  if (cleanSpanish.endsWith('ción') || cleanSpanish.endsWith('dad') || cleanSpanish.endsWith('al') || cleanSpanish.endsWith('ble')) {
+  if (
+    cleanSpanish.endsWith("ción") ||
+    cleanSpanish.endsWith("dad") ||
+    cleanSpanish.endsWith("al") ||
+    cleanSpanish.endsWith("ble")
+  ) {
     // These are very likely cognates if they are long enough
     if (cleanSpanish.length > 5) return true;
   }
@@ -112,13 +201,19 @@ export function isEasyCognate(spanishWord: string, koreanMeaning: string): boole
   return false;
 }
 
-export function getUnits(sources: string[] = ['1', '2'], excludeEasy: boolean = false): LearningUnit[] {
+export function getUnits(
+  sources: string[] = ["1", "2"],
+  excludeEasy: boolean = false,
+): LearningUnit[] {
   // 1. Get ALL unique words across all sources to establish static base units
-  const allFilteredVocab = (vocabData as VocabEntry[]).filter(item => ['1', '2'].includes(item["출처"]));
-  
+  let allFilteredVocab = (vocabData as VocabEntry[]).filter((item) =>
+    ["1", "2"].includes(item["출처"]),
+  );
+
   if (excludeEasy) {
-    // Note: excludeEasy is usually for total count or specific filtering, 
-    // but for static units we must be careful. For now, we follow the same pattern.
+    allFilteredVocab = allFilteredVocab.filter(
+      (item) => !isEasyCognate(item["스페인어 단어"], item["한국어 의미"]),
+    );
   }
 
   const uniqueWordsMap = new Map<string, VocabEntry>();
@@ -148,7 +243,9 @@ export function getUnits(sources: string[] = ['1', '2'], excludeEasy: boolean = 
     if (staticUnitWords.length === 0) break;
 
     // Filter words in this static unit based on requested sources
-    const dynamicWords = staticUnitWords.filter(w => sources.includes(w["출처"]));
+    const dynamicWords = staticUnitWords.filter((w) =>
+      sources.includes(w["출처"]),
+    );
 
     units.push({
       id: `unit-${i + 1}`,
@@ -161,20 +258,34 @@ export function getUnits(sources: string[] = ['1', '2'], excludeEasy: boolean = 
   return units;
 }
 
-export function getRandomWords(count: number, sources: string[] = ['1'], exclude?: string | string[]): VocabEntry[] {
-  const allWords = (vocabData as VocabEntry[]).filter(item => sources.includes(item["출처"]));
+export function getRandomWords(
+  count: number,
+  sources: string[] = ["1"],
+  exclude?: string | string[],
+): VocabEntry[] {
+  const allWords = (vocabData as VocabEntry[]).filter((item) =>
+    sources.includes(item["출처"]),
+  );
 
-  const excludeArray = typeof exclude === 'string' ? [exclude] : exclude || [];
-  const filtered = excludeArray.length > 0
-    ? allWords.filter(w => !excludeArray.includes(w["스페인어 단어"]))
-    : allWords;
+  const excludeArray = typeof exclude === "string" ? [exclude] : exclude || [];
+  const filtered =
+    excludeArray.length > 0
+      ? allWords.filter((w) => !excludeArray.includes(w["스페인어 단어"]))
+      : allWords;
 
   return [...filtered].sort(() => Math.random() - 0.5).slice(0, count);
 }
-export function getTotalWordCount(sources: string[] = ['1'], excludeEasy: boolean = false): number {
-  let filtered = (vocabData as VocabEntry[]).filter(item => sources.includes(item["출처"]));
+export function getTotalWordCount(
+  sources: string[] = ["1"],
+  excludeEasy: boolean = false,
+): number {
+  let filtered = (vocabData as VocabEntry[]).filter((item) =>
+    sources.includes(item["출처"]),
+  );
   if (excludeEasy) {
-    filtered = filtered.filter(item => !isEasyCognate(item["스페인어 단어"], item["한국어 의미"]));
+    filtered = filtered.filter(
+      (item) => !isEasyCognate(item["스페인어 단어"], item["한국어 의미"]),
+    );
   }
   return filtered.length;
 }
@@ -183,28 +294,28 @@ export function getTotalWordCount(sources: string[] = ['1'], excludeEasy: boolea
  * Parses a Spanish word string and returns the form corresponding to the specified gender.
  * Handles patterns like "abogado/a", "actor/actriz", "escritor(a)".
  */
-export function getGenderedForm(fullWord: string, gender: 'm' | 'f'): string {
-  if (gender === 'm') {
+export function getGenderedForm(fullWord: string, gender: "m" | "f"): string {
+  if (gender === "m") {
     // Usually the first part is masculine
-    if (fullWord.includes('/')) {
-      const parts = fullWord.split('/');
+    if (fullWord.includes("/")) {
+      const parts = fullWord.split("/");
       // If second part is just a suffix (e.g., "abogado/a"), first part is masculine
       if (parts[1].length === 1) return parts[0];
       // Otherwise, it might be "actor/actriz", so first part is masculine
       return parts[0];
     }
-    if (fullWord.includes('(')) {
-      return fullWord.split('(')[0];
+    if (fullWord.includes("(")) {
+      return fullWord.split("(")[0];
     }
     return fullWord;
   } else {
     // Feminine
-    if (fullWord.includes('/')) {
-      const parts = fullWord.split('/');
+    if (fullWord.includes("/")) {
+      const parts = fullWord.split("/");
       if (parts[1].length === 1) {
         // e.g. "abogado/a" -> "abogada"
         // Replace last character if it's 'o'
-        if (parts[0].endsWith('o')) {
+        if (parts[0].endsWith("o")) {
           return parts[0].slice(0, -1) + parts[1];
         }
         // Otherwise just append suffix (rare in this dataset but safe)
@@ -213,10 +324,10 @@ export function getGenderedForm(fullWord: string, gender: 'm' | 'f'): string {
       // e.g. "actor/actriz" -> "actriz"
       return parts[1];
     }
-    if (fullWord.includes('(')) {
+    if (fullWord.includes("(")) {
       // e.g. "escritor(a)" -> "escritora"
-      const base = fullWord.split('(')[0];
-      const suffix = fullWord.split('(')[1].replace(')', '');
+      const base = fullWord.split("(")[0];
+      const suffix = fullWord.split("(")[1].replace(")", "");
       return base + suffix;
     }
     return fullWord;

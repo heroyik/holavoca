@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { getUnits } from "@/utils/vocab";
 import Quiz from "./Quiz";
+import { useGamification } from "@/hooks/useGamification";
 
 interface QuizLoaderProps {
     unitId: string;
@@ -10,10 +11,13 @@ interface QuizLoaderProps {
 
 export default function QuizLoader({ unitId }: QuizLoaderProps) {
     const searchParams = useSearchParams();
+    const { stats } = useGamification();
+    const excludeEasyWords = stats?.settings?.excludeEasyWords ?? false;
+
     const sourcesStr = searchParams.get("sources");
     const sources = sourcesStr ? sourcesStr.split(",") : ["1"];
 
-    const units = getUnits(sources);
+    const units = getUnits(sources, excludeEasyWords);
     const unit = units.find((u) => u.id === unitId);
 
     if (!unit) {
