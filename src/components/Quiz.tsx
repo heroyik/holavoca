@@ -1,15 +1,21 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-import { VocabEntry } from "@/utils/vocab";
+import { useState, useCallback, useMemo, useEffect } from "react";
+import { VocabEntry, guessPOS } from "@/utils/vocab";
 import vocabData from "@/data/vocab.json"; // Import full vocab for distractors
+import deleSentences from "@/data/dele_sentences.json";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { X, CheckCircle, XCircle } from "lucide-react";
+import { X, CheckCircle, XCircle, HelpCircle, Frown } from "lucide-react";
 import { useGamification } from "@/hooks/useGamification";
+import { useGlobalTop20 } from "@/hooks/useGlobalTop20";
+import { useRank } from "@/hooks/useRank";
 import Image from "next/image";
 import vol1 from "../../public/vol1.jpg";
 import vol2 from "../../public/vol2.jpg";
+
+type DeleSentenceMap = Record<string, { sentence: string; translation: string }>;
+const DELE: DeleSentenceMap = deleSentences as DeleSentenceMap;
 
 interface QuizProps {
   unitId: string;
@@ -20,30 +26,78 @@ interface QuizProps {
 
 export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
   const router = useRouter();
-  const { addXP, addGem, addMistake, completeUnit } = useGamification();
+  const { addXP, addGem, addMistake, completeUnit, user, stats } = useGamification();
+
+  // 6.2 — Live rank refresh after quiz ends
+  const { refresh: refreshRank } = useRank(user?.uid ?? null, stats.xp);
+
+  // Wall of Pain lookup (session-cached, no extra Firestore reads)
+  const { top20 } = useGlobalTop20();
+  const wallOfPainMap = useMemo(() => {
+    const map = new Map<string, number>();
+    top20.forEach((entry, idx) => map.set(entry.word, idx + 1));
+    return map;
+  }, [top20]);
+
+  // Memoize grouped vocabulary by POS to optimize generation
+  const vocabByPOS = useMemo(() => {
+    const groups: Record<string, VocabEntry[]> = {
+      noun: [],
+      verb: [],
+      adjective: [],
+      other: []
+    };
+    (vocabData as VocabEntry[]).forEach(entry => {
+      const pos = guessPOS(entry);
+      groups[pos].push(entry);
+    });
+    return groups;
+  }, []);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [hasMistakes, setHasMistakes] = useState(false);
   const [questions] = useState(() => [...unitWords].sort(() => Math.random() - 0.5));
 
+  // Refresh rank when quiz finishes (6.2)
+  useEffect(() => {
+    if (showResult) {
+      refreshRank();
+    }
+  }, [showResult, refreshRank]);
 
-
-  const generateOptions = useCallback((correctAnswer: string) => {
-    // Use full vocabData for distractors to ensure we always have enough options
-    const allDistractors = (vocabData as VocabEntry[])
-      .map(v => v["한국어 의미"])
-      .filter(v => v !== correctAnswer);
+  const generateOptions = useCallback((currentEntry: VocabEntry) => {
+    const correctAnswer = currentEntry["한국어 의미"];
+    const pos = guessPOS(currentEntry);
+    
+    // 1. Try to get 3 distractors from the same POS
+    const samePOSDistractors = vocabByPOS[pos]
+      .filter(v => v["한국어 의미"] !== correctAnswer)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3);
       
-    const shuffledDistractors = allDistractors.sort(() => Math.random() - 0.5).slice(0, 3);
-    return [...shuffledDistractors, correctAnswer].sort(() => Math.random() - 0.5);
-  }, []); // No dependencies needed as vocabData is static import
+    let finalDistractors = samePOSDistractors.map(v => v["한국어 의미"]);
+
+    // 2. Fallback if not enough same-POS words (unlikely with this dataset but safe)
+    if (finalDistractors.length < 3) {
+      const fallbackDistractors = (vocabData as VocabEntry[])
+        .filter(v => v["한국어 의미"] !== correctAnswer && !finalDistractors.includes(v["한국어 의미"]))
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3 - finalDistractors.length)
+        .map(v => v["한국어 의미"]);
+      
+      finalDistractors = [...finalDistractors, ...fallbackDistractors];
+    }
+    
+    return [correctAnswer, ...finalDistractors].sort(() => Math.random() - 0.5);
+  }, [vocabByPOS]); 
 
   const options = useMemo(() => {
     if (questions.length > 0 && currentIndex < questions.length) {
-      return generateOptions(questions[currentIndex]["한국어 의미"]);
+      return generateOptions(questions[currentIndex]);
     }
     return [];
   }, [currentIndex, questions, generateOptions]);
@@ -59,8 +113,18 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
       setScore(prev => prev + 1);
       addXP(10);
     } else {
-      addMistake(questions[currentIndex]["스페인어 단어"]);
+      setHasMistakes(true);
+      addMistake(questions[currentIndex]["스페인어 단어"], unitId);
     }
+  };
+
+  const handleDontKnow = () => {
+    if (selectedOption) return;
+    
+    setHasMistakes(true);
+    addMistake(questions[currentIndex]["스페인어 단어"], unitId);
+    setIsCorrect(false);
+    setSelectedOption("DONT_KNOW");
   };
 
   const handleNext = () => {
@@ -73,7 +137,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
       if (unitId !== 'review') {
         const passThreshold = Math.ceil(questions.length * 0.8);
         if (score >= passThreshold) {
-          completeUnit(unitId);
+          completeUnit(unitId, 0, !hasMistakes);
           addGem(20);
         }
       }
@@ -121,12 +185,16 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
 
   const currentQuestion = questions[currentIndex];
   const progress = ((currentIndex) / questions.length) * 100;
+  const painRank = wallOfPainMap.get(currentQuestion["스페인어 단어"]);
+  const isDontKnow = selectedOption === "DONT_KNOW";
+
+  // 6.4 — DELE sentence lookup
+  const deleSentence = isCorrect
+    ? DELE[currentQuestion["스페인어 단어"]] ?? null
+    : null;
 
   return (
     <div className="container flex flex-col min-h-screen p-20-120 relative">
-      {/* Book Source Badge */}
-
-
       {/* Header */}
       <div className="flex-between gap-16 mb-32">
         <Link href="/" aria-label="Close lesson" className="no-underline">
@@ -164,8 +232,27 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
               &quot;{currentQuestion["예문"]}&quot;
             </div>
           )}
+          {/* 6.2 — Wall of Pain badge */}
+          {painRank && (
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                marginTop: "10px",
+                background: "#fee2e2",
+                color: "#dc2626",
+                borderRadius: "10px",
+                padding: "4px 10px",
+                fontSize: "12px",
+                fontWeight: 700,
+              }}
+            >
+              <Frown size={13} />
+              Wall of Pain #{painRank}
+            </div>
+          )}
         </div>
-
         <div className="grid-gap-12">
           {options.map((option) => (
             <button
@@ -182,11 +269,26 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
             </button>
           ))}
         </div>
+
+        {/* 6.3 — Funnier No Lo Sé button */}
+        {!selectedOption && (
+          <button
+            onClick={handleDontKnow}
+            className="duo-button duo-button-outline btn-nolo w-full mt-24 text-subtitle"
+            style={{ borderColor: '#afafaf', color: '#777' }}
+          >
+            <HelpCircle size={16} style={{ display: "inline", marginRight: "6px", verticalAlign: "middle" }} />
+            No Lo Sé... (I have no idea!)
+          </button>
+        )}
       </div>
 
-      {/* Feedback Bar */}
+      {/* 6.3 + 6.4 — Feedback Bar */}
       {selectedOption && (
-        <div className={`quiz-feedback-bar ${isCorrect ? 'correct' : 'incorrect'}`}>
+        <div
+          className={`quiz-feedback-bar ${isCorrect ? 'correct' : 'incorrect'}`}
+          style={isDontKnow ? { background: "#fff0f0", borderColor: "#fecaca" } : undefined}
+        >
           <div className="container flex-between">
             <div className="flex-center gap-12">
               {isCorrect ? (
@@ -195,13 +297,40 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
                 <XCircle size={32} className="text-es-red" />
               )}
               <div>
-                <h3 className={`text-subtitle ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}`}>
-                  {isCorrect ? 'Excellent!' : 'Correct solution:'}
+                {/* 6.3 — Friendlier message for "don't know" */}
+                <h3
+                  className={`text-subtitle ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}`}
+                  style={isDontKnow ? { color: "#dc2626" } : undefined}
+                >
+                  {isDontKnow
+                    ? "😅 That's okay! Here's the answer:"
+                    : isCorrect
+                    ? "✅ ¡Correcto!"
+                    : "Correct solution:"}
                 </h3>
-                {!isCorrect && (
+                {(!isCorrect || isDontKnow) && (
                   <p className="correct-solution">
                     {questions[currentIndex]["한국어 의미"]}
                   </p>
+                )}
+                {/* 6.4 — DELE contextual sentence */}
+                {isCorrect && deleSentence && (
+                  <div
+                    style={{
+                      marginTop: "8px",
+                      background: "#f0fdf4",
+                      border: "1px solid #bbf7d0",
+                      borderRadius: "8px",
+                      padding: "8px 10px",
+                      fontSize: "12px",
+                      color: "#166534",
+                    }}
+                  >
+                    <div style={{ fontWeight: 700, marginBottom: "2px" }}>
+                      💬 &quot;{deleSentence.sentence}&quot;
+                    </div>
+                    <div style={{ opacity: 0.75 }}>({deleSentence.translation})</div>
+                  </div>
                 )}
               </div>
             </div>
@@ -219,6 +348,21 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
           </div>
         </div>
       )}
+
+      {/* 6.3 — No Lo Sé jiggle animation */}
+      <style>{`
+        @keyframes jiggle {
+          0%  { transform: rotate(0deg); }
+          20% { transform: rotate(-3deg); }
+          40% { transform: rotate(3deg); }
+          60% { transform: rotate(-3deg); }
+          80% { transform: rotate(3deg); }
+          100%{ transform: rotate(0deg); }
+        }
+        .btn-nolo:hover {
+          animation: jiggle 0.4s ease;
+        }
+      `}</style>
     </div>
   );
 }

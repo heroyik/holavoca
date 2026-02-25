@@ -1,6 +1,6 @@
-# 🇪🇸 HolaVoca (R.1.3.13)- Spanish Vocabulary Learning App
+# 🇪🇸 HolaVoca (v2.0.0-alpha.7) - Spanish Vocabulary Learning App
 
-`Revision 1.3.13`
+`Version 2.0.0-alpha.7`
 
 HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 730 Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
 
@@ -8,10 +8,18 @@ HolaVoca is a premium, gamified Spanish learning platform inspired by modern edu
 
 ## 🆕 Latest Updates
 
-### [R.1.3.13] - 2024-02-24
+### [v2.0.0-alpha.7] - 2026-02-25 — Workflow & Multi-Device Synchronization
 
-- **Fix**: Resolved broken book source badge image on the Quiz Results screen.
-- **Optimization**: Standardized static asset imports for better base path compatibility.
+- **Workflow Documentation**: Added detailed "Multi-Device Development Workflow" section to ensure consistency across different laptops.
+- **Sync Rules**: Formalized the mandatory pre-push checklist (README revision, Playwright verification, .gitignore updates).
+- **Dual-Stream Strategy**: Documented the parallel management of `develop` (v2.0) and `v1.3-maintenance` branches.
+
+### [v2.0.0-alpha.6] - 2026-02-24 — Phase 5: Enhanced Variety & Engagement
+
+- **Tiered Snake Path**: Level icons now use dynamic colors based on difficulty — 🔴 Beginner (red), 🔵 Intermediate (blue), 🟡 Advanced (gold).
+- **Mastery Glow**: Units completed with zero mistakes now display a glowing gold animation to clearly show mastery.
+- **Failed Word Count Badge**: Attempted units with mistakes show a red badge with the number of words that need more practice.
+- **Per-Unit Tracking**: `GamificationContext` now stores `failedWords`, `attempts`, and `isMastered` per unit.
 
 ### [R.1.3.12] - 2024-02-13.3.12**: **Mobile Layout Optimization (Galaxy S25)**
 
@@ -67,6 +75,7 @@ HolaVoca is a premium, gamified Spanish learning platform inspired by modern edu
 - **R.1.1.6**: **Leaderboard Polish**.
   - **Smart Fallback**: If Firestore index is missing, automatically switches to client-side sorting to prevent infinite loading.
   - **R.1.3.14**: Updated v1.4.0 Upgrade Proposal with "Failed Word Count" and "Free Level Access" (Unlock all levels) settings.
+- **R.1.3.15**: Implemented Automatic Backporting via GitHub Actions (v2.x -> v1.x sync for bug fixes).
   - **UI**: Added "Hall of Fame" title and 👑 Crown icon for 1st place.
   - **Admin**: Strict reset logic for cleaner testing.
 - **R.1.1.5**: **Leaderboard Fallback**. Added robust error handling to prevent infinite loading when Firestore indexes are missing.
@@ -176,6 +185,41 @@ Check out our future plans and technical upgrade strategy:
 - [v1.4.0 Upgrade Proposal](file:///Users/ikyoon/proj/holavoca/strategy/upgrade_proposal.md)
 - [v1.4.0 Test Automation Plan](file:///Users/ikyoon/proj/holavoca/strategy/testplan.md)
 - [v2.0 Transition & Workflow Guide](file:///Users/ikyoon/proj/holavoca/strategy/v2.0_workflow.md)
+
+---
+
+## 🔄 Multi-Device Development Workflow
+
+To maintain consistency across multiple development environments (laptops), follow this dual-stream workflow:
+
+### 1. Branching Strategy
+
+- **`develop`**: Primary branch for **v2.0** feature development (e.g., Phase 6 Social Upgrades).
+- **`v1.3-maintenance`**: Dedicated branch for critical bug fixes affecting the stable v1.3.x production line.
+- **`main`**: Mirror of the current live production release.
+
+### 2. Mandatory Pre-Push Checklist
+
+Before syncing your local changes to GitHub, you **MUST** complete these steps:
+
+1. **Update README Revision**:
+    - Increment the version/revision at the top of `README.md`.
+    - Document all changes in the `## 🆕 Latest Updates` section.
+2. **Verify with Playwright**:
+    - Run `npx playwright test` (or the appropriate test script) to ensure no regressions.
+    - Only push if all tests pass.
+3. **Audit .gitignore**:
+    - Ensure sensitive files (API keys, `.env.local`) are not tracked.
+    - Update `.gitignore` immediately if new temporary or sensitive folders are created.
+
+### 3. Cross-Device Synchronization
+
+When switching between computers:
+
+- Always run `git fetch --all` followed by `git pull` on your active branch.
+- If you made fixes in `v1.3-maintenance`, ensure they are merged or cherry-picked into `develop` to maintain consistency across technical stacks.
+
+---
 
 ---
 

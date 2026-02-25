@@ -14,14 +14,6 @@ interface LeaderboardEntry {
     broken?: boolean;
 }
 
-const DEMO_LEADERS: LeaderboardEntry[] = [
-    { id: 'd1', displayName: 'Maria Garcia', photoURL: undefined, xp: 2500, gems: 120, broken: false },
-    { id: 'd2', displayName: 'John Doe', photoURL: undefined, xp: 2100, gems: 90, broken: false },
-    { id: 'd3', displayName: 'Sakura Tanaka', photoURL: undefined, xp: 1800, gems: 50, broken: false },
-    { id: 'd4', displayName: 'Ali Khan', photoURL: undefined, xp: 1500, gems: 30, broken: false },
-    { id: 'd5', displayName: 'Emma Wilson', photoURL: undefined, xp: 1200, gems: 20, broken: false },
-];
-
 export default function Leaderboard() {
     const [leaders, setLeaders] = useState<LeaderboardEntry[]>([]);
     const [loading, setLoading] = useState(true);
@@ -37,13 +29,13 @@ export default function Leaderboard() {
 
             const firestore = db;
             if (!firestore) {
-                setLeaders(DEMO_LEADERS);
+                setLeaders([]);
                 setLoading(false);
                 return;
             }
 
             timeoutId = setTimeout(() => {
-                setLeaders(DEMO_LEADERS);
+                setLeaders([]);
                 setLoading(false);
             }, 5000);
 
@@ -81,7 +73,7 @@ export default function Leaderboard() {
                             console.error("Fallback query failed:", fallbackErr);
                         }
                     }
-                    setLeaders(DEMO_LEADERS);
+                    setLeaders([]);
                     setLoading(false);
                     clearTimeout(timeoutId);
                 });

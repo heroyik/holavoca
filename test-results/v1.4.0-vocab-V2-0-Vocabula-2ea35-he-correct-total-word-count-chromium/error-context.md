@@ -1,0 +1,152 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - heading "HolaVoca" [level=1] [ref=e5]
+        - generic [ref=e6]: R.2.0.0-alpha.1
+      - generic [ref=e7]:
+        - generic "Download JSON" [ref=e8] [cursor=pointer]:
+          - strong [ref=e9]: "547"
+          - text: 📚
+        - generic [ref=e10]:
+          - img "Book 1" [ref=e12] [cursor=pointer]
+          - img "Book 2" [ref=e14] [cursor=pointer]
+    - generic [ref=e16]:
+      - img
+      - generic [ref=e17]:
+        - link "⭐ START!" [ref=e18] [cursor=pointer]:
+          - /url: /holavoca/quiz/unit-1?sources=1
+          - button "⭐ START!" [ref=e19]:
+            - text: ⭐
+            - generic [ref=e20]: START!
+        - generic [ref=e21]:
+          - paragraph [ref=e22]: BEGINNER 1
+          - paragraph [ref=e23]: 🌱 First Steps
+      - generic [ref=e24]:
+        - link "🔒" [ref=e25] [cursor=pointer]:
+          - /url: "#"
+          - button "🔒" [ref=e26]
+        - generic [ref=e27]:
+          - paragraph [ref=e28]: BEGINNER 2
+          - paragraph [ref=e29]: 🔍 Word Hunter
+      - generic [ref=e30]:
+        - link "🔒" [ref=e31] [cursor=pointer]:
+          - /url: "#"
+          - button "🔒" [ref=e32]
+        - generic [ref=e33]:
+          - paragraph [ref=e34]: BEGINNER 3
+          - paragraph [ref=e35]: 🎯 Target Hit
+      - generic [ref=e36]:
+        - link "🔒" [ref=e37] [cursor=pointer]:
+          - /url: "#"
+          - button "🔒" [ref=e38]
+        - generic [ref=e39]:
+          - paragraph [ref=e40]: BEGINNER 4
+          - paragraph [ref=e41]: 🚀 Blasting Off
+      - generic [ref=e42]:
+        - link "🔒" [ref=e43] [cursor=pointer]:
+          - /url: "#"
+          - button "🔒" [ref=e44]
+        - generic [ref=e45]:
+          - paragraph [ref=e46]: BEGINNER 5
+          - paragraph [ref=e47]: 💎 Shiny Start
+      - generic [ref=e48]:
+        - link "🔒" [ref=e49] [cursor=pointer]:
+          - /url: "#"
+          - button "🔒" [ref=e50]
+        - generic [ref=e51]:
+          - paragraph [ref=e52]: INTERMEDIATE 6
+          - paragraph [ref=e53]: 🌉 Bridge Builder
+      - generic [ref=e54]:
+        - link "🔒" [ref=e55] [cursor=pointer]:
+          - /url: "#"
+          - button "🔒" [ref=e56]
+        - generic [ref=e57]:
+          - paragraph [ref=e58]: INTERMEDIATE 7
+          - paragraph [ref=e59]: 🔥 Getting Hotter
+      - generic [ref=e60]:
+        - link "🔒" [ref=e61] [cursor=pointer]:
+          - /url: "#"
+          - button "🔒" [ref=e62]
+        - generic [ref=e63]:
+          - paragraph [ref=e64]: INTERMEDIATE 8
+          - paragraph [ref=e65]: 🎭 Story Teller
+      - generic [ref=e66]:
+        - link "🔒" [ref=e67] [cursor=pointer]:
+          - /url: "#"
+          - button "🔒" [ref=e68]
+        - generic [ref=e69]:
+          - paragraph [ref=e70]: INTERMEDIATE 9
+          - paragraph [ref=e71]: 🧩 Mastermind
+      - generic [ref=e72]:
+        - link "🔒" [ref=e73] [cursor=pointer]:
+          - /url: "#"
+          - button "🔒" [ref=e74]
+        - generic [ref=e75]:
+          - paragraph [ref=e76]: INTERMEDIATE 10
+          - paragraph [ref=e77]: ⛰️ Leveling Up
+      - generic [ref=e78]:
+        - link "🔒" [ref=e79] [cursor=pointer]:
+          - /url: "#"
+          - button "🔒" [ref=e80]
+        - generic [ref=e81]:
+          - paragraph [ref=e82]: ADVANCED 11
+          - paragraph [ref=e83]: 👑 Word Royalty
+      - generic [ref=e84]:
+        - link "🔒" [ref=e85] [cursor=pointer]:
+          - /url: "#"
+          - button "🔒" [ref=e86]
+        - generic [ref=e87]:
+          - paragraph [ref=e88]: ADVANCED 12
+          - paragraph [ref=e89]: 🎓 Wise Scholar
+      - generic [ref=e90]:
+        - link "🔒" [ref=e91] [cursor=pointer]:
+          - /url: "#"
+          - button "🔒" [ref=e92]
+        - generic [ref=e93]:
+          - paragraph [ref=e94]: ADVANCED 13
+          - paragraph [ref=e95]: ⚡ Power Flow
+      - generic [ref=e96]:
+        - link "🔒" [ref=e97] [cursor=pointer]:
+          - /url: "#"
+          - button "🔒" [ref=e98]
+        - generic [ref=e99]:
+          - paragraph [ref=e100]: ADVANCED 14
+          - paragraph [ref=e101]: 🌌 Zen Master
+      - generic [ref=e102]:
+        - link "🔒" [ref=e103] [cursor=pointer]:
+          - /url: "#"
+          - button "🔒" [ref=e104]
+        - generic [ref=e105]:
+          - paragraph [ref=e106]: ADVANCED 15
+          - paragraph [ref=e107]: 🏆 Legend!
+    - navigation [ref=e108]:
+      - generic [ref=e109] [cursor=pointer]:
+        - generic [ref=e110]: 🏠
+        - generic [ref=e111]: LEARN
+      - generic [ref=e112] [cursor=pointer]:
+        - generic [ref=e113]: 🏆
+        - generic [ref=e114]: LEADER
+      - generic [ref=e115] [cursor=pointer]:
+        - generic [ref=e116]: 📚
+        - generic [ref=e117]: REVIEW
+      - generic [ref=e118] [cursor=pointer]:
+        - generic [ref=e119]: 👤
+        - generic [ref=e120]: PROFILE
+      - generic [ref=e121]:
+        - generic [ref=e122]:
+          - generic [ref=e123]: 🔥 0
+          - generic [ref=e124]: 💎 0
+        - generic [ref=e125]:
+          - text: "My Learning Aura:"
+          - strong [ref=e126]: 0 ✨
+        - link "Repositorio de GitHub" [ref=e127] [cursor=pointer]:
+          - /url: https://github.com/heroyik/holavoca
+          - img [ref=e128]
+  - button "Open Next.js Dev Tools" [ref=e136] [cursor=pointer]:
+    - img [ref=e137]
+  - alert [ref=e140]
+```

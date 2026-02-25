@@ -2,30 +2,36 @@
 
 import vocabData from '@/data/vocab.json';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { APP_VERSION } from '@/lib/constants';
 import { getUnits, getTotalWordCount } from '@/utils/vocab';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useGamification } from '@/hooks/useGamification';
+import { useRank } from '@/hooks/useRank';
 import Leaderboard from '@/components/Leaderboard';
 import UserProfile from '@/components/UserProfile';
 import ReviewTab from '@/components/ReviewTab';
+import RankToast from '@/components/RankToast';
 import vol1 from '../../public/vol1.jpg';
 import vol2 from '../../public/vol2.jpg';
 import { Github } from 'lucide-react';
 
 // Gamification Helpers
-const getLevelTitle = (idx: number) => {
-  if (idx < 5) return "BEGINNER";
-  if (idx < 10) return "INTERMEDIATE";
-  return "ADVANCED";
+const getLevelTier = (idx: number) => {
+  if (idx < 5) return "beginner";
+  if (idx < 10) return "intermediate";
+  return "advanced";
 };
 
-const getUnitIcon = (idx: number, isLocked: boolean, isCompleted: boolean) => {
+const getLevelTitle = (idx: number) => {
+  return getLevelTier(idx).toUpperCase();
+};
+
+const getUnitIcon = (idx: number, isLocked: boolean, isCompleted: boolean, isMastered: boolean) => {
   if (isLocked) return '🔒';
+  if (isMastered) return '👑';
   if (isCompleted) return '✅';
-  if (idx === 4 || idx === 9 || idx === 14) return '👑'; // Milestone
   return '⭐';
 };
 
@@ -62,11 +68,15 @@ export default function Home() {
   });
   const [activeTab, setActiveTab] = useState<'learn' | 'review' | 'leader' | 'profile'>('learn');
   const { stats, user } = useGamification();
+  const { rank, total, rankDelta, refresh: refreshRank, clearDelta } = useRank(user?.uid ?? null, stats.xp);
 
-  // Load selection effect removed - now handled in initializer
+  const handleQuizComplete = useCallback(() => {
+    refreshRank();
+  }, [refreshRank]);
 
-  const units = getUnits(selectedBooks);
-  const totalWords = getTotalWordCount(selectedBooks);
+  // Updated units calculation to respect excludeEasyWords setting
+  const units = getUnits(selectedBooks, stats.settings?.excludeEasyWords);
+  const totalWords = getTotalWordCount(selectedBooks, stats.settings?.excludeEasyWords);
 
   const toggleBook = (bookId: string) => {
     setSelectedBooks(prev => {
@@ -82,24 +92,45 @@ export default function Home() {
     });
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     const date = new Date().toISOString().split('T')[0];
     const fileName = `${date}-voca.json`;
     const jsonString = JSON.stringify(vocabData, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
+
+    // Chrome 86+: use File System Access API for reliable filename support
+    if ('showSaveFilePicker' in window) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const fileHandle = await (window as any).showSaveFilePicker({
+          suggestedName: fileName,
+          types: [{ description: 'JSON file', accept: { 'application/json': ['.json'] } }],
+        });
+        const writable = await fileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        return;
+      } catch {
+        // User cancelled the dialog — do nothing
+        return;
+      }
+    }
+
+    // Fallback for Safari, Firefox, mobile
     const url = URL.createObjectURL(blob);
-    const link = document.body.appendChild(document.createElement('a'));
+    const link = document.createElement('a');
     link.href = url;
     link.download = fileName;
+    document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   return (
     <main className="container min-h-screen bg-soft pb-140">
       {/* Premium Compact Header */}
-{/* Premium Compact Header - 2 Line Redesign */}
+      {/* Premium Compact Header - 2 Line Redesign */}
       <header className="sticky-header spanish-header">
         <div className="header-left flex items-baseline gap-4">
           <h1 className="font-22 font-900 m-0 text-es-red leading-1-1 tracking-tight" style={{ letterSpacing: '-0.5px' }}>HolaVoca</h1>
@@ -107,7 +138,27 @@ export default function Home() {
         </div>
 
         <div className="header-right flex items-center gap-12">
-           <div
+          {/* Live rank badge — only shown when authenticated and rank is known */}
+          {user && rank !== null && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "3px",
+                background: rank === 1 ? "linear-gradient(135deg,#fbbf24,#f59e0b)" : "#f3f4f6",
+                color: rank === 1 ? "#fff" : "#374151",
+                borderRadius: "10px",
+                padding: "3px 8px",
+                fontSize: "11px",
+                fontWeight: 800,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {rank === 1 ? "👑" : "🏅"} #{rank}
+              {total > 0 && <span style={{ opacity: 0.6, fontSize: "10px" }}>&nbsp;of {total}</span>}
+            </div>
+          )}
+          <div
             onClick={handleDownload}
             className="vocab-stash-pill mt-0 flex items-center gap-2 py-4 px-10 h-32 hover-scale"
             title="Download JSON"
@@ -156,14 +207,23 @@ export default function Home() {
 
           {units.slice(0, 15).map((unit, index) => {
             const offset = (Math.sin(index * 1.2) * 60).toFixed(2);
-            const isCompleted = stats.completedUnits.includes(unit.id);
-            const isLocked = index > stats.completedUnits.length;
-            const isCurrent = index === stats.completedUnits.length;
+            const isCompleted = !!stats.completedUnits?.includes(unit.id);
+            const isMastered = !!(stats.masteredUnits?.includes(unit.id) || stats.unitStats?.[unit.id]?.isMastered);
 
-            const unitStatusClass = isLocked ? 'locked' : (isCurrent ? 'current' : (isCompleted ? 'completed' : 'available'));
+            // Bypass logic if unlockAllLevels is enabled
+            const unlockAll = stats.settings?.unlockAllLevels ?? false;
+            const isLocked = !unlockAll && index > (stats.completedUnits?.length ?? 0);
+            const isCurrent = !unlockAll && index === (stats.completedUnits?.length ?? 0);
+
+            const tier = getLevelTier(index);
+            const unitStatusClass = isLocked ? 'locked' : (isMastered ? 'mastered' : (isCurrent ? 'current' : (isCompleted ? 'completed' : 'available')));
+            const combinedClass = `${unitStatusClass} ${isLocked ? '' : tier}`;
+
+            const failCount = stats.unitStats?.[unit.id]?.failedWords || 0;
+            const showFailBadge = !isCompleted && !isLocked && failCount > 0;
 
             return (
-              <div key={unit.id} 
+              <div key={unit.id}
                 className="unit-node-container"
                 style={{ transform: `translateX(${offset}px)` }}
               >
@@ -173,9 +233,15 @@ export default function Home() {
                   className="no-underline"
                 >
                   <button
-                    className={`unit-button ${unitStatusClass}`}
+                    className={`unit-button ${combinedClass}`}
                   >
-                    {getUnitIcon(index, isLocked, isCompleted)}
+                    {getUnitIcon(index, isLocked, isCompleted, isMastered)}
+
+                    {showFailBadge && (
+                      <div className="fail-badge">
+                        {failCount}
+                      </div>
+                    )}
 
                     {isCurrent && (
                       <div className="start-indicator">
@@ -185,8 +251,7 @@ export default function Home() {
                   </button>
                 </Link>
 
-                <div className="unit-label-card" style={{
-                  border: `3px solid ${isLocked ? 'var(--border-light)' : getLevelColor(index, isLocked)}`,
+                <div className={`unit-label-card tier-${tier}`} style={{
                   boxShadow: `0 4px 0 ${isLocked ? '#e5e5e5' : 'rgba(0,0,0,0.1)'}`,
                 }}>
                   <p className="font-11 font-900 letter-spacing-0-5 mb-1" style={{ color: getLevelColor(index, isLocked) }}>
@@ -205,6 +270,9 @@ export default function Home() {
       {activeTab === 'review' && <ReviewTab />}
       {activeTab === 'leader' && <Leaderboard />}
       {activeTab === 'profile' && <UserProfile user={user} stats={stats} />}
+
+      {/* Rank toast — shown after rank improvement */}
+      <RankToast rank={rank} rankDelta={rankDelta} onDismiss={clearDelta} />
 
       <style jsx global>{`
         @keyframes pulse-node {
@@ -244,7 +312,7 @@ export default function Home() {
           <span className="font-24">👤</span>
           <span className="font-10 font-800">PROFILE</span>
         </div>
-        
+
         <div className="aura-bar">
           <div className="flex items-center gap-3 mr-4">
             <span className="text-duo-orange font-14 font-700">🔥 {stats.streak}</span>

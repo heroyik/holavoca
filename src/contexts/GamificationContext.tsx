@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import { User, onAuthStateChanged } from "firebase/auth";
-import { doc, setDoc, onSnapshot } from "firebase/firestore";
+import { doc, setDoc, onSnapshot, collection, increment, updateDoc, setDoc as fsSetDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 export interface UserStats {
@@ -11,9 +11,21 @@ export interface UserStats {
   streak: number;
   lastStudyDate: string | null;
   completedUnits: string[];
+  masteredUnits: string[]; // Units completed with 0 mistakes
   mistakes: Record<string, number>;
+  unitStats?: Record<string, {
+    failedWords: number;
+    attempts: number;
+    isMastered: boolean;
+  }>;
   displayName?: string;
   photoURL?: string;
+  settings?: {
+    soundEnabled: boolean;
+    hapticsEnabled: boolean;
+    excludeEasyWords: boolean;
+    unlockAllLevels: boolean;
+  };
 }
 
 interface GamificationContextType {
@@ -21,32 +33,40 @@ interface GamificationContextType {
   stats: UserStats;
   isInitialized: boolean;
   addXP: (amount: number) => void;
-  completeUnit: (unitId: string, xpEarned?: number) => void;
+  completeUnit: (unitId: string, xpEarned?: number, isPerfect?: boolean) => void;
   unlockProgress: (unitIds: string[], xp: number, gems: number) => void;
-  recordMistake: (spanishWord: string) => void;
-  addMistake: (spanishWord: string) => void;
+  recordMistake: (spanishWord: string, unitId?: string) => void;
+  addMistake: (spanishWord: string, unitId?: string) => void;
   clearMistake: (spanishWord: string) => void;
   removeMistake: (spanishWord: string) => void;
   clearAllMistakes: () => void;
   addGem: (amount: number) => void;
+  updateSettings: (settings: Partial<NonNullable<UserStats['settings']>>) => void;
 }
 
 const GamificationContext = createContext<GamificationContextType | undefined>(undefined);
 
+const defaultStats: UserStats = {
+  xp: 0,
+  gems: 0,
+  streak: 0,
+  lastStudyDate: null,
+  completedUnits: [],
+  masteredUnits: [],
+  mistakes: {},
+  unitStats: {},
+  settings: {
+    soundEnabled: true,
+    hapticsEnabled: true,
+    excludeEasyWords: false,
+    unlockAllLevels: false,
+  },
+};
+
 export function GamificationProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [stats, setStats] = useState<UserStats>(() => {
-    const defaultStats = {
-      xp: 0,
-      gems: 0,
-      streak: 0,
-      lastStudyDate: null,
-      completedUnits: [],
-      mistakes: {},
-    };
-    return defaultStats;
-  });
+  const [stats, setStats] = useState<UserStats>(defaultStats);
 
   // Client-side hydration
   useEffect(() => {
@@ -58,7 +78,12 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
           setStats(prev => ({ 
             ...prev, 
             ...parsed, 
-            mistakes: parsed.mistakes || {} 
+            mistakes: parsed.mistakes || {},
+            unitStats: parsed.unitStats || {},
+            settings: {
+              ...defaultStats.settings,
+              ...(parsed.settings || {}),
+            }
           }));
         } catch (e) {
           console.error("Failed to parse local stats", e);
@@ -92,12 +117,19 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
                 ? cloudData.mistakes 
                 : prev.mistakes;
               
-              const newStats = {
+              const newStats: UserStats = {
                 ...prev,
                 ...cloudData,
                 xp: Math.max(prev.xp, cloudData.xp || 0),
                 completedUnits: Array.from(new Set([...prev.completedUnits, ...(cloudData.completedUnits || [])])),
-                mistakes: mergedMistakes || {}
+                masteredUnits: Array.from(new Set([...(prev.masteredUnits || []), ...(cloudData.masteredUnits || [])])),
+                mistakes: mergedMistakes || {},
+                settings: {
+                  soundEnabled: cloudData.settings?.soundEnabled ?? defaultStats.settings!.soundEnabled,
+                  hapticsEnabled: cloudData.settings?.hapticsEnabled ?? defaultStats.settings!.hapticsEnabled,
+                  excludeEasyWords: cloudData.settings?.excludeEasyWords ?? defaultStats.settings!.excludeEasyWords,
+                  unlockAllLevels: cloudData.settings?.unlockAllLevels ?? defaultStats.settings!.unlockAllLevels,
+                },
               };
               
               setIsInitialized(true);
@@ -115,8 +147,6 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
 
     return () => unsubscribeAuth();
   }, []);
-
-  // Hydrate from localStorage removed - now handled in initializer
 
   // Throttled Auto-Sync
   useEffect(() => {
@@ -154,7 +184,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     saveStatsLocally({ ...statsRef.current, gems: statsRef.current.gems + amount });
   };
 
-  const completeUnit = (unitId: string, xpEarned: number = 0) => {
+  const completeUnit = (unitId: string, xpEarned: number = 0, isPerfect: boolean = false) => {
     const today = new Date().toISOString().split('T')[0];
     let newStreak = statsRef.current.streak;
 
@@ -162,15 +192,31 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       newStreak += 1;
     }
 
+    const currentCompleted = statsRef.current.completedUnits || [];
+    const currentMastered = statsRef.current.masteredUnits || [];
+
+    const currentUnitStats = statsRef.current.unitStats?.[unitId] || { failedWords: 0, attempts: 0, isMastered: false };
+    
     const newStats: UserStats = {
       ...statsRef.current,
       xp: statsRef.current.xp + xpEarned,
       gems: statsRef.current.gems + Math.floor(xpEarned / 10),
       streak: newStreak,
       lastStudyDate: today,
-      completedUnits: statsRef.current.completedUnits.includes(unitId)
-        ? statsRef.current.completedUnits
-        : [...statsRef.current.completedUnits, unitId],
+      completedUnits: currentCompleted.includes(unitId)
+        ? currentCompleted
+        : [...currentCompleted, unitId],
+      masteredUnits: isPerfect && !currentMastered.includes(unitId)
+        ? [...currentMastered, unitId]
+        : currentMastered,
+      unitStats: {
+        ...(statsRef.current.unitStats || {}),
+        [unitId]: {
+          ...currentUnitStats,
+          attempts: currentUnitStats.attempts + 1,
+          isMastered: isPerfect || currentUnitStats.isMastered,
+        }
+      }
     };
     saveStatsLocally(newStats);
   };
@@ -185,15 +231,33 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     saveStatsLocally(newStats);
   };
 
-  const recordMistake = (spanishWord: string) => {
+  const recordMistake = (spanishWord: string, unitId?: string) => {
     const currentMistakes = statsRef.current.mistakes || {};
+    const newUnitStats = { ...(statsRef.current.unitStats || {}) };
+    
+    if (unitId) {
+      const uStat = newUnitStats[unitId] || { failedWords: 0, attempts: 0, isMastered: false };
+      newUnitStats[unitId] = {
+        ...uStat,
+        failedWords: uStat.failedWords + 1
+      };
+    }
+
     saveStatsLocally({
       ...statsRef.current,
       mistakes: {
         ...currentMistakes,
         [spanishWord]: (currentMistakes[spanishWord] || 0) + 1
-      }
+      },
+      unitStats: newUnitStats
     });
+
+    // Fire-and-forget: increment global word fail count in Firestore
+    if (db) {
+      const wordRef = doc(db, "globalWordStats", encodeURIComponent(spanishWord));
+      fsSetDoc(wordRef, { failCount: increment(1), word: spanishWord }, { merge: true })
+        .catch((e) => console.warn("[GlobalStats] Failed to increment:", e));
+    }
   };
 
   const clearMistake = (spanishWord: string) => {
@@ -212,6 +276,17 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const updateSettings = (newSettings: Partial<NonNullable<UserStats['settings']>>) => {
+    const updatedStats: UserStats = {
+      ...statsRef.current,
+      settings: {
+        ...statsRef.current.settings!,
+        ...newSettings,
+      },
+    };
+    saveStatsLocally(updatedStats);
+  };
+
   return (
     <GamificationContext.Provider value={{
       user,
@@ -225,7 +300,8 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       clearMistake,
       removeMistake: clearMistake,
       clearAllMistakes,
-      addGem
+      addGem,
+      updateSettings
     }}>
       {children}
     </GamificationContext.Provider>
@@ -235,7 +311,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
 export function useGamificationContext() {
   const context = useContext(GamificationContext);
   if (context === undefined) {
-    throw new Error("useGamificationContext must be used within a GamificationProvider");
+    throw new Error("useGamification must be used within a GamificationProvider");
   }
   return context;
 }

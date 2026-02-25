@@ -2,10 +2,10 @@
 
 import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithPopup, signOut } from 'firebase/auth';
-import { UserStats, useGamification } from '@/hooks/useGamification';
+import { useGamification } from '@/hooks/useGamification';
+import { UserStats } from '@/hooks/useGamification';
 import { User } from 'firebase/auth';
 import Image from 'next/image';
-
 import { useState } from 'react';
 import { getUnits } from '@/utils/vocab';
 
@@ -15,7 +15,7 @@ interface UserProfileProps {
 }
 
 export default function UserProfile({ user, stats }: UserProfileProps) {
-    const { unlockProgress } = useGamification();
+    const { unlockProgress, updateSettings } = useGamification();
     const [devClickCount, setDevClickCount] = useState(0);
     const [selectedLevel, setSelectedLevel] = useState(1);
 
@@ -36,115 +36,171 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
         if (auth) signOut(auth);
     };
 
-    const handleDevTrigger = () => {
-        setDevClickCount(prev => prev + 1);
-    };
-
-    const handleUnlockLevel = () => {
-        const units = getUnits();
-        const targetUnits = units.slice(0, selectedLevel).map(u => u.id);
-        const targetXp = selectedLevel * 200;
-        const targetGems = selectedLevel * 20;
-
-        unlockProgress(targetUnits, targetXp, targetGems);
-        alert(`🔓 Unlocked Level ${selectedLevel}!\n\nXP: ${targetXp}\nGems: ${targetGems}\nUnits: ${selectedLevel} Completed`);
-        setDevClickCount(0);
+    const toggleSetting = (key: 'soundEnabled' | 'hapticsEnabled' | 'excludeEasyWords' | 'unlockAllLevels') => {
+        if (stats.settings) {
+            updateSettings({ [key]: !stats.settings[key] });
+        }
     };
 
     return (
-        <div className="profile-container">
-            <div className="card-premium text-center p-32">
+        <div className="profile-container pb-140">
+            <div className="card-premium text-center p-32 mb-24">
                 {user ? (
                     <>
                         <div
-                            onClick={handleDevTrigger}
-                            className="avatar-container w-100 h-100 relative"
+                            onClick={() => setDevClickCount(prev => prev + 1)}
+                            className="avatar-container w-100 h-100 relative mb-16"
                         >
-                            <Image 
-                                src={user.photoURL || '/default-avatar.png'} 
-                                alt={user.displayName || 'User'} 
+                            <Image
+                                src={user.photoURL || '/default-avatar.png'}
+                                alt={user.displayName || 'User'}
                                 fill
                                 className="object-cover"
                             />
                         </div>
-                        <h2
-                            onClick={handleDevTrigger}
-                            className="font-24 font-900 text-main mb-8 cursor-pointer user-select-none"
-                        >
-                            {user.displayName}
-                        </h2>
-                        <p className="text-secondary font-700 mb-24">
-                            Welcome back, Spanish Master! 🇪🇸
-                        </p>
+                        <h2 className="font-24 font-900 text-main mb-4">{user.displayName}</h2>
+                        <p className="text-secondary font-700 mb-24">Spanish Enthusiast 🇪🇸</p>
 
-                        {/* Hidden Dev Tools - Admin Only */}
+                        <div className="stat-grid">
+                            <div className="profile-stat-card">
+                                <span className="font-12 font-800 text-secondary uppercase">Streak</span>
+                                <span className="font-24 font-900 text-duo-orange">🔥 {stats.streak}</span>
+                            </div>
+                            <div className="profile-stat-card">
+                                <span className="font-12 font-800 text-secondary uppercase">Total XP</span>
+                                <span className="font-24 font-900 text-duo-green">✨ {stats.xp}</span>
+                            </div>
+                            <div className="profile-stat-card">
+                                <span className="font-12 font-800 text-secondary uppercase">Gems</span>
+                                <span className="font-24 font-900 text-duo-blue">💎 {stats.gems}</span>
+                            </div>
+                            <div className="profile-stat-card">
+                                <span className="font-12 font-800 text-secondary uppercase">Crowns</span>
+                                <span className="font-24 font-900 text-duo-yellow">👑 {stats.masteredUnits?.length || 0}</span>
+                            </div>
+                        </div>
+
+                        {/* Developer Tools */}
                         {user.email === 'heroyik@gmail.com' && devClickCount >= 5 && (
-                            <div className="mb-20 p-16 bg-dev border-dev rounded-12">
-                                <p className="font-14 font-800 text-duo-green mb-12">🔧 DEVELOPER CONSOLE</p>
-                                <div className="flex-center gap-8">
-                                    <span className="font-12 font-700 text-secondary">Target Level:</span>
+                            <div className="mt-32 p-16 bg-dev border-dev rounded-12 text-left">
+                                <p className="font-14 font-800 text-duo-green mb-12">🔧 DEV CONSOLE</p>
+                                <div className="flex items-center gap-8">
                                     <select
                                         value={selectedLevel}
                                         onChange={(e) => setSelectedLevel(Number(e.target.value))}
-                                        className="select-standard"
-                                        title="Select level to unlock"
+                                        className="select-standard flex-1"
                                     >
                                         {Array.from({ length: 15 }, (_, i) => i + 1).map(level => (
-                                            <option key={level} value={level}>Level {level}</option>
+                                            <option key={level} value={level}>Unlock to Level {level}</option>
                                         ))}
                                     </select>
                                     <button
-                                        onClick={handleUnlockLevel}
-                                        className="duo-button duo-button-primary w-auto p-16"
-                                        style={{ padding: '8px 16px' }}
+                                        onClick={() => {
+                                            const units = getUnits();
+                                            unlockProgress(units.slice(0, selectedLevel).map(u => u.id), selectedLevel * 500, selectedLevel * 50);
+                                            setDevClickCount(0);
+                                        }}
+                                        className="duo-button duo-button-primary w-auto py-8"
                                     >
-                                        Unlock 🔓
+                                        GO
                                     </button>
                                 </div>
                             </div>
                         )}
 
-                        <div className="stat-grid">
-                            <div className="badge-outline">
-                                <p className="font-12 text-secondary font-800">STREAK</p>
-                                <p className="font-20 font-900 text-duo-orange">🔥 {stats.streak}</p>
-                            </div>
-                            <div className="badge-outline">
-                                <p className="font-12 text-secondary font-800">TOTAL GEMS</p>
-                                <p className="font-20 font-900 text-duo-blue">💎 {stats.gems}</p>
-                            </div>
-                        </div>
-
                         <button
                             onClick={handleLogout}
-                            className="duo-button bg-danger shadow-danger"
+                            className="duo-button bg-danger shadow-danger mt-32"
                         >
                             LOG OUT
                         </button>
                     </>
                 ) : (
-                    <>
+                    <div className="py-24">
                         <div className="font-64 mb-16">🔑</div>
-                        <h2 className="font-24 font-900 text-main mb-16">
-                            Save Your Progress
-                        </h2>
+                        <h2 className="font-24 font-900 text-main mb-16">Save Your Progress</h2>
                         <p className="text-secondary font-700 mb-32">
-                            Sign in with Google to sync your XP, streak, and rank on the global leaderboard!
+                            Sign in with Google to sync your XP, streak, and mastered crowns across devices!
                         </p>
                         <button
                             onClick={handleLogin}
                             className="duo-button duo-button-outline flex-center gap-12 p-16 bg-google"
                         >
-                            <Image 
-                                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
-                                alt="Google" 
-                                width={20} 
+                            <Image
+                                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                                alt="Google"
+                                width={20}
                                 height={20}
                             />
                             LOG IN WITH GOOGLE
                         </button>
-                    </>
+                    </div>
                 )}
+
+                {/* Settings Section (Moved outside to allow Guest access) */}
+                <div className="settings-section mt-24 pt-24 border-t-glass">
+                    <h3 className="font-18 font-900 text-main mb-16 text-left">Settings</h3>
+
+                    <div className="settings-item">
+                        <div className="flex flex-col">
+                            <span className="font-16 font-700">Sound Effects</span>
+                            <span className="font-12 text-secondary">Audio feedback in quiz</span>
+                        </div>
+                        <label className="toggle-switch">
+                            <input
+                                type="checkbox"
+                                checked={stats.settings?.soundEnabled ?? true}
+                                onChange={() => toggleSetting('soundEnabled')}
+                            />
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+
+                    <div className="settings-item">
+                        <div className="flex flex-col">
+                            <span className="font-16 font-700">Haptic Feedback</span>
+                            <span className="font-12 text-secondary">Vibration on interactions</span>
+                        </div>
+                        <label className="toggle-switch">
+                            <input
+                                type="checkbox"
+                                checked={stats.settings?.hapticsEnabled ?? true}
+                                onChange={() => toggleSetting('hapticsEnabled')}
+                            />
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+
+                    <div className="settings-item">
+                        <div className="flex flex-col">
+                            <span className="font-16 font-700">Exclude Easy Cognates</span>
+                            <span className="font-12 text-secondary">Hide words similar to English</span>
+                        </div>
+                        <label className="toggle-switch">
+                            <input
+                                type="checkbox"
+                                checked={stats.settings?.excludeEasyWords ?? false}
+                                onChange={() => toggleSetting('excludeEasyWords')}
+                            />
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+
+                    <div className="settings-item">
+                        <div className="flex flex-col">
+                            <span className="font-16 font-700">Unlock All Levels</span>
+                            <span className="font-12 text-secondary">Start any level freely</span>
+                        </div>
+                        <label className="toggle-switch">
+                            <input
+                                type="checkbox"
+                                checked={stats.settings?.unlockAllLevels ?? false}
+                                onChange={() => toggleSetting('unlockAllLevels')}
+                            />
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
     );
