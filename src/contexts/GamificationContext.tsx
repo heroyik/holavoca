@@ -303,7 +303,8 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     const updatedStats: UserStats = {
       ...statsRef.current,
       completedUnits: [],
-      unitStats: {}, // Reset unit-specific attempts
+      masteredUnits: [],
+      unitStats: {}, // Reset unit-specific attempts and mastery
     };
     saveStatsLocally(updatedStats);
   };

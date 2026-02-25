@@ -49,7 +49,7 @@ Analysis and technical plan for the next version of the Spanish learning app.
 ### Progression UI
 
 - Update the Snake Path to show more visual variety per level (different colors or icons for difficulty tiers).
-- Add "Mastery" indicators for levels completed with 0 mistakes.
+- Add "Mastery" indicators (👍) for levels completed with 0 mistakes.
 - **Failed Word Count**: For levels that were attempted but not cleared, display the number of incorrect words (including "Don't Know" selections) on the level icon/card. Hide this for unattempted levels.
 
 ## Technical Implementation Steps

@@ -30,7 +30,7 @@ const getLevelTitle = (idx: number) => {
 
 const getUnitIcon = (idx: number, isLocked: boolean, isCompleted: boolean, isMastered: boolean) => {
   if (isLocked) return '🔒';
-  if (isMastered) return '👑';
+  if (isMastered) return '👍';
   if (isCompleted) return '✅';
   return '⭐';
 };
