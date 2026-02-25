@@ -15,52 +15,69 @@ const SOUND_FILES: Record<string, string> = {
 };
 
 /**
- * Preloads all quiz sounds and provides a play() function.
+ * WebAudio API-based sound hook for maximum browser compatibility.
  *
- * Browser compatibility:
- * - Chrome Android: AudioContext is suspended until first user gesture.
- *   We unlock by playing a single silent audio on first gesture.
- * - iOS Safari: Only ONE audio.play() is allowed per user gesture event.
- *   We must NOT attempt to play multiple sounds during the unlock gesture.
- *   After the first gesture, subsequent plays work freely.
- * - Desktop Chrome/Safari: No special handling needed.
+ * Strategy:
+ * - Use AudioContext + fetch/decodeAudioData (works on all browsers incl. Safari macOS/iOS).
+ * - HTMLAudioElement approach is unreliable on Safari (suspend issue, no preload, CORS quirks).
+ * - AudioContext must be created/resumed inside a user gesture handler on Safari.
+ * - Buffers are pre-fetched and decoded once; playback is instant via BufferSource nodes.
  */
 export function useSound(enabled: boolean) {
-  const audioPoolRef = useRef<Record<string, HTMLAudioElement>>({});
+  const ctxRef = useRef<AudioContext | null>(null);
+  const buffersRef = useRef<Record<string, AudioBuffer>>({});
   const unlockedRef = useRef(false);
 
-  // Create all Audio objects once on mount
-  // Note: iOS Safari ignores preload="auto" — that's fine, we unlock on first gesture
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    Object.entries(SOUND_FILES).forEach(([key, src]) => {
-      const audio = new Audio(src);
-      audio.preload = "auto"; // respected by Chrome; ignored by iOS (acceptable)
-      audio.volume = 0.85;
-      audioPoolRef.current[key] = audio;
-    });
+  // Lazily create AudioContext (must happen in browser context)
+  const getContext = useCallback((): AudioContext | null => {
+    if (typeof window === "undefined") return null;
+    if (!ctxRef.current) {
+      const AC =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext;
+      if (!AC) return null;
+      ctxRef.current = new AC();
+    }
+    return ctxRef.current;
   }, []);
 
-  // Unlock audio on first user gesture
-  // iOS Safari rule: only ONE .play() call is honored per gesture event.
-  // So we play only the "correct" sound as the single unlock, then immediately pause it.
-  // After this point, all audio objects in the pool are free to play.
+  // Fetch and decode all sound buffers
+  const loadBuffers = useCallback(async () => {
+    const ctx = getContext();
+    if (!ctx) return;
+
+    await Promise.allSettled(
+      Object.entries(SOUND_FILES).map(async ([key, src]) => {
+        if (buffersRef.current[key]) return; // already loaded
+        try {
+          const res = await fetch(src);
+          const arrayBuf = await res.arrayBuffer();
+          const audioBuf = await ctx.decodeAudioData(arrayBuf);
+          buffersRef.current[key] = audioBuf;
+        } catch (err) {
+          console.warn(`[useSound] Failed to load ${key}:`, err);
+        }
+      })
+    );
+  }, [getContext]);
+
+  // Unlock AudioContext on first user gesture (required by Safari & Chrome Android)
   useEffect(() => {
     const unlock = async () => {
       if (unlockedRef.current) return;
       unlockedRef.current = true;
 
-      // Pick just one audio to warm up (iOS only allows 1 play per gesture)
-      const primary = audioPoolRef.current["correct"];
-      if (!primary) return;
+      const ctx = getContext();
+      if (!ctx) return;
 
-      try {
-        await primary.play();
-        primary.pause();
-        primary.currentTime = 0;
-      } catch {
-        // Silently ignore — e.g., file not found or still blocked
+      // Resume suspended context (Chrome Android starts as 'suspended')
+      if (ctx.state === "suspended") {
+        await ctx.resume().catch(() => {});
       }
+
+      // Load all buffers now that we have a user gesture
+      await loadBuffers();
     };
 
     document.addEventListener("touchstart", unlock, { once: true, passive: true });
@@ -70,12 +87,11 @@ export function useSound(enabled: boolean) {
       document.removeEventListener("touchstart", unlock);
       document.removeEventListener("click", unlock);
     };
-  }, []);
+  }, [getContext, loadBuffers]);
 
   const play = useCallback(
-    (type: SoundType) => {
+    async (type: SoundType) => {
       if (!enabled) return;
-      if (typeof window === "undefined") return;
 
       let key: string = type;
       if (type === "cheer") {
@@ -83,19 +99,40 @@ export function useSound(enabled: boolean) {
         key = `cheer${n}`;
       }
 
-      const audio = audioPoolRef.current[key];
-      if (!audio) return;
+      try {
+        const ctx = getContext();
+        if (!ctx) return;
 
-      // Rewind and play — safe for both Chrome and Safari
-      audio.currentTime = 0;
-      audio.play().catch((err: Error) => {
-        // NotAllowedError before first gesture is expected — silent fail
-        if (err.name !== "NotAllowedError") {
-          console.warn(`[useSound] play failed (${key}):`, err.message);
+        // Safari: AudioContext may still be suspended if this is the very first click
+        // that also triggers play() — resume first.
+        if (ctx.state === "suspended") {
+          await ctx.resume();
         }
-      });
+
+        // Load buffer if not yet available (e.g., slow network)
+        if (!buffersRef.current[key]) {
+          await loadBuffers();
+        }
+
+        const buffer = buffersRef.current[key];
+        if (!buffer) return;
+
+        // Create a new BufferSourceNode (one-time-use, by spec)
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+
+        // Volume control via GainNode
+        const gain = ctx.createGain();
+        gain.gain.value = 0.85;
+
+        source.connect(gain);
+        gain.connect(ctx.destination);
+        source.start(0);
+      } catch (err) {
+        console.warn(`[useSound] play failed (${key}):`, err);
+      }
     },
-    [enabled]
+    [enabled, getContext, loadBuffers]
   );
 
   return { play };
