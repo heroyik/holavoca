@@ -16,7 +16,7 @@ interface UserProfileProps {
 }
 
 export default function UserProfile({ user, stats }: UserProfileProps) {
-    const { unlockProgress, updateSettings, updateProfile } = useGamification();
+    const { unlockProgress, updateSettings, updateProfile, resetProgress } = useGamification();
     const [devClickCount, setDevClickCount] = useState(0);
     const [selectedLevel, setSelectedLevel] = useState(1);
     const [adminName, setAdminName] = useState(stats.displayName || user?.displayName || '');
