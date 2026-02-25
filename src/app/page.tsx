@@ -2,7 +2,7 @@
 
 import vocabData from '@/data/vocab.json';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { APP_VERSION } from '@/lib/constants';
 import { getUnits, getTotalWordCount } from '@/utils/vocab';
 import Link from 'next/link';
@@ -68,11 +68,8 @@ export default function Home() {
   });
   const [activeTab, setActiveTab] = useState<'learn' | 'review' | 'leader' | 'profile'>('learn');
   const { stats, user } = useGamification();
-  const { rank, total, rankDelta, refresh: refreshRank, clearDelta } = useRank(user?.uid ?? null, stats.xp);
+  const { rank, total, rankDelta, clearDelta } = useRank(user?.uid ?? null, stats.xp);
 
-  const handleQuizComplete = useCallback(() => {
-    refreshRank();
-  }, [refreshRank]);
 
   // Updated units calculation to respect excludeEasyWords setting
   const units = getUnits(selectedBooks, stats.settings?.excludeEasyWords);
