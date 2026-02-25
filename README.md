@@ -1,12 +1,18 @@
-# 🇪🇸 HolaVoca (v2.0.0-alpha.7) - Spanish Vocabulary Learning App
+# 🇪🇸 HolaVoca (v2.0.0-alpha.8) - Spanish Vocabulary Learning App
 
-`Version 2.0.0-alpha.7`
+`Version 2.0.0-alpha.8`
 
 HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 730 Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
 
 ---
 
 ## 🆕 Latest Updates
+
+### [v2.0.0-alpha.8] - 2026-02-25 — Safari Audio Fix & WebAudio API Migration
+
+- **WebAudio API Adoption**: Migrated `useSound` from `HTMLAudioElement` to `AudioContext` to resolve Safari's shared audio suspension issues.
+- **basePath Compatibility**: Fixed 404 errors by correctly prepending `/holavoca` base path to all sound asset requests.
+- **User Activation Logic**: Refined `AudioContext` unlock mechanism to ensure compliance with Safari's strict "User Activation" requirements.
 
 ### [v2.0.0-alpha.7] - 2026-02-25 — Workflow & Multi-Device Synchronization
 

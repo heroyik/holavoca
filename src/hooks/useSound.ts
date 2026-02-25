@@ -4,31 +4,31 @@ import { useRef, useEffect, useCallback } from "react";
 
 type SoundType = "correct" | "incorrect" | "cheer";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "/holavoca";
+
 const SOUND_FILES: Record<string, string> = {
-  correct: "/sounds/correct.mp3",
-  incorrect: "/sounds/incorrect.mp3",
-  cheer1: "/sounds/cheer1.mp3",
-  cheer2: "/sounds/cheer2.mp3",
-  cheer3: "/sounds/cheer3.mp3",
-  cheer4: "/sounds/cheer4.mp3",
-  cheer5: "/sounds/cheer5.mp3",
+  correct: `${BASE_PATH}/sounds/correct.mp3`,
+  incorrect: `${BASE_PATH}/sounds/incorrect.mp3`,
+  cheer1: `${BASE_PATH}/sounds/cheer1.mp3`,
+  cheer2: `${BASE_PATH}/sounds/cheer2.mp3`,
+  cheer3: `${BASE_PATH}/sounds/cheer3.mp3`,
+  cheer4: `${BASE_PATH}/sounds/cheer4.mp3`,
+  cheer5: `${BASE_PATH}/sounds/cheer5.mp3`,
 };
 
 /**
  * WebAudio API-based sound hook for maximum browser compatibility.
- *
+ * 
  * Strategy:
  * - Use AudioContext + fetch/decodeAudioData (works on all browsers incl. Safari macOS/iOS).
- * - HTMLAudioElement approach is unreliable on Safari (suspend issue, no preload, CORS quirks).
- * - AudioContext must be created/resumed inside a user gesture handler on Safari.
- * - Buffers are pre-fetched and decoded once; playback is instant via BufferSource nodes.
+ * - Prefixes assets with BASE_PATH to avoid 404s.
+ * - AudioContext must be resumed inside a user gesture handler for Safari.
  */
 export function useSound(enabled: boolean) {
   const ctxRef = useRef<AudioContext | null>(null);
   const buffersRef = useRef<Record<string, AudioBuffer>>({});
   const unlockedRef = useRef(false);
 
-  // Lazily create AudioContext (must happen in browser context)
   const getContext = useCallback((): AudioContext | null => {
     if (typeof window === "undefined") return null;
     if (!ctxRef.current) {
@@ -42,50 +42,53 @@ export function useSound(enabled: boolean) {
     return ctxRef.current;
   }, []);
 
-  // Fetch and decode all sound buffers
   const loadBuffers = useCallback(async () => {
     const ctx = getContext();
     if (!ctx) return;
 
     await Promise.allSettled(
       Object.entries(SOUND_FILES).map(async ([key, src]) => {
-        if (buffersRef.current[key]) return; // already loaded
+        if (buffersRef.current[key]) return;
         try {
           const res = await fetch(src);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const arrayBuf = await res.arrayBuffer();
           const audioBuf = await ctx.decodeAudioData(arrayBuf);
           buffersRef.current[key] = audioBuf;
         } catch (err) {
-          console.warn(`[useSound] Failed to load ${key}:`, err);
+          console.warn(`[useSound] Failed to load ${key} from ${src}:`, err);
         }
       })
     );
   }, [getContext]);
 
-  // Unlock AudioContext on first user gesture (required by Safari & Chrome Android)
   useEffect(() => {
     const unlock = async () => {
-      if (unlockedRef.current) return;
-      unlockedRef.current = true;
-
       const ctx = getContext();
       if (!ctx) return;
 
-      // Resume suspended context (Chrome Android starts as 'suspended')
-      if (ctx.state === "suspended") {
-        await ctx.resume().catch(() => {});
+      // Resume context within user gesture (CRITICAL for Safari)
+      if (ctx.state === "suspended" || ctx.state === "interrupted") {
+        await ctx.resume().catch((e) => console.warn("[useSound] Resume failed:", e));
       }
 
-      // Load all buffers now that we have a user gesture
+      if (unlockedRef.current) return;
+      unlockedRef.current = true;
+      
+      // Load buffers immediately after unlock
       await loadBuffers();
     };
 
-    document.addEventListener("touchstart", unlock, { once: true, passive: true });
-    document.addEventListener("click", unlock, { once: true });
+    const handleGesture = () => {
+      unlock();
+    };
+
+    document.addEventListener("touchstart", handleGesture, { once: false, passive: true });
+    document.addEventListener("mousedown", handleGesture, { once: false });
 
     return () => {
-      document.removeEventListener("touchstart", unlock);
-      document.removeEventListener("click", unlock);
+      document.removeEventListener("touchstart", handleGesture);
+      document.removeEventListener("mousedown", handleGesture);
     };
   }, [getContext, loadBuffers]);
 
@@ -103,25 +106,21 @@ export function useSound(enabled: boolean) {
         const ctx = getContext();
         if (!ctx) return;
 
-        // Safari: AudioContext may still be suspended if this is the very first click
-        // that also triggers play() — resume first.
-        if (ctx.state === "suspended") {
-          await ctx.resume();
-        }
-
-        // Load buffer if not yet available (e.g., slow network)
-        if (!buffersRef.current[key]) {
-          await loadBuffers();
+        // Ensure context is running - some browsers re-suspend it
+        if (ctx.state !== "running") {
+          await ctx.resume().catch(() => {});
         }
 
         const buffer = buffersRef.current[key];
-        if (!buffer) return;
+        if (!buffer) {
+          // Fallback: try loading if missing, though it might be too late for this trigger
+          loadBuffers();
+          return;
+        }
 
-        // Create a new BufferSourceNode (one-time-use, by spec)
         const source = ctx.createBufferSource();
         source.buffer = buffer;
 
-        // Volume control via GainNode
         const gain = ctx.createGain();
         gain.gain.value = 0.85;
 
