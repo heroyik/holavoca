@@ -139,15 +139,24 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                                             onChange={(e) => setSelectedLevel(Number(e.target.value))}
                                             className="select-standard flex-1"
                                         >
+                                            <option value={0}>Initialize (Reset All)</option>
                                             {Array.from({ length: 15 }, (_, i) => i + 1).map(level => (
                                                 <option key={level} value={level}>Unlock to Level {level}</option>
                                             ))}
                                         </select>
                                         <button
                                             onClick={() => {
-                                                const units = getUnits();
-                                                unlockProgress(units.slice(0, selectedLevel).map(u => u.id), selectedLevel * 500, selectedLevel * 50);
-                                                setDevClickCount(0);
+                                                if (selectedLevel === 0) {
+                                                    if (confirm("Are you sure you want to RESET all progress? This cannot be undone.")) {
+                                                        resetProgress();
+                                                        setDevClickCount(0);
+                                                        alert("Progress initialized!");
+                                                    }
+                                                } else {
+                                                    const units = getUnits();
+                                                    unlockProgress(units.slice(0, selectedLevel).map(u => u.id), selectedLevel * 500, selectedLevel * 50);
+                                                    setDevClickCount(0);
+                                                }
                                             }}
                                             className="duo-button duo-button-primary w-auto py-8"
                                         >
@@ -155,6 +164,7 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                                         </button>
                                     </div>
                                 </div>
+
                             </div>
                         )}
 

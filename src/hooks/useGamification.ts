@@ -22,7 +22,9 @@ export function useGamification() {
     removeMistake: context.removeMistake,
     clearAllMistakes: context.clearAllMistakes,
     updateSettings: context.updateSettings,
-    updateProfile: context.updateProfile
+    updateProfile: context.updateProfile,
+    resetProgress: context.resetProgress
   };
 }
+
 

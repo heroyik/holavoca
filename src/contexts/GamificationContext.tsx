@@ -43,7 +43,9 @@ interface GamificationContextType {
   addGem: (amount: number) => void;
   updateSettings: (settings: Partial<NonNullable<UserStats['settings']>>) => void;
   updateProfile: (profile: Partial<Pick<UserStats, 'displayName' | 'photoURL'>>) => void;
+  resetProgress: () => void;
 }
+
 
 
 const GamificationContext = createContext<GamificationContextType | undefined>(undefined);
@@ -297,6 +299,15 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     saveStatsLocally(updatedStats);
   };
 
+  const resetProgress = () => {
+    const updatedStats: UserStats = {
+      ...statsRef.current,
+      completedUnits: [],
+      unitStats: {}, // Reset unit-specific attempts
+    };
+    saveStatsLocally(updatedStats);
+  };
+
   return (
     <GamificationContext.Provider value={{
       user,
@@ -312,7 +323,8 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       clearAllMistakes,
       addGem,
       updateSettings,
-      updateProfile
+      updateProfile,
+      resetProgress
     }}>
       {children}
     </GamificationContext.Provider>
