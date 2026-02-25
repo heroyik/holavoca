@@ -76,7 +76,7 @@ export default function Home() {
 
   // Updated units calculation to respect excludeEasyWords setting
   const units = getUnits(selectedBooks, stats.settings?.excludeEasyWords);
-  const totalWords = getTotalWordCount(selectedBooks);
+  const totalWords = getTotalWordCount(selectedBooks, stats.settings?.excludeEasyWords);
 
   const toggleBook = (bookId: string) => {
     setSelectedBooks(prev => {
@@ -130,7 +130,7 @@ export default function Home() {
   return (
     <main className="container min-h-screen bg-soft pb-140">
       {/* Premium Compact Header */}
-{/* Premium Compact Header - 2 Line Redesign */}
+      {/* Premium Compact Header - 2 Line Redesign */}
       <header className="sticky-header spanish-header">
         <div className="header-left flex items-baseline gap-4">
           <h1 className="font-22 font-900 m-0 text-es-red leading-1-1 tracking-tight" style={{ letterSpacing: '-0.5px' }}>HolaVoca</h1>
@@ -158,7 +158,7 @@ export default function Home() {
               {total > 0 && <span style={{ opacity: 0.6, fontSize: "10px" }}>&nbsp;of {total}</span>}
             </div>
           )}
-           <div
+          <div
             onClick={handleDownload}
             className="vocab-stash-pill mt-0 flex items-center gap-2 py-4 px-10 h-32 hover-scale"
             title="Download JSON"
@@ -209,7 +209,7 @@ export default function Home() {
             const offset = (Math.sin(index * 1.2) * 60).toFixed(2);
             const isCompleted = !!stats.completedUnits?.includes(unit.id);
             const isMastered = !!(stats.masteredUnits?.includes(unit.id) || stats.unitStats?.[unit.id]?.isMastered);
-            
+
             // Bypass logic if unlockAllLevels is enabled
             const unlockAll = stats.settings?.unlockAllLevels ?? false;
             const isLocked = !unlockAll && index > (stats.completedUnits?.length ?? 0);
@@ -218,12 +218,12 @@ export default function Home() {
             const tier = getLevelTier(index);
             const unitStatusClass = isLocked ? 'locked' : (isMastered ? 'mastered' : (isCurrent ? 'current' : (isCompleted ? 'completed' : 'available')));
             const combinedClass = `${unitStatusClass} ${isLocked ? '' : tier}`;
-            
+
             const failCount = stats.unitStats?.[unit.id]?.failedWords || 0;
             const showFailBadge = !isCompleted && !isLocked && failCount > 0;
 
             return (
-              <div key={unit.id} 
+              <div key={unit.id}
                 className="unit-node-container"
                 style={{ transform: `translateX(${offset}px)` }}
               >
@@ -312,7 +312,7 @@ export default function Home() {
           <span className="font-24">👤</span>
           <span className="font-10 font-800">PROFILE</span>
         </div>
-        
+
         <div className="aura-bar">
           <div className="flex items-center gap-3 mr-4">
             <span className="text-duo-orange font-14 font-700">🔥 {stats.streak}</span>

@@ -21,6 +21,7 @@ Comprehensive testing strategy using Playwright to ensure the stability and corr
 | **TC-SET-02** | Settings | "Unlock all levels" allows instant access to Level 15. | Ease of Use |
 | **TC-UI-01** | UI | Display failed word counts on uncleared, attempted levels. | Progression Feedback |
 | **TC-UI-02** | UI | Show "Mastery" (Crown/Gold) on levels with 0 mistakes. | Gamification |
+| **TC-UI-03** | UI (Mobile) | Validate UI integrity on Galaxy S25 (360x780, DPR 3). | Responsiveness |
 
 ## 3. Playwright Automation Strategy
 
@@ -54,3 +55,21 @@ Comprehensive testing strategy using Playwright to ensure the stability and corr
 - **Phase 1**: Initial logic verification via unit tests (Jest/Vitest).
 - **Phase 2**: E2E verification of UI components.
 - **Phase 3**: Cross-browser sanity checks (Chromium, WebKit).
+
+## 6. Mobile Responsiveness (Galaxy S25 Base Model)
+
+Specific audit for Samsung Galaxy S25 (Base Model) behavior.
+
+### Target Environment
+
+- **Viewport**: 360 x 780 CSS pixels
+- **Device Pixel Ratio (DPR)**: 3.0
+- **Primary Browser**: Chromium (Playwright `android.chrome` or emulated)
+
+### Key Inspection Points
+
+- **Overlap Checks**: Ensure the floating "START!" indicator doesn't overlap unit labels on the winding path.
+- **Card Overflow**: Verify that long Spanish words (e.g., *civilización*) and their DELE sentences don't overflow the 360px width quiz cards.
+- **Header Symmetry**: Confirm the 12px horizontal padding remains symmetrically balanced on the narrow screen.
+- **Touch Targets**: Ensure `duo-button` elements remain easily tappable and don't bunch up in the 4-choice grid.
+- **Image Scaling**: Verify the textbook thumbnails (Vol 1/2) scale correctly without losing aspect ratio or breaking line flow.

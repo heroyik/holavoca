@@ -53,19 +53,19 @@ const COMMON_COGNATES = [
 
 function getDifficultyScore(word: string): number {
   let score = word.length * 10;
-  
+
   // Accents check (á, é, í, ó, ú, ñ)
   const accents = /[áéíóúñ]/i;
   if (accents.test(word)) {
     score += 50;
   }
-  
+
   // Cognate check
   const cleanWord = word.toLowerCase().split('/')[0].split('(')[0].trim();
   if (COMMON_COGNATES.includes(cleanWord)) {
     score -= 100; // Very easy
   }
-  
+
   return score;
 }
 
@@ -95,7 +95,7 @@ function getLevenshteinDistance(a: string, b: string): number {
 
 export function isEasyCognate(spanishWord: string, koreanMeaning: string): boolean {
   const cleanSpanish = spanishWord.toLowerCase().split('/')[0].split('(')[0].trim();
-  
+
   // 1. Check curated list
   if (COMMON_COGNATES.includes(cleanSpanish)) return true;
 
@@ -105,8 +105,8 @@ export function isEasyCognate(spanishWord: string, koreanMeaning: string): boole
   // we might need to assume the Spanish word itself looks like English.
   // Common patterns for Spanish/English cognates:
   if (cleanSpanish.endsWith('ción') || cleanSpanish.endsWith('dad') || cleanSpanish.endsWith('al') || cleanSpanish.endsWith('ble')) {
-      // These are very likely cognates if they are long enough
-      if (cleanSpanish.length > 5) return true;
+    // These are very likely cognates if they are long enough
+    if (cleanSpanish.length > 5) return true;
   }
 
   return false;
@@ -151,7 +151,7 @@ export function getUnits(sources: string[] = ['1', '2'], excludeEasy: boolean = 
     const start = i * unitSize;
     const end = Math.min(start + unitSize, allWords.length);
     const unitWords = allWords.slice(start, end);
-    
+
     if (unitWords.length === 0) break;
 
     units.push({
@@ -175,8 +175,12 @@ export function getRandomWords(count: number, sources: string[] = ['1'], exclude
 
   return [...filtered].sort(() => Math.random() - 0.5).slice(0, count);
 }
-export function getTotalWordCount(sources: string[] = ['1']): number {
-  return (vocabData as VocabEntry[]).filter(item => sources.includes(item["출처"])).length;
+export function getTotalWordCount(sources: string[] = ['1'], excludeEasy: boolean = false): number {
+  let filtered = (vocabData as VocabEntry[]).filter(item => sources.includes(item["출처"]));
+  if (excludeEasy) {
+    filtered = filtered.filter(item => !isEasyCognate(item["스페인어 단어"], item["한국어 의미"]));
+  }
+  return filtered.length;
 }
 
 /**

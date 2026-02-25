@@ -51,9 +51,9 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                             onClick={() => setDevClickCount(prev => prev + 1)}
                             className="avatar-container w-100 h-100 relative mb-16"
                         >
-                            <Image 
-                                src={user.photoURL || '/default-avatar.png'} 
-                                alt={user.displayName || 'User'} 
+                            <Image
+                                src={user.photoURL || '/default-avatar.png'}
+                                alt={user.displayName || 'User'}
                                 fill
                                 className="object-cover"
                             />
@@ -77,71 +77,6 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                             <div className="profile-stat-card">
                                 <span className="font-12 font-800 text-secondary uppercase">Crowns</span>
                                 <span className="font-24 font-900 text-duo-yellow">👑 {stats.masteredUnits?.length || 0}</span>
-                            </div>
-                        </div>
-
-                        {/* Settings Section */}
-                        <div className="settings-section">
-                            <h3 className="font-18 font-900 text-main mb-16 text-left">Settings</h3>
-                            
-                            <div className="settings-item">
-                                <div className="flex flex-col">
-                                    <span className="font-16 font-700">Sound Effects</span>
-                                    <span className="font-12 text-secondary">Audio feedback in quiz</span>
-                                </div>
-                                <label className="toggle-switch">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={stats.settings?.soundEnabled ?? true} 
-                                        onChange={() => toggleSetting('soundEnabled')}
-                                    />
-                                    <span className="slider"></span>
-                                </label>
-                            </div>
-
-                            <div className="settings-item">
-                                <div className="flex flex-col">
-                                    <span className="font-16 font-700">Haptic Feedback</span>
-                                    <span className="font-12 text-secondary">Vibration on interactions</span>
-                                </div>
-                                <label className="toggle-switch">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={stats.settings?.hapticsEnabled ?? true} 
-                                        onChange={() => toggleSetting('hapticsEnabled')}
-                                    />
-                                    <span className="slider"></span>
-                                </label>
-                            </div>
-
-                            <div className="settings-item">
-                                <div className="flex flex-col">
-                                    <span className="font-16 font-700">Exclude Easy Cognates</span>
-                                    <span className="font-12 text-secondary">Hide words similar to English</span>
-                                </div>
-                                <label className="toggle-switch">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={stats.settings?.excludeEasyWords ?? false} 
-                                        onChange={() => toggleSetting('excludeEasyWords')}
-                                    />
-                                    <span className="slider"></span>
-                                </label>
-                            </div>
-
-                            <div className="settings-item">
-                                <div className="flex flex-col">
-                                    <span className="font-16 font-700">Unlock All Levels</span>
-                                    <span className="font-12 text-secondary">Start any level freely</span>
-                                </div>
-                                <label className="toggle-switch">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={stats.settings?.unlockAllLevels ?? false} 
-                                        onChange={() => toggleSetting('unlockAllLevels')}
-                                    />
-                                    <span className="slider"></span>
-                                </label>
                             </div>
                         </div>
 
@@ -191,16 +126,81 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                             onClick={handleLogin}
                             className="duo-button duo-button-outline flex-center gap-12 p-16 bg-google"
                         >
-                            <Image 
-                                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
-                                alt="Google" 
-                                width={20} 
+                            <Image
+                                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                                alt="Google"
+                                width={20}
                                 height={20}
                             />
                             LOG IN WITH GOOGLE
                         </button>
                     </div>
                 )}
+
+                {/* Settings Section (Moved outside to allow Guest access) */}
+                <div className="settings-section mt-24 pt-24 border-t-glass">
+                    <h3 className="font-18 font-900 text-main mb-16 text-left">Settings</h3>
+
+                    <div className="settings-item">
+                        <div className="flex flex-col">
+                            <span className="font-16 font-700">Sound Effects</span>
+                            <span className="font-12 text-secondary">Audio feedback in quiz</span>
+                        </div>
+                        <label className="toggle-switch">
+                            <input
+                                type="checkbox"
+                                checked={stats.settings?.soundEnabled ?? true}
+                                onChange={() => toggleSetting('soundEnabled')}
+                            />
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+
+                    <div className="settings-item">
+                        <div className="flex flex-col">
+                            <span className="font-16 font-700">Haptic Feedback</span>
+                            <span className="font-12 text-secondary">Vibration on interactions</span>
+                        </div>
+                        <label className="toggle-switch">
+                            <input
+                                type="checkbox"
+                                checked={stats.settings?.hapticsEnabled ?? true}
+                                onChange={() => toggleSetting('hapticsEnabled')}
+                            />
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+
+                    <div className="settings-item">
+                        <div className="flex flex-col">
+                            <span className="font-16 font-700">Exclude Easy Cognates</span>
+                            <span className="font-12 text-secondary">Hide words similar to English</span>
+                        </div>
+                        <label className="toggle-switch">
+                            <input
+                                type="checkbox"
+                                checked={stats.settings?.excludeEasyWords ?? false}
+                                onChange={() => toggleSetting('excludeEasyWords')}
+                            />
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+
+                    <div className="settings-item">
+                        <div className="flex flex-col">
+                            <span className="font-16 font-700">Unlock All Levels</span>
+                            <span className="font-12 text-secondary">Start any level freely</span>
+                        </div>
+                        <label className="toggle-switch">
+                            <input
+                                type="checkbox"
+                                checked={stats.settings?.unlockAllLevels ?? false}
+                                onChange={() => toggleSetting('unlockAllLevels')}
+                            />
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
     );
