@@ -1107,6 +1107,7 @@ button {
   display: inline-block;
   width: 48px;
   height: 24px;
+  flex-shrink: 0;
 }
 
 .toggle-switch input {
