@@ -317,8 +317,8 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
             className="duo-button duo-button-outline btn-nolo w-full mt-24 text-subtitle"
             style={{ borderColor: '#afafaf', color: '#777' }}
           >
-            <HelpCircle size={16} style={{ display: "inline", marginRight: "6px", verticalAlign: "middle" }} />
-            No Lo Sé... (I have no idea!)
+            <span style={{ marginRight: "8px", fontSize: "20px" }}>🤔</span>
+            NO LO SÉ...
           </button>
         )}
       </div>
@@ -330,12 +330,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
           style={isDontKnow ? { background: "#fff0f0", borderColor: "#fecaca" } : undefined}
         >
           <div className="container flex-between">
-            <div className="flex-center gap-12">
-              {isCorrect ? (
-                <CheckCircle size={32} className="text-duo-green" />
-              ) : (
-                <XCircle size={32} className="text-es-red" />
-              )}
+            <div className="flex flex-col items-start">
               <div>
                 {/* 6.3 — Friendlier message for "don't know" */}
                 <h3
