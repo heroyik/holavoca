@@ -26,85 +26,113 @@ const SOUND_FILES: Record<string, string> = {
  */
 /**
  * Global Singleton for Audio state to persist across page navigations.
- * This ensures sounds are only loaded once and are ready immediately.
  */
 let globalCtx: AudioContext | null = null;
+const globalArrayBuffers: Record<string, ArrayBuffer> = {};
 const globalBuffers: Record<string, AudioBuffer> = {};
 let globalUnlocked = false;
-let isPreloadingStarted = false;
+let isFetchingStarted = false;
 
 const getGlobalContext = (): AudioContext | null => {
   if (typeof window === "undefined") return null;
   if (!globalCtx) {
-    const AC =
-      window.AudioContext ||
-      (window as any).webkitAudioContext;
+    const AC = (window as any).AudioContext || (window as any).webkitAudioContext;
     if (!AC) return null;
     globalCtx = new AC();
+    console.log(`[useSound] 🆕 AudioContext created. Initial state: ${globalCtx.state}`);
   }
   return globalCtx;
 };
 
-const preloadAllBuffers = async () => {
-  if (isPreloadingStarted) return;
-  isPreloadingStarted = true;
+/**
+ * Stage 1: Fast Fetch
+ * Fetch raw .mp3 files as ArrayBuffer. Does NOT need AudioContext.
+ * Can happen immediately on page load.
+ */
+const prefetchRawAssets = async () => {
+  if (typeof window === "undefined" || isFetchingStarted) return;
+  isFetchingStarted = true;
 
-  const ctx = getGlobalContext();
-  if (!ctx) return;
-
+  console.log("[useSound] 📡 Starting raw asset pre-fetch...");
   await Promise.allSettled(
     Object.entries(SOUND_FILES).map(async ([key, src]) => {
-      if (globalBuffers[key]) return;
+      if (globalArrayBuffers[key]) return;
       try {
         const res = await fetch(src);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const arrayBuf = await res.arrayBuffer();
-        const audioBuf = await ctx.decodeAudioData(arrayBuf);
-        globalBuffers[key] = audioBuf;
-        console.log(`[useSound] Preloaded: ${key}`);
+        globalArrayBuffers[key] = await res.arrayBuffer();
+        console.log(`[useSound] 📥 Fetched: ${key}`);
       } catch (err) {
-        console.warn(`[useSound] Failed to preload ${key}:`, err);
+        console.error(`[useSound] ❌ Fetch fail (${key}):`, err);
       }
     })
   );
 };
 
-// Start preloading immediately if in browser
+/**
+ * Stage 2: Synchronous Decode
+ * Convert ArrayBuffers to AudioBuffers using the AudioContext.
+ * Must happen after/during a user gesture for best results on Safari.
+ */
+const decodeAllAssets = async () => {
+  const ctx = getGlobalContext();
+  if (!ctx) return;
+
+  const entries = Object.entries(globalArrayBuffers);
+  if (entries.length === 0) {
+    console.warn("[useSound] ⚠️ Decoding requested but no raw assets found. Retrying fetch...");
+    prefetchRawAssets();
+    return;
+  }
+
+  await Promise.allSettled(
+    entries.map(async ([key, arrayBuf]) => {
+      if (globalBuffers[key]) return;
+      try {
+        // decodeAudioData consumes the ArrayBuffer, so we might want to clone it
+        // but since we only decode once globally, it's fine.
+        const audioBuf = await ctx.decodeAudioData(arrayBuf.slice(0));
+        globalBuffers[key] = audioBuf;
+        console.log(`[useSound] 💿 Decoded: ${key}`);
+      } catch (err) {
+        console.error(`[useSound] ❌ Decode fail (${key}):`, err);
+      }
+    })
+  );
+};
+
+// Start fetching immediately
 if (typeof window !== "undefined") {
-  preloadAllBuffers();
+  prefetchRawAssets();
 }
 
-/**
- * WebAudio API-based sound hook for maximum browser compatibility.
- */
 export function useSound(enabled: boolean) {
-  // We still use a ref for local tracking inside the component if needed,
-  // but rely on global state for the heavy lifting.
-  
   const unlock = useCallback(async () => {
+    // 1. Ensure Context exists
     const ctx = getGlobalContext();
     if (!ctx) return;
 
-    // Resume context within user gesture (CRITICAL for Safari)
+    // 2. High-priority Resume (must be directly in gesture handler)
     if (ctx.state !== "running") {
-      await ctx.resume().catch((e) => console.warn("[useSound] Resume failed:", e));
+      console.log(`[useSound] ⚡ Resuming context... (current: ${ctx.state})`);
+      await ctx.resume().catch((e) => console.warn("[useSound] Resume err:", e));
+      console.log(`[useSound] ⚡ New state: ${ctx.state}`);
     }
 
-    if (!globalUnlocked) {
+    // 3. Decode if first time
+    if (!globalUnlocked || Object.keys(globalBuffers).length === 0) {
       globalUnlocked = true;
-      console.log("[useSound] AudioContext Unlocked");
-      // Re-trigger buffer loading just in case it missed the context window
-      preloadAllBuffers();
+      console.log("[useSound] 🔓 Global Unlock Pulse");
+      await decodeAllAssets();
     }
   }, []);
 
   useEffect(() => {
-    const handleGesture = () => {
-      unlock();
-    };
-
-    // Use multiple events for capture
-    document.addEventListener("touchstart", handleGesture, { once: false, passive: true });
+    const handleGesture = () => unlock();
+    
+    // Add multiple listeners to capture first interaction anywhere
+    const options = { once: false, passive: true };
+    document.addEventListener("touchstart", handleGesture, options);
     document.addEventListener("mousedown", handleGesture, { once: false });
     document.addEventListener("click", handleGesture, { once: false });
 
@@ -119,43 +147,63 @@ export function useSound(enabled: boolean) {
     async (type: SoundType) => {
       if (!enabled) return;
 
+      const ctx = getGlobalContext();
+      if (!ctx) return;
+
+      // Force resume if suspended (Safari likes to sleep)
+      if (ctx.state !== "running") {
+        console.warn(`[useSound] ⚠️ Context ${ctx.state} during play request. Resuming...`);
+        await ctx.resume().catch(() => {});
+      }
+
       let key: string = type;
       if (type === "cheer") {
         const n = Math.floor(Math.random() * 5) + 1;
         key = `cheer${n}`;
       }
 
-      try {
-        const ctx = getGlobalContext();
-        if (!ctx) return;
-
-        // Auto-resume fallback (essential for some mobile browsers)
-        if (ctx.state !== "running") {
-          await ctx.resume().catch(() => {});
+      const buffer = globalBuffers[key];
+      if (!buffer) {
+        console.error(`[useSound] 🚫 Skip play: ${key} not decoded.`, {
+          hasRaw: !!globalArrayBuffers[key],
+          decodedKeys: Object.keys(globalBuffers)
+        });
+        
+        // Attempt emergency decode if raw data exists
+        if (globalArrayBuffers[key]) {
+          console.log(`[useSound] 🆘 Emergency decoding ${key}...`);
+          await decodeAllAssets();
+          const retryBuffer = globalBuffers[key];
+          if (retryBuffer) {
+            console.log(`[useSound] 🆘 Recovered! Playing ${key}`);
+            startBufferPlayback(ctx, retryBuffer, key);
+          }
+        } else {
+          prefetchRawAssets();
         }
-
-        const buffer = globalBuffers[key];
-        if (!buffer) {
-          console.warn(`[useSound] Skipping play - ${key} not buffered yet.`);
-          preloadAllBuffers(); // Lazy-retry
-          return;
-        }
-
-        const source = ctx.createBufferSource();
-        source.buffer = buffer;
-
-        const gain = ctx.createGain();
-        gain.gain.value = 0.85;
-
-        source.connect(gain);
-        gain.connect(ctx.destination);
-        source.start(0);
-      } catch (err) {
-        console.warn(`[useSound] play failed (${key}):`, err);
+        return;
       }
+
+      startBufferPlayback(ctx, buffer, key);
     },
     [enabled]
   );
 
   return { play };
+}
+
+/** Helper to handle the actual WebAudio node creation */
+function startBufferPlayback(ctx: AudioContext, buffer: AudioBuffer, key: string) {
+  try {
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gain = ctx.createGain();
+    gain.gain.value = 0.85;
+    source.connect(gain);
+    gain.connect(ctx.destination);
+    source.start(0);
+    console.log(`[useSound] ▶️ Played: ${key} (state: ${ctx.state})`);
+  } catch (err) {
+    console.error(`[useSound] 💥 Play error for ${key}:`, err);
+  }
 }
