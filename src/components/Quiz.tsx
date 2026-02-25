@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo, useEffect } from "react";
+import { useSound } from "@/hooks/useSound";
 import { VocabEntry, guessPOS } from "@/utils/vocab";
 import vocabData from "@/data/vocab.json"; // Import full vocab for distractors
 import deleSentences from "@/data/dele_sentences.json";
@@ -27,6 +28,9 @@ interface QuizProps {
 export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
   const router = useRouter();
   const { addXP, addGem, addMistake, completeUnit, user, stats } = useGamification();
+
+  // Sound hook — preloaded + Chrome Android unlock
+  const { play: playSound } = useSound(stats.settings?.soundEnabled ?? true);
 
   // 6.2 — Live rank refresh after quiz ends
   const { refresh: refreshRank } = useRank(user?.uid ?? null, stats.xp);
@@ -56,6 +60,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
+  const [comboCount, setComboCount] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -72,13 +77,13 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
   const generateOptions = useCallback((currentEntry: VocabEntry) => {
     const correctAnswer = currentEntry["한국어 의미"];
     const pos = guessPOS(currentEntry);
-    
+
     // 1. Try to get 3 distractors from the same POS
     const samePOSDistractors = vocabByPOS[pos]
       .filter(v => v["한국어 의미"] !== correctAnswer)
       .sort(() => Math.random() - 0.5)
       .slice(0, 3);
-      
+
     let finalDistractors = samePOSDistractors.map(v => v["한국어 의미"]);
 
     // 2. Fallback if not enough same-POS words (unlikely with this dataset but safe)
@@ -88,12 +93,12 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
         .sort(() => Math.random() - 0.5)
         .slice(0, 3 - finalDistractors.length)
         .map(v => v["한국어 의미"]);
-      
+
       finalDistractors = [...finalDistractors, ...fallbackDistractors];
     }
-    
+
     return [correctAnswer, ...finalDistractors].sort(() => Math.random() - 0.5);
-  }, [vocabByPOS]); 
+  }, [vocabByPOS]);
 
   const options = useMemo(() => {
     if (questions.length > 0 && currentIndex < questions.length) {
@@ -104,27 +109,56 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
 
   const handleCheck = (option: string) => {
     if (selectedOption) return;
-    
+
     setSelectedOption(option);
     const correct = option === questions[currentIndex]["한국어 의미"];
     setIsCorrect(correct);
 
     if (correct) {
+      const newCombo = comboCount + 1;
+      setComboCount(newCombo);
       setScore(prev => prev + 1);
       addXP(10);
+
+      if (newCombo >= 3) {
+        playSound("cheer");
+        triggerHaptic("combo");
+      } else {
+        playSound("correct");
+        triggerHaptic("success");
+      }
     } else {
+      setComboCount(0);
       setHasMistakes(true);
       addMistake(questions[currentIndex]["스페인어 단어"], unitId);
+      playSound("incorrect");
+      triggerHaptic("error");
     }
   };
 
   const handleDontKnow = () => {
     if (selectedOption) return;
-    
+
+    setComboCount(0);
     setHasMistakes(true);
     addMistake(questions[currentIndex]["스페인어 단어"], unitId);
     setIsCorrect(false);
     setSelectedOption("DONT_KNOW");
+    playSound("incorrect");
+    triggerHaptic("error");
+  };
+
+  // playSound is now provided by useSound hook above
+
+  const triggerHaptic = (type: "success" | "error" | "combo") => {
+    if (!stats.settings?.hapticsEnabled || typeof navigator === 'undefined' || !navigator.vibrate) return;
+    if (type === "success") {
+      navigator.vibrate(50);
+    } else if (type === "combo") {
+      navigator.vibrate([50, 30, 50, 30, 50]);
+    } else {
+      navigator.vibrate([100, 50, 100]);
+    }
   };
 
   const handleNext = () => {
@@ -152,9 +186,9 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
         {/* Book Source Badge */}
         {questions.length > 0 && questions[currentIndex] && (
           <div className="source-badge" data-testid="source-badge">
-            <Image 
-              src={questions[currentIndex]["출처"] === "2" ? vol2 : vol1} 
-              alt="Book Source" 
+            <Image
+              src={questions[currentIndex]["출처"] === "2" ? vol2 : vol1}
+              alt="Book Source"
               fill
               sizes="40px"
               className="object-cover"
@@ -173,7 +207,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
             {score === questions.length ? "Perfect! 🌟" : score >= questions.length * 0.8 ? "Great job! 🔥" : "Keep practicing! 💪"}
           </p>
         </div>
-        <button 
+        <button
           onClick={() => router.push('/')}
           className="duo-button duo-button-primary w-auto px-40 py-12"
         >
@@ -215,9 +249,9 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
           {/* Book Source Badge inside Card */}
           {questions.length > 0 && questions[currentIndex] && (
             <div className="source-badge" data-testid="source-badge">
-              <Image 
-                src={questions[currentIndex]["출처"] === "2" ? vol2 : vol1} 
-                alt="Book Source" 
+              <Image
+                src={questions[currentIndex]["출처"] === "2" ? vol2 : vol1}
+                alt="Book Source"
                 fill
                 sizes="40px"
                 className="object-cover"
@@ -258,11 +292,10 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
             <button
               key={option}
               onClick={() => handleCheck(option)}
-              className={`duo-button duo-button-outline ${
-                selectedOption === option
-                  ? (isCorrect ? 'correct' : 'incorrect')
-                  : (selectedOption && option === currentQuestion["한국어 의미"] ? 'correct' : '')
-              }`}
+              className={`duo-button duo-button-outline ${selectedOption === option
+                ? (isCorrect ? 'correct' : 'incorrect')
+                : (selectedOption && option === currentQuestion["한국어 의미"] ? 'correct' : '')
+                }`}
               disabled={!!selectedOption}
             >
               {option}
@@ -277,8 +310,8 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
             className="duo-button duo-button-outline btn-nolo w-full mt-24 text-subtitle"
             style={{ borderColor: '#afafaf', color: '#777' }}
           >
-            <HelpCircle size={16} style={{ display: "inline", marginRight: "6px", verticalAlign: "middle" }} />
-            No Lo Sé... (I have no idea!)
+            <span style={{ marginRight: "8px", fontSize: "20px" }}>🤔</span>
+            NO LO SÉ...
           </button>
         )}
       </div>
@@ -290,12 +323,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
           style={isDontKnow ? { background: "#fff0f0", borderColor: "#fecaca" } : undefined}
         >
           <div className="container flex-between">
-            <div className="flex-center gap-12">
-              {isCorrect ? (
-                <CheckCircle size={32} className="text-duo-green" />
-              ) : (
-                <XCircle size={32} className="text-es-red" />
-              )}
+            <div className="flex flex-col items-start">
               <div>
                 {/* 6.3 — Friendlier message for "don't know" */}
                 <h3
@@ -305,8 +333,8 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
                   {isDontKnow
                     ? "😅 That's okay! Here's the answer:"
                     : isCorrect
-                    ? "✅ ¡Correcto!"
-                    : "Correct solution:"}
+                      ? "✅ ¡Correcto!"
+                      : "Correct solution:"}
                 </h3>
                 {(!isCorrect || isDontKnow) && (
                   <p className="correct-solution">
@@ -337,7 +365,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
             <button
               onClick={handleNext}
               className={`duo-button w-auto px-40 py-12 ${isCorrect ? 'duo-button-primary' : ''}`}
-              style={{ 
+              style={{
                 backgroundColor: isCorrect ? 'var(--duo-green)' : 'var(--es-red)',
                 color: 'white',
                 boxShadow: isCorrect ? '0 4px 0 var(--duo-green-dark)' : '0 4px 0 var(--es-red)'

@@ -8,6 +8,7 @@ import { User } from 'firebase/auth';
 import Image from 'next/image';
 import { useState } from 'react';
 import { getUnits } from '@/utils/vocab';
+import { getAvatarColor, getInitial } from '@/utils/ui';
 
 interface UserProfileProps {
     user: User | null;
@@ -49,14 +50,24 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                     <>
                         <div
                             onClick={() => setDevClickCount(prev => prev + 1)}
-                            className="avatar-container w-100 h-100 relative mb-16"
+                            className="avatar-container w-100 h-100 rounded-full relative mb-16 overflow-hidden flex-center"
+                            style={{
+                                backgroundColor: user.photoURL ? 'transparent' : getAvatarColor(user.uid),
+                                color: 'white',
+                                fontWeight: 900,
+                                fontSize: '48px'
+                            }}
                         >
-                            <Image
-                                src={user.photoURL || '/default-avatar.png'}
-                                alt={user.displayName || 'User'}
-                                fill
-                                className="object-cover"
-                            />
+                            {user.photoURL ? (
+                                <Image
+                                    src={user.photoURL}
+                                    alt={user.displayName || 'User'}
+                                    fill
+                                    className="object-cover"
+                                />
+                            ) : (
+                                <span>{getInitial(user.displayName || undefined)}</span>
+                            )}
                         </div>
                         <h2 className="font-24 font-900 text-main mb-4">{user.displayName}</h2>
                         <p className="text-secondary font-700 mb-24">Spanish Enthusiast 🇪🇸</p>

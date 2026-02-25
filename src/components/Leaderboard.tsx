@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, query, orderBy, limit, onSnapshot, getDocs } from 'firebase/firestore';
 import Image from 'next/image';
+import { getAvatarColor, getInitial } from '@/utils/ui';
 
 interface LeaderboardEntry {
     id: string;
@@ -105,16 +106,21 @@ export default function Leaderboard() {
                         <div className="rank-text">
                             {index === 0 ? '👑' : index + 1}
                         </div>
-                        <div className="user-avatar mr-12 relative">
+                        <div className="user-avatar mr-12 relative" style={{
+                            backgroundColor: entry.photoURL ? 'transparent' : getAvatarColor(entry.id),
+                            color: 'white',
+                            fontWeight: 900,
+                            fontSize: '18px'
+                        }}>
                             {entry.photoURL ? (
-                                <Image 
-                                    src={entry.photoURL} 
-                                    alt={entry.displayName || "Usuario"} 
+                                <Image
+                                    src={entry.photoURL}
+                                    alt={entry.displayName || "Usuario"}
                                     fill
                                     className="object-cover rounded-full"
                                 />
                             ) : (
-                                <span className="font-20">👤</span>
+                                <span>{getInitial(entry.displayName)}</span>
                             )}
                         </div>
                         <div className="leader-item-name">

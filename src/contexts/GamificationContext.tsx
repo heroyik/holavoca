@@ -75,9 +75,9 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          setStats(prev => ({ 
-            ...prev, 
-            ...parsed, 
+          setStats(prev => ({
+            ...prev,
+            ...parsed,
             mistakes: parsed.mistakes || {},
             unitStats: parsed.unitStats || {},
             settings: {
@@ -113,10 +113,10 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
           if (snapshot.exists() && !snapshot.metadata.hasPendingWrites) {
             const cloudData = snapshot.data() as UserStats;
             setStats(prev => {
-              const mergedMistakes = cloudData.mistakes !== undefined 
-                ? cloudData.mistakes 
+              const mergedMistakes = cloudData.mistakes !== undefined
+                ? cloudData.mistakes
                 : prev.mistakes;
-              
+
               const newStats: UserStats = {
                 ...prev,
                 ...cloudData,
@@ -125,18 +125,18 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
                 masteredUnits: Array.from(new Set([...(prev.masteredUnits || []), ...(cloudData.masteredUnits || [])])),
                 mistakes: mergedMistakes || {},
                 settings: {
-                  soundEnabled: cloudData.settings?.soundEnabled ?? defaultStats.settings!.soundEnabled,
-                  hapticsEnabled: cloudData.settings?.hapticsEnabled ?? defaultStats.settings!.hapticsEnabled,
-                  excludeEasyWords: cloudData.settings?.excludeEasyWords ?? defaultStats.settings!.excludeEasyWords,
-                  unlockAllLevels: cloudData.settings?.unlockAllLevels ?? defaultStats.settings!.unlockAllLevels,
+                  soundEnabled: cloudData.settings?.soundEnabled ?? prev.settings?.soundEnabled ?? defaultStats.settings!.soundEnabled,
+                  hapticsEnabled: cloudData.settings?.hapticsEnabled ?? prev.settings?.hapticsEnabled ?? defaultStats.settings!.hapticsEnabled,
+                  excludeEasyWords: cloudData.settings?.excludeEasyWords ?? prev.settings?.excludeEasyWords ?? defaultStats.settings!.excludeEasyWords,
+                  unlockAllLevels: cloudData.settings?.unlockAllLevels ?? prev.settings?.unlockAllLevels ?? defaultStats.settings!.unlockAllLevels,
                 },
               };
-              
+
               setIsInitialized(true);
               return newStats;
             });
           } else if (!snapshot.exists()) {
-              setIsInitialized(true);
+            setIsInitialized(true);
           }
         });
         return () => unsubStats();
@@ -158,9 +158,9 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     const timer = setTimeout(async () => {
       try {
         await setDoc(doc(currentDb, "users", currentUser.uid), {
-            ...statsRef.current,
-            displayName: currentUser.displayName,
-            photoURL: currentUser.photoURL
+          ...statsRef.current,
+          displayName: currentUser.displayName,
+          photoURL: currentUser.photoURL
         }, { merge: true });
         console.log("[GamificationProvider] Progress synced to cloud");
       } catch (e) {
@@ -196,7 +196,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     const currentMastered = statsRef.current.masteredUnits || [];
 
     const currentUnitStats = statsRef.current.unitStats?.[unitId] || { failedWords: 0, attempts: 0, isMastered: false };
-    
+
     const newStats: UserStats = {
       ...statsRef.current,
       xp: statsRef.current.xp + xpEarned,
@@ -234,7 +234,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   const recordMistake = (spanishWord: string, unitId?: string) => {
     const currentMistakes = statsRef.current.mistakes || {};
     const newUnitStats = { ...(statsRef.current.unitStats || {}) };
-    
+
     if (unitId) {
       const uStat = newUnitStats[unitId] || { failedWords: 0, attempts: 0, isMastered: false };
       newUnitStats[unitId] = {
