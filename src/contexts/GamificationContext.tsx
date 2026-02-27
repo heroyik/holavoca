@@ -114,20 +114,23 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       if (currentUser && db) {
         const userDocRef = doc(db, "users", currentUser.uid);
         const unsubStats = onSnapshot(userDocRef, (snapshot) => {
-          if (snapshot.exists() && !snapshot.metadata.hasPendingWrites) {
-            const cloudData = snapshot.data() as UserStats;
+          if (snapshot.exists()) {
             setStats(prev => {
-              const mergedMistakes = cloudData.mistakes !== undefined
-                ? cloudData.mistakes
-                : prev.mistakes;
+              if (snapshot.metadata.hasPendingWrites) return prev;
+
+              const cloudData = snapshot.data() as UserStats;
 
               const newStats: UserStats = {
                 ...prev,
                 ...cloudData,
-                xp: Math.max(prev.xp, cloudData.xp || 0),
-                completedUnits: Array.from(new Set([...prev.completedUnits, ...(cloudData.completedUnits || [])])),
-                masteredUnits: Array.from(new Set([...(prev.masteredUnits || []), ...(cloudData.masteredUnits || [])])),
-                mistakes: mergedMistakes || {},
+                xp: cloudData.xp ?? 0,
+                gems: cloudData.gems ?? 0,
+                streak: cloudData.streak ?? 0,
+                lastStudyDate: cloudData.lastStudyDate ?? null,
+                completedUnits: cloudData.completedUnits || [],
+                masteredUnits: cloudData.masteredUnits || [],
+                mistakes: cloudData.mistakes || {},
+                unitStats: cloudData.unitStats || {},
                 settings: {
                   soundEnabled: cloudData.settings?.soundEnabled ?? prev.settings?.soundEnabled ?? defaultStats.settings!.soundEnabled,
                   hapticsEnabled: cloudData.settings?.hapticsEnabled ?? prev.settings?.hapticsEnabled ?? defaultStats.settings!.hapticsEnabled,
@@ -139,12 +142,14 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
               setIsInitialized(true);
               return newStats;
             });
-          } else if (!snapshot.exists()) {
+          } else {
+            // Document doesn't exist yet (new user)
             setIsInitialized(true);
           }
         });
         return () => unsubStats();
       } else {
+        // No user or no DB
         setIsInitialized(true);
       }
     });
@@ -154,12 +159,12 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
 
   const syncStatsToCloud = async (newStats: UserStats) => {
     if (!user || !db || !isInitialized) return;
-    
+
     try {
       await setDoc(doc(db, "users", user.uid), {
         ...newStats,
         displayName: newStats.displayName || user.displayName,
-        photoURL: (function() {
+        photoURL: (function () {
           const currentPhoto = newStats.photoURL;
           const authPhoto = user.photoURL;
           if (!currentPhoto) return authPhoto;
@@ -270,12 +275,12 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     const word = spanishWord.trim();
     const currentMistakes = { ...statsRef.current.mistakes };
     delete currentMistakes[word];
-    
+
     const newStats = {
       ...statsRef.current,
       mistakes: currentMistakes
     };
-    
+
     saveStatsLocally(newStats);
     statsRef.current = newStats;
     console.log("[GamificationProvider] Mistake cleared:", word);
@@ -286,7 +291,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       ...statsRef.current,
       mistakes: {}
     };
-    
+
     saveStatsLocally(newStats);
     statsRef.current = newStats;
     console.log("[GamificationProvider] All mistakes cleared");
@@ -314,8 +319,13 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   const resetProgress = () => {
     const updatedStats: UserStats = {
       ...statsRef.current,
+      xp: 0,
+      gems: 0,
+      streak: 0,
+      lastStudyDate: null,
       completedUnits: [],
       masteredUnits: [],
+      mistakes: {},
       unitStats: {}, // Reset unit-specific attempts and mastery
     };
     saveStatsLocally(updatedStats);
