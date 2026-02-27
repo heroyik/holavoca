@@ -1,4 +1,4 @@
-import { test, expect, devices } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 test.describe('V2.0 UI & Galaxy S25 Responsiveness Tests', () => {
 
@@ -14,8 +14,9 @@ test.describe('V2.0 UI & Galaxy S25 Responsiveness Tests', () => {
 
         // 1. Header symmetry check
         const header = page.locator('.sticky-header');
+        await expect(header).toBeVisible();
         const box = await header.boundingBox();
-        expect(box?.width).toBe(360 - 32); // 16px padding on each side at mobile
+        expect(box?.width).toBeCloseTo(360 - 32, 1); // 16px padding on each side at mobile
 
         // 2. Snake Path Connector visibility
         const connectorVisible = await page.locator('.connector-svg').isVisible();
@@ -40,7 +41,7 @@ test.describe('V2.0 UI & Galaxy S25 Responsiveness Tests', () => {
 
         // Alternative: Check if fail-badge class exists in CSS
         const styleTag = await page.locator('style').allInnerTexts();
-        const hasFailBadge = styleTag.some(s => s.includes('.fail-badge'));
+        styleTag.some(s => s.includes('.fail-badge'));
         // Actually better to check if it's applied to the DOM in Home
         await page.goto('/holavoca');
         // We expect at least one fail badge if there were previous failures in local storage
@@ -50,8 +51,9 @@ test.describe('V2.0 UI & Galaxy S25 Responsiveness Tests', () => {
         // Go to quiz
         await page.goto('/holavoca/quiz/unit-1?sources=1');
         const quizCard = page.locator('.quiz-card');
+        await expect(quizCard).toBeVisible({ timeout: 10000 });
         const box = await quizCard.boundingBox();
         // Card should be constrained within container (360 - 32px padding)
-        expect(box?.width).toBeLessThanOrEqual(360 - 32);
+        expect(box?.width).toBeLessThanOrEqual(360 - 32 + 1); // Allow 1px slack for subpixel rendering
     });
 });

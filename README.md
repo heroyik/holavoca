@@ -2,8 +2,6 @@
 
 `Version 2.0.2`
 
-HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 720+ Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
-
 ---
 
 ## 🆕 Latest Updates
@@ -20,6 +18,10 @@ HolaVoca is a premium, gamified Spanish learning platform inspired by modern edu
   - On **Android**, the app now automatically forces opening in Chrome via Android Intents.
   - On **iOS (KakaoTalk)**, it automatically triggers opening in Safari.
   - Provides guidance for other iOS IABs to ensure a seamless Google Login experience.
+
+---
+
+HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 720+ Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
 
 ### [v2.0.0] - 2026-02-25 — Official Release & Vocabulary Optimization
 

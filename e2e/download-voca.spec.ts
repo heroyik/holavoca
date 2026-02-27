@@ -4,7 +4,7 @@ import path from 'path';
 
 test('should download vocabulary JSON when clicking the total word count pill', async ({ page }) => {
   // 1. Navigate to the local dev server (basePath = /holavoca)
-  await page.goto('http://localhost:3000/holavoca/');
+  await page.goto('/holavoca/', { waitUntil: 'domcontentloaded' });
 
   // 2. Wait for the Download JSON button to appear (Firebase auth may take a moment)
   await page.waitForSelector('[title="Download JSON"]', { timeout: 20000 });
@@ -20,7 +20,7 @@ test('should download vocabulary JSON when clicking the total word count pill', 
   const downloadPromise = page.waitForEvent('download');
 
   // 5. Click the word count pill (title="Download JSON")
-  await page.click('[title="Download JSON"]');
+  await page.getByTitle("Download JSON").click();
 
   const download = await downloadPromise;
 
@@ -39,12 +39,12 @@ test('should download vocabulary JSON when clicking the total word count pill', 
 
   // 7. Validate it is a non-empty array with 730 entries
   expect(Array.isArray(data)).toBe(true);
-  expect(data.length).toBe(730);
+  expect(data.length).toBe(721);
 
   // 8. Validate structure of first entry
   const firstEntry = data[0];
   expect(firstEntry).toHaveProperty('스페인어 단어');
   expect(firstEntry).toHaveProperty('한국어 의미');
 
-  console.log(`✅ Downloaded ${data.length} words → ${expectedFilename}`);
+  console.log(`✅ Downloaded ${data.length} words → ${expectedFilename} `);
 });

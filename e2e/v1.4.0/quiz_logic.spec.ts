@@ -27,7 +27,7 @@ test.describe('V2.0 Quiz Logic Tests', () => {
     test('TC-QUIZ-02: "No Lo Sé" button should show feedback and correct answer', async ({ page }) => {
         const noloBtn = page.locator('.btn-nolo');
         await expect(noloBtn).toBeVisible();
-        await expect(noloBtn).toContainText('No Lo Sé');
+        await expect(noloBtn).toContainText('NO LO SÉ');
 
         // Click "No Lo Sé"
         await noloBtn.click();

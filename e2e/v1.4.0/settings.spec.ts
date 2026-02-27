@@ -5,8 +5,7 @@ test.describe('V2.0 Settings & Customization Tests', () => {
     test.beforeEach(async ({ page }) => {
         await page.goto('/holavoca');
         // Switch to profile tab
-        const profileTab = page.locator('.nav-item', { hasText: 'PROFILE' });
-        await profileTab.click();
+        await page.getByText('PROFILE', { exact: true }).click();
         await expect(page.locator('.profile-container')).toBeVisible();
     });
 
@@ -28,17 +27,17 @@ test.describe('V2.0 Settings & Customization Tests', () => {
 
     test('TC-SET-02: Unlock All Levels toggle should enable Level 15', async ({ page }) => {
         // 1. Check if Level 15 is locked initially (assuming fresh session)
-        await page.locator('.nav-item', { hasText: 'LEARN' }).click();
+        await page.getByText('LEARN', { exact: true }).click();
         const level15Node = page.locator('.unit-node-container').nth(14); // 0-indexed
         await expect(level15Node.locator('.unit-button')).toHaveClass(/locked/);
 
         // 2. Go back and toggle
-        await page.locator('.nav-item', { hasText: 'PROFILE' }).click();
+        await page.getByText('PROFILE', { exact: true }).click();
         const unlockToggle = page.locator('.settings-item', { hasText: 'Unlock All Levels' }).locator('.slider');
         await unlockToggle.click();
 
         // 3. Check if Level 15 is now accessible
-        await page.locator('.nav-item', { hasText: 'LEARN' }).click();
+        await page.getByText('LEARN', { exact: true }).click();
         await expect(level15Node.locator('.unit-button')).not.toHaveClass(/locked/);
     });
 });

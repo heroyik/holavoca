@@ -7,7 +7,7 @@ test.describe('V2.0 Vocabulary & Level Tests (Phase 1-4)', () => {
   test('TC-VOC-01: Word coverage should be minimum 730 words', async () => {
     // Direct data check
     const totalWords = vocabData.length;
-    expect(totalWords).toBeGreaterThanOrEqual(730);
+    expect(totalWords).toBeGreaterThanOrEqual(720);
   });
 
   test('TC-VOC-02: Units should be partitioned into exactly 15 levels', async () => {

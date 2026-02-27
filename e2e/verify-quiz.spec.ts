@@ -2,12 +2,12 @@ import { test, expect } from '@playwright/test';
 
 test('Verify Quiz Stability (4 options bug fix)', async ({ page }) => {
     // 1. Visit the site
-    await page.goto('http://localhost:3005/holavoca/', { waitUntil: 'domcontentloaded' });
+    await page.goto('/holavoca/', { waitUntil: 'domcontentloaded' });
 
     // 2. Click Unit 1 circle
     console.log('Starting Quiz...');
-    // The first duo-node corresponds to Unit 1
-    const unit1 = page.locator('.duo-node').first();
+    // The first unit-button corresponds to Unit 1
+    const unit1 = page.locator('.unit-button').first();
     await unit1.click({ force: true });
 
     // 3. Wait for quiz to load (it navigates to /holavoca/quiz/unit-1...)
@@ -33,7 +33,10 @@ test('Verify Quiz Stability (4 options bug fix)', async ({ page }) => {
     // 5. Check next question too
     // Just click first option to move fast (might be wrong but it's fine for UI check)
     await options.first().click();
-    await page.locator('text=Got it').click();
+
+    // Wait for feedback bar to appear
+    await expect(page.locator('.quiz-feedback-bar')).toBeVisible();
+    await page.locator('button', { hasText: 'NEXT' }).click();
 
     await expect(async () => {
         const newOptionsCount = await options.count();

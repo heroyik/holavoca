@@ -11,20 +11,20 @@ test('Verify HolaVoca v1.1 Deployment', async ({ page }) => {
     test.setTimeout(60000);
 
     // Use domcontentloaded to avoid waiting for long-polling requests
-    await page.goto('http://localhost:3005/holavoca/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto('/holavoca/', { waitUntil: 'domcontentloaded', timeout: 60000 });
 
     // 2. Check title and revision
     await expect(page).toHaveTitle(/HolaVoca/);
 
     // Check for Revision tag (Current version)
-    const revisionTag = page.locator('text=v1.1.2'); // Current version in constants.ts
-    await expect(revisionTag).toBeVisible({ timeout: 30000 });
+    const revisionTag = page.locator('.version-badge'); // Match the class used in page.tsx
+    await expect(revisionTag).toContainText('2.0.2');
     console.log('✅ Version badge found.');
 
     // 2.5 Check Vocabulary (Unit 1 should be beginner)
-    // The UI renders "PRINCIPIANTE 1", not "Unit 1"
-    await expect(page.locator('text=PRINCIPIANTE 1')).toBeVisible({ timeout: 10000 });
-    console.log('✅ Unit 1 (PRINCIPIANTE 1) found.');
+    // The UI renders "BEGINNER 1", not "Unit 1"
+    await expect(page.locator('text=BEGINNER 1')).toBeVisible({ timeout: 10000 });
+    console.log('✅ Unit 1 (BEGINNER 1) found.');
 
     // 3. Check Leaderboard
     console.log('Clicking LEADER tab...');
@@ -36,8 +36,8 @@ test('Verify HolaVoca v1.1 Deployment', async ({ page }) => {
     console.log('Waiting for Leaderboard content...');
 
     try {
-        await expect(page.locator('h2:has-text("Hall de la Fama")')).toBeVisible({ timeout: 20000 });
-        console.log('✅ Leaderboard Header "Hall de la Fama" found.');
+        await expect(page.locator('h2:has-text("Hall of Fame")')).toBeVisible({ timeout: 20000 });
+        console.log('✅ Leaderboard Header "Hall of Fame" found.');
     } catch {
         console.log('❌ Leaderboard Header NOT found. Checking for error state...');
     }
@@ -84,8 +84,7 @@ test('Verify HolaVoca v1.1 Deployment', async ({ page }) => {
     await page.locator('text=PROFILE').click();
 
     // Check if the Sign In button is present
-    // The UI has "INICIAR SESIÓN CON GOOGLE"
-    await expect(page.locator('button:has-text("INICIAR SESIÓN")')).toBeVisible();
+    await expect(page.locator('button:has-text("LOG IN WITH GOOGLE")')).toBeVisible();
 
     // Listen for dialogs (alerts)
     page.on('dialog', async dialog => {
@@ -96,6 +95,6 @@ test('Verify HolaVoca v1.1 Deployment', async ({ page }) => {
         await dialog.dismiss();
     });
 
-    await page.locator('button:has-text("SIGN IN")').click();
+    await page.locator('button:has-text("LOG IN WITH GOOGLE")').click();
     console.log('✅ Auth interaction tested.');
 });

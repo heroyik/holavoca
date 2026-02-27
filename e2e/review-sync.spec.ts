@@ -27,15 +27,15 @@ test.describe('Review Feature Refinement', () => {
     // 1. Visit the app and clear storage
     await page.goto('http://localhost:3000/holavoca/');
     await page.evaluate(() => localStorage.clear());
-    
+
     // 2. Set mock stats in localStorage to simulate a synced account
     await page.evaluate((stats) => {
       localStorage.setItem('holavoca_stats', JSON.stringify(stats));
     }, MOCK_STATS);
-    
+
     // 3. Reload to let useGamification pick up the data
     await page.goto('http://localhost:3000/holavoca/');
-    
+
     // 4. Wait for the gamification hook to initialize by checking for XP display
     await expect(page.locator('text=My Learning Aura')).toBeVisible({ timeout: 10000 });
   });
@@ -45,13 +45,14 @@ test.describe('Review Feature Refinement', () => {
     await page.locator('nav >> text=REVIEW').click();
 
     // Verify header and count
-    await expect(page.locator('text=2 palabras para repasar')).toBeVisible();
+    await expect(page.locator('text=Tricky Words')).toBeVisible();
+    await expect(page.locator('.stat-value')).toHaveText('2');
 
     // Verify words and their mistakes
     await expect(page.locator('text=abril')).toBeVisible();
-    await expect(page.locator('text=3 errores')).toBeVisible();
+    await expect(page.locator('.mistake-item', { hasText: 'abril' }).locator('.mistake-count')).toHaveText('3');
     await expect(page.locator('text=adiós')).toBeVisible();
-    await expect(page.locator('text=1 error')).toBeVisible();
+    await expect(page.locator('.mistake-item', { hasText: 'adiós' }).locator('.mistake-count')).toHaveText('1');
   });
 
   test('should allow individual removal of a mistake', async ({ page }) => {
@@ -65,7 +66,7 @@ test.describe('Review Feature Refinement', () => {
 
     // Check if it disappeared
     await expect(page.locator('text=adiós')).not.toBeVisible();
-    await expect(page.locator('text=1 palabra para repasar')).toBeVisible();
+    await expect(page.locator('.stat-value')).toHaveText('1');
 
     // Verify localStorage was updated
     const stats = await page.evaluate(() => JSON.parse(localStorage.getItem('holavoca_stats') || '{}'));
@@ -76,13 +77,13 @@ test.describe('Review Feature Refinement', () => {
   test('should allow clearing all mistakes', async ({ page }) => {
     await page.locator('nav >> text=REVIEW').click();
 
-    // Click "Borrar todo"
+    // Click "Clear list" icon button
     // Mock the confirm dialog
     page.on('dialog', dialog => dialog.accept());
-    await page.click('button:has-text("Borrar todo")');
+    await page.click('button[title="Clear list"]');
 
     // Verify empty state UI
-    await expect(page.locator('text=¡Todo despejado!')).toBeVisible();
+    await expect(page.locator('text=All Clear!')).toBeVisible();
 
     // Verify localStorage
     const stats = await page.evaluate(() => JSON.parse(localStorage.getItem('holavoca_stats') || '{}'));
