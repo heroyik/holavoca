@@ -1,15 +1,18 @@
-# 🇪🇸 HolaVoca (v2.0.2) - Spanish Vocabulary Learning App
+# 🇪🇸 HolaVoca (v2.0.3) - Spanish Vocabulary Learning App
 
-`Version 2.0.2`
+`Version 2.0.3`
 
 ---
 
 ## 🆕 Latest Updates
 
+### [v2.0.3] - 2026-02-27 — Admin Progression Preservation
+
+- **Admin Cheat Logic Refinement**: Modified "Initialize" and "Unlock Level" cheat actions to preserve **Total XP**, **Gems**, and **Mistakes**. Only localized progress (unit completion, streaks, unit-specific stats) are now reset, ensuring global persistence is maintained even during admin operations.
+
 ### [v2.0.2] - 2026-02-27 — Admin Persistence & Sync Optimization
 
-- **Persistent Admin Actions**: Fixed an issue where "Initialize Progress" and "Unlock to Level" cheat keys would fail to sync to the cloud. The synchronization logic now correctly supports rollbacks and resets.
-- **Full Initialization**: Enhanced the admin reset logic to fully clear XP, Gems, and Streaks alongside unit progress.
+- **Persistent Admin Actions**: Fixed an issue where "Initialize Progress" and "Unlock to Level" cheat keys would fail to sync to the cloud.
 
 ### [v2.0.1] - 2026-02-27 — Mobile In-App Browser Compatibility
 

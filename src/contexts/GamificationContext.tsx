@@ -319,13 +319,10 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   const resetProgress = () => {
     const updatedStats: UserStats = {
       ...statsRef.current,
-      xp: 0,
-      gems: 0,
       streak: 0,
       lastStudyDate: null,
       completedUnits: [],
       masteredUnits: [],
-      mistakes: {},
       unitStats: {}, // Reset unit-specific attempts and mastery
     };
     saveStatsLocally(updatedStats);
