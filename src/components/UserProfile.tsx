@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { getUnits } from '@/utils/vocab';
 import { getAvatarColor, getInitial } from '@/utils/ui';
+import { isUnsupportedIAB, redirectToExternalBrowser } from '@/utils/browser';
 
 interface UserProfileProps {
     user: User | null;
@@ -28,6 +29,13 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
             alert("Firebase Authentication is not available in this environment.");
             return;
         }
+
+        // Handle In-App Browser redirection for Google Login compatibility
+        if (isUnsupportedIAB()) {
+            redirectToExternalBrowser();
+            return;
+        }
+
         try {
             await signInWithPopup(auth, googleProvider);
         } catch (error) {
@@ -98,12 +106,12 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                         {user.email === 'heroyik@gmail.com' && devClickCount >= 5 && (
                             <div className="mt-32 p-16 bg-dev border-dev rounded-12 text-left">
                                 <p className="font-14 font-800 text-duo-green mb-12">🔧 DEV CONSOLE</p>
-                                
+
                                 <div className="space-y-12 mb-20">
                                     <div className="flex flex-col gap-4">
                                         <label className="font-12 font-800 uppercase text-secondary">Admin Name</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             value={adminName}
                                             onChange={(e) => setAdminName(e.target.value)}
                                             className="input-standard py-8 px-12"
@@ -112,8 +120,8 @@ export default function UserProfile({ user, stats }: UserProfileProps) {
                                     </div>
                                     <div className="flex flex-col gap-4">
                                         <label className="font-12 font-800 uppercase text-secondary">Admin Photo URL</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             value={adminPhoto}
                                             onChange={(e) => setAdminPhoto(e.target.value)}
                                             className="input-standard py-8 px-12 font-11"

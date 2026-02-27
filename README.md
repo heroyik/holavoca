@@ -1,12 +1,20 @@
-# 🇪🇸 HolaVoca (v2.0.0) - Spanish Vocabulary Learning App
+# 🇪🇸 HolaVoca (v2.0.1) - Spanish Vocabulary Learning App
 
-`Version 2.0.0`
+`Version 2.0.1`
 
 HolaVoca is a premium, gamified Spanish learning platform inspired by modern educational apps. It helps users master over 720+ Spanish words through a mobile-optimized **Snake Path** journey and a real-time competitive leaderboard.
 
 ---
 
 ## 🆕 Latest Updates
+
+### [v2.0.1] - 2026-02-27 — Mobile In-App Browser Compatibility
+
+- **External Browser Redirection**: Implemented logic to detect unsupported mobile in-app browsers (KakaoTalk, Instagram, Facebook, Line) that block Google Login.
+- **Auto-Launch Chrome/Safari**:
+  - On **Android**, the app now automatically forces opening in Chrome via Android Intents.
+  - On **iOS (KakaoTalk)**, it automatically triggers opening in Safari.
+  - Provides guidance for other iOS IABs to ensure a seamless Google Login experience.
 
 ### [v2.0.0] - 2026-02-25 — Official Release & Vocabulary Optimization
 

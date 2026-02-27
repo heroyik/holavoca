@@ -15,26 +15,26 @@ import ReviewTab from '@/components/ReviewTab';
 import RankToast from '@/components/RankToast';
 import vol1 from '../../public/vol1.jpg';
 import vol2 from '../../public/vol2.jpg';
-import { 
-  Github, 
-  ThumbsUp, 
-  Check, 
-  Lock, 
-  MessageSquare, 
-  User, 
-  Coffee, 
-  ShoppingBag, 
-  MapPin, 
-  Activity, 
-  Heart, 
-  Star, 
-  Book, 
-  Music, 
-  Camera, 
-  Sun, 
-  Award, 
-  Shield, 
-  Target 
+import {
+  Github,
+  ThumbsUp,
+  Check,
+  Lock,
+  MessageSquare,
+  User,
+  Coffee,
+  ShoppingBag,
+  MapPin,
+  Activity,
+  Heart,
+  Star,
+  Book,
+  Music,
+  Camera,
+  Sun,
+  Award,
+  Shield,
+  Target
 } from 'lucide-react';
 
 // Gamification Helpers
@@ -224,8 +224,13 @@ export default function Home() {
 
             // Bypass logic if unlockAllLevels is enabled
             const unlockAll = stats.settings?.unlockAllLevels ?? false;
-            const isLocked = !unlockAll && index > (stats.completedUnits?.length ?? 0);
-            const isCurrent = !unlockAll && index === (stats.completedUnits?.length ?? 0);
+
+            // isLocked: strictly sequential unless unlockAll is true
+            // Unit 1 (index 0) is always unlocked. Others depend on previous unit completion.
+            const isLocked = !unlockAll && index > 0 && !stats.completedUnits?.includes(units[index - 1].id);
+
+            // isCurrent: the "actual" next level to tackle, persistent even if we explore others
+            const isCurrent = index === (stats.completedUnits?.length ?? 0);
 
             const tier = getLevelTier(index);
             const unitStatusClass = isLocked ? 'locked' : (isMastered ? 'mastered' : (isCurrent ? 'current' : (isCompleted ? 'completed' : 'available')));
@@ -240,7 +245,7 @@ export default function Home() {
               if (locked) return <Lock size={24} className="text-white opacity-50" />;
               if (mastered) return <ThumbsUp size={32} className="text-white" fill="currentColor" />;
               if (completed) return <Check size={32} className="text-white" strokeWidth={4} />;
-              
+
               // Standard level icons
               const icons = [MessageSquare, User, Coffee, ShoppingBag, MapPin, Activity, Heart, Star, Book, Music, Camera, Sun, Award, Shield, Target];
               const Icon = icons[index % icons.length];
