@@ -8,10 +8,10 @@
 
 ### [v2.1.0] - 2026-02-28 — Mistake Highlighting & Automatic Mastering
 
-- **"Tricky Word" Highlighting**: Implemented a visual badge in quizzes to alert users when a word is from their previously missed list.
-- **Unit Mistake Review Flow**: Added a specialized flow reachable by clicking the mistake indicator on the unit list.
-- **Automatic Master Status & Redirection**: Correctly clearing all wrong words now marks the unit as "Mastered" with celebratory UI and auto-redirects back to the snake map.
-- **React Performance Optimization**: Refactored the mistake sync logic in `Quiz.tsx` to prevent cascading renders and improved internal state consistency.
+- **Unit Mistake Review Flow**: Clickable red mistake badges on the map launch targeted sessions for previously incorrect words.
+- **Mastery Redirection & Feedback**: Perfect reviews now trigger a "UNIT MASTERED! 🏆" celebratory screen with a "BACK TO MAP" button for seamless navigation.
+- **Automatic Visual Mastery**: Successfully cleared units instantly transform into a **Thumbs Up (👍)** icon and unlock the subsequent level.
+- **Next.js & React Stability**: Fixed `QuizLoader` pre-emption bugs and refined client-side redirection to ensure a smooth, flash-free mastery experience.
 - **Dictionary Expansion**: Added Spanish UI terms to the project's spellcheck configuration to maintain clean linting states.
 
 ### [v2.0.3] - 2026-02-27 — Admin Progression Preservation
