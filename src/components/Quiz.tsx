@@ -27,7 +27,7 @@ interface QuizProps {
 
 export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
   const router = useRouter();
-  const { addXP, addGem, addMistake, completeUnit, user, stats } = useGamification();
+  const { addXP, addGem, addMistake, completeUnit, user, stats, removeMistake } = useGamification();
 
   // Sound hook — preloaded + Chrome Android unlock
   const { play: playSound } = useSound(stats.settings?.soundEnabled ?? true);
@@ -66,6 +66,15 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [hasMistakes, setHasMistakes] = useState(false);
   const [questions] = useState(() => [...unitWords].sort(() => Math.random() - 0.5));
+  const [prevIndex, setPrevIndex] = useState(-1);
+  const [initiallyWasMistake, setInitiallyWasMistake] = useState(false);
+
+  // Sync initial mistake status when moving to a new question
+  if (currentIndex !== prevIndex && questions[currentIndex]) {
+    setPrevIndex(currentIndex);
+    const word = questions[currentIndex]["스페인어 단어"].trim();
+    setInitiallyWasMistake(!!stats.mistakes?.[word]);
+  }
 
   // Refresh rank when quiz finishes (6.2)
   useEffect(() => {
@@ -120,6 +129,10 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
       setScore(prev => prev + 1);
       addXP(10);
 
+      if (initiallyWasMistake) {
+        removeMistake(questions[currentIndex]["스페인어 단어"]);
+      }
+
       if (newCombo >= 3) {
         playSound("cheer");
         triggerHaptic("combo");
@@ -136,14 +149,14 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
     }
   };
 
-  const handleDontKnow = () => {
+  const handleUnknown = () => {
     if (selectedOption) return;
 
     setComboCount(0);
     setHasMistakes(true);
     addMistake(questions[currentIndex]["스페인어 단어"], unitId);
     setIsCorrect(false);
-    setSelectedOption("DONT_KNOW");
+    setSelectedOption("UNKNOWN");
     playSound("incorrect");
     triggerHaptic("error");
   };
@@ -220,7 +233,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
   const currentQuestion = questions[currentIndex];
   const progress = ((currentIndex) / questions.length) * 100;
   const painRank = wallOfPainMap.get(currentQuestion["스페인어 단어"]);
-  const isDontKnow = selectedOption === "DONT_KNOW";
+  const isUnknown = selectedOption === "UNKNOWN";
 
   // 6.4 — DELE sentence lookup
   const deleSentence = isCorrect
@@ -266,6 +279,11 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
           <div className="text-main-title text-es-red mb-8">
             {currentQuestion["스페인어 단어"]}
           </div>
+          {initiallyWasMistake && (
+            <div className="mistake-badge mb-12">
+              Tricky Word
+            </div>
+          )}
           {currentQuestion["예문"] && (
             <div className="text-subtitle italic font-16">
               &quot;{currentQuestion["예문"]}&quot;
@@ -311,7 +329,7 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
         {/* 6.3 — Funnier No Lo Sé button */}
         {!selectedOption && (
           <button
-            onClick={handleDontKnow}
+            onClick={handleUnknown}
             className="duo-button duo-button-outline btn-nolo w-full mt-24 text-subtitle"
             style={{ borderColor: '#afafaf', color: '#777' }}
           >
@@ -325,23 +343,23 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
       {selectedOption && (
         <div
           className={`quiz-feedback-bar ${isCorrect ? 'correct' : 'incorrect'}`}
-          style={isDontKnow ? { background: "#fff0f0", borderColor: "#fecaca" } : undefined}
+          style={isUnknown ? { background: "#fff0f0", borderColor: "#fecaca" } : undefined}
         >
           <div className="container flex-between">
             <div className="flex flex-col items-start">
               <div>
-                {/* 6.3 — Friendlier message for "don't know" */}
+                {/* 6.3 — Friendlier message for "unknown" answer */}
                 <h3
                   className={`text-subtitle ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}`}
-                  style={isDontKnow ? { color: "#dc2626" } : undefined}
+                  style={isUnknown ? { color: "#dc2626" } : undefined}
                 >
-                  {isDontKnow
+                  {isUnknown
                     ? "😅 That's okay! Here's the answer:"
                     : isCorrect
-                      ? "✅ ¡Correcto!"
+                      ? initiallyWasMistake ? "✨ ¡Mastered!" : "✅ ¡Correcto!"
                       : "Correct solution:"}
                 </h3>
-                {(!isCorrect || isDontKnow) && (
+                {(!isCorrect || isUnknown) && (
                   <p className="correct-solution">
                     {questions[currentIndex]["한국어 의미"]}
                   </p>

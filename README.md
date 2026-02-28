@@ -1,10 +1,17 @@
-# 🇪🇸 HolaVoca (v2.0.3) - Spanish Vocabulary Learning App
+# 🇪🇸 HolaVoca (v2.1.0) - Spanish Vocabulary Learning App
 
-`Version 2.0.3`
+`Version 2.1.0`
 
 ---
 
 ## 🆕 Latest Updates
+
+### [v2.1.0] - 2026-02-28 — Mistake Highlighting & Automatic Mastering
+
+- **"Tricky Word" Highlighting**: Implemented a visual badge in quizzes to alert users when a word is from their previously missed list.
+- **Automatic Master Status**: When a "tricky word" is answered correctly, it is now automatically purged from the mistake list, rewarding the user with a "✨ ¡Mastered!" feedback message.
+- **React Performance Optimization**: Refactored the mistake sync logic in `Quiz.tsx` to prevent cascading renders and improved internal state consistency.
+- **Dictionary Expansion**: Added Spanish UI terms to the project's spellcheck configuration to maintain clean linting states.
 
 ### [v2.0.3] - 2026-02-27 — Admin Progression Preservation
 

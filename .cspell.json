@@ -29,7 +29,13 @@
     "basepath",
     "basePath",
     "tailwindcss",
-    "lucide"
+    "lucide",
+    "Correcto",
+    "incorrecto",
+    "Incorrecto",
+    "Mastered",
+    "perfecto",
+    "Perfecto"
   ],
   "ignorePaths": [
     "node_modules",
