@@ -3,6 +3,7 @@
 import vocabData from '@/data/vocab.json';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { APP_VERSION } from '@/lib/constants';
 import { getUnits, getTotalWordCount } from '@/utils/vocab';
 import Link from 'next/link';
@@ -81,12 +82,17 @@ export default function Home() {
   });
   const [activeTab, setActiveTab] = useState<'learn' | 'review' | 'leader' | 'profile'>('learn');
   const { stats, user } = useGamification();
-  const { rank, total, rankDelta, clearDelta } = useRank(user?.uid ?? null, stats.xp);
-
+  const router = useRouter();
 
   // Updated units calculation to respect excludeEasyWords setting
   const units = getUnits(selectedBooks, stats.settings?.excludeEasyWords);
   const totalWords = getTotalWordCount(selectedBooks, stats.settings?.excludeEasyWords);
+
+  const handleReviewMistakes = (e: React.MouseEvent, unitId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(`/quiz/${unitId}?mode=review&sources=${selectedBooks.join(',')}`);
+  };
 
   const toggleBook = (bookId: string) => {
     setSelectedBooks(prev => {
@@ -268,7 +274,11 @@ export default function Home() {
                     {getUnitIcon(index, isLocked, isCompleted, isMastered)}
 
                     {showFailBadge && (
-                      <div className="fail-badge-dual">
+                      <div 
+                        className="fail-badge-dual" 
+                        onClick={e => handleReviewMistakes(e, unit.id)}
+                        style={{ cursor: 'pointer' }}
+                      >
                         <div className="fail-badge-circle" />
                         {vol1FailCount > 0 && <span className="vol-count vol1-count">{vol1FailCount}</span>}
                         {vol2FailCount > 0 && <span className="vol-count vol2-count">{vol2FailCount}</span>}

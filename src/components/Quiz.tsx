@@ -23,9 +23,10 @@ interface QuizProps {
   unitWords: VocabEntry[];
   unitTitle?: string;
   sources: string[];
+  isReview?: boolean;
 }
 
-export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
+export default function Quiz({ unitId, unitWords, unitTitle, isReview = false }: QuizProps) {
   const router = useRouter();
   const { addXP, addGem, addMistake, completeUnit, user, stats, removeMistake } = useGamification();
 
@@ -184,8 +185,17 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
       if (unitId !== 'review') {
         const passThreshold = Math.ceil(questions.length * 0.8);
         if (score >= passThreshold) {
-          completeUnit(unitId, 0, !hasMistakes);
-          addGem(20);
+          // If in review mode, we need a perfect score to mark as mastered
+          const isPerfectReview = isReview && score === questions.length;
+          const isPerfectNormal = !isReview && !hasMistakes;
+          
+          completeUnit(unitId, 0, isPerfectReview || isPerfectNormal);
+          
+          if (isPerfectReview || isPerfectNormal) {
+            addGem(25); // Bonus gems for mastering
+          } else {
+            addGem(10);
+          }
         }
       }
     }
@@ -353,11 +363,13 @@ export default function Quiz({ unitId, unitWords, unitTitle }: QuizProps) {
                   className={`text-subtitle ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}`}
                   style={isUnknown ? { color: "#dc2626" } : undefined}
                 >
-                  {isUnknown
-                    ? "😅 That's okay! Here's the answer:"
-                    : isCorrect
-                      ? initiallyWasMistake ? "✨ ¡Mastered!" : "✅ ¡Correcto!"
-                      : "Correct solution:"}
+                  {isReview && isCorrect && score + 1 === questions.length && !hasMistakes 
+                    ? "🌟 Unit Mastered!" 
+                    : isUnknown
+                      ? "😅 That's okay! Here's the answer:"
+                      : isCorrect
+                        ? initiallyWasMistake ? "✨ ¡Mastered!" : "✅ ¡Correcto!"
+                        : "Correct solution:"}
                 </h3>
                 {(!isCorrect || isUnknown) && (
                   <p className="correct-solution">
