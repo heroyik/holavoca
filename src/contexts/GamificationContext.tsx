@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import { User, onAuthStateChanged } from "firebase/auth";
-import { doc, setDoc, onSnapshot, increment, setDoc as fsSetDoc } from "firebase/firestore";
+import { doc, setDoc, onSnapshot, increment, setDoc as fsSetDoc, updateDoc, deleteField } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 export interface UserStats {
@@ -157,11 +157,13 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     return () => unsubscribeAuth();
   }, []);
 
-  const syncStatsToCloud = async (newStats: UserStats) => {
+  const syncStatsToCloud = async (newStats: UserStats, isDeletion: boolean = false) => {
     if (!user || !db || !isInitialized) return;
 
     try {
-      await setDoc(doc(db, "users", user.uid), {
+      const userDocRef = doc(db, "users", user.uid);
+      
+      const dataToSync = {
         ...newStats,
         displayName: newStats.displayName || user.displayName,
         photoURL: (function () {
@@ -173,17 +175,25 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
           }
           return currentPhoto;
         })()
-      }, { merge: true });
+      };
+
+      if (isDeletion) {
+        // Using updateDoc with the whole object replaces top-level fields 
+        // including the entire 'mistakes' map, which fulfills our deletion need.
+        await updateDoc(userDocRef, dataToSync);
+      } else {
+        await setDoc(userDocRef, dataToSync, { merge: true });
+      }
       console.log("[GamificationProvider] Progress synced to cloud");
     } catch (e) {
       console.error("[GamificationProvider] Cloud sync failed", e);
     }
   };
 
-  const saveStatsLocally = (newStats: UserStats) => {
+  const saveStatsLocally = (newStats: UserStats, isDeletion: boolean = false) => {
     setStats(newStats);
     localStorage.setItem("holavoca_stats", JSON.stringify(newStats));
-    syncStatsToCloud(newStats);
+    syncStatsToCloud(newStats, isDeletion);
   };
 
   const addXP = (amount: number) => {
@@ -281,7 +291,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       mistakes: currentMistakes
     };
 
-    saveStatsLocally(newStats);
+    saveStatsLocally(newStats, true); // true indicates a deletion operation
     statsRef.current = newStats;
     console.log("[GamificationProvider] Mistake cleared:", word);
   };
@@ -292,7 +302,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       mistakes: {}
     };
 
-    saveStatsLocally(newStats);
+    saveStatsLocally(newStats, true);
     statsRef.current = newStats;
     console.log("[GamificationProvider] All mistakes cleared");
   };
