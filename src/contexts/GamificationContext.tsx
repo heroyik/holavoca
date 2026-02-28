@@ -220,7 +220,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     const newStats: UserStats = {
       ...statsRef.current,
       xp: statsRef.current.xp + xpEarned,
-      gems: statsRef.current.gems + Math.floor(xpEarned / 10),
+      gems: statsRef.current.gems + Math.floor(xpEarned / 10) + (isPerfect ? 25 : 0),
       streak: newStreak,
       lastStudyDate: today,
       completedUnits: currentCompleted.includes(unitId)

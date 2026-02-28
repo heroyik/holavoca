@@ -192,7 +192,7 @@ export default function Quiz({ unitId, unitWords, unitTitle, isReview = false }:
           completeUnit(unitId, 0, isPerfectReview || isPerfectNormal);
           
           if (isPerfectReview || isPerfectNormal) {
-            addGem(25); // Bonus gems for mastering
+            // Gem addition is now handled in completeUnit
           } else {
             addGem(10);
           }
@@ -235,7 +235,10 @@ export default function Quiz({ unitId, unitWords, unitTitle, isReview = false }:
           </p>
         </div>
         <button
-          onClick={() => router.push('/')}
+          onClick={() => {
+            router.push('/');
+            // Small delay to ensure navigation is triggered before any other state changes
+          }}
           className={`duo-button ${isMastery ? 'duo-button-secondary' : 'duo-button-primary'} w-auto px-40 py-12`}
         >
           {isMastery ? "BACK TO MAP" : "CONTINUE"}

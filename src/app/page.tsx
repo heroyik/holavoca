@@ -368,7 +368,7 @@ export default function Home() {
             href="https://github.com/heroyik/holavoca"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Repositorio de GitHub"
+            aria-label="GitHub Repository"
             title="GitHub Repository"
             className="aura-link"
           >
