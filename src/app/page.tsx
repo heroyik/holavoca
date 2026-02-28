@@ -83,6 +83,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'learn' | 'review' | 'leader' | 'profile'>('learn');
   const { stats, user } = useGamification();
   const router = useRouter();
+  const { rank, total, rankDelta, clearDelta } = useRank(user?.uid ?? null, stats.xp);
 
   // Updated units calculation to respect excludeEasyWords setting
   const units = getUnits(selectedBooks, stats.settings?.excludeEasyWords);
