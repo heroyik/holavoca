@@ -56,6 +56,7 @@ This list contains Spanish words that are very similar or identical to English o
 * familia
 * clase
 * papel
+* final
 
 ## Professions & People
 

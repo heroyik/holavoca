@@ -126,6 +126,7 @@ const COMMON_COGNATES = [
   "tigre",
   "metro",
   "coche",
+  "final",
 ];
 
 function getDifficultyScore(word: string): number {

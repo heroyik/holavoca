@@ -12,6 +12,7 @@
 - **Mastery Redirection & Feedback**: Perfect reviews now trigger a "UNIT MASTERED! 🏆" celebratory screen with a "BACK TO MAP" button for seamless navigation.
 - **Automatic Visual Mastery**: Successfully cleared units instantly transform into a **Thumbs Up (👍)** icon and unlock the subsequent level.
 - **Next.js & React Stability**: Fixed `QuizLoader` pre-emption bugs and refined client-side redirection to ensure a smooth, flash-free mastery experience.
+- **Vocabulary Refinement**: Added **"final"** to the easy cognates list to ensure it's prioritized for early learning and excluded from advanced quizzes.
 - **Dictionary Expansion**: Added Spanish UI terms to the project's spellcheck configuration to maintain clean linting states.
 
 ### [v2.0.3] - 2026-02-27 — Admin Progression Preservation
