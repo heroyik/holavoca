@@ -204,6 +204,7 @@ export default function Quiz({ unitId, unitWords, unitTitle, isReview = false }:
   if (questions.length === 0) return <div className="flex-center min-h-screen font-800">Loading...</div>;
 
   if (showResult) {
+    const isMastery = isReview && score === questions.length;
     return (
       <div className="container flex-center min-h-screen flex-col pt-40-pb-20 relative">
         {/* Book Source Badge */}
@@ -220,21 +221,24 @@ export default function Quiz({ unitId, unitWords, unitTitle, isReview = false }:
         )}
 
         <div className="w-full max-w-md mb-8 flex justify-between items-center px-4"></div>
-        <h2 className="text-main-title text-duo-green mb-20">Finished!</h2>
+        <h2 className={`text-main-title ${isMastery ? 'text-duo-orange' : 'text-duo-green'} mb-20`}>
+          {isMastery ? "UNIT MASTERED!" : "Finished!"}
+        </h2>
         <div className="text-center mb-32">
+          {isMastery && <div className="font-64 mb-16">🏆</div>}
           <div className="text-subtitle mb-8">Your Score:</div>
           <span className="score-text">
             {score} / {questions.length}
           </span>
           <p className="pass-message">
-            {score === questions.length ? "Perfect! 🌟" : score >= questions.length * 0.8 ? "Great job! 🔥" : "Keep practicing! 💪"}
+            {isMastery ? "You've conquered all the tricky words! 🌟" : score === questions.length ? "Perfect! 🌟" : score >= questions.length * 0.8 ? "Great job! 🔥" : "Keep practicing! 💪"}
           </p>
         </div>
         <button
           onClick={() => router.push('/')}
-          className="duo-button duo-button-primary w-auto px-40 py-12"
+          className={`duo-button ${isMastery ? 'duo-button-secondary' : 'duo-button-primary'} w-auto px-40 py-12`}
         >
-          CONTINUE
+          {isMastery ? "BACK TO MAP" : "CONTINUE"}
         </button>
       </div>
     );

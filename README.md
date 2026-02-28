@@ -9,7 +9,8 @@
 ### [v2.1.0] - 2026-02-28 — Mistake Highlighting & Automatic Mastering
 
 - **"Tricky Word" Highlighting**: Implemented a visual badge in quizzes to alert users when a word is from their previously missed list.
-- **Automatic Master Status**: When a "tricky word" is answered correctly, it is now automatically purged from the mistake list, rewarding the user with a "✨ ¡Mastered!" feedback message.
+- **Unit Mistake Review Flow**: Added a specialized flow reachable by clicking the mistake indicator on the unit list.
+- **Automatic Master Status & Redirection**: Correctly clearing all wrong words now marks the unit as "Mastered" with celebratory UI and auto-redirects back to the snake map.
 - **React Performance Optimization**: Refactored the mistake sync logic in `Quiz.tsx` to prevent cascading renders and improved internal state consistency.
 - **Dictionary Expansion**: Added Spanish UI terms to the project's spellcheck configuration to maintain clean linting states.
 

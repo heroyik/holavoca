@@ -144,6 +144,19 @@ button {
   border: 2px solid var(--border-light);
   box-shadow: 0 2px 0 var(--border-light);
 }
+.duo-button-secondary {
+  background-color: var(--duo-orange);
+  color: white;
+  box-shadow: 0 4px 0 var(--duo-orange-dark);
+}
+
+.text-duo-orange {
+  color: var(--duo-orange);
+}
+
+.text-duo-green {
+  color: var(--duo-green);
+}
 
 @media (max-width: 600px) {
   .container {
