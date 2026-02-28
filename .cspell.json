@@ -35,7 +35,9 @@
     "Incorrecto",
     "Mastered",
     "perfecto",
-    "Perfecto"
+    "Perfecto",
+    "Kakao",
+    "KakaoTalk"
   ],
   "ignorePaths": [
     "node_modules",
